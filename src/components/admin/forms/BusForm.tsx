@@ -17,12 +17,21 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
+const BUS_TYPE_CONFIG = {
+  "Mini Bus": { capacity: 20, seatsPerRow: 4 },
+  "Coach": { capacity: 50, seatsPerRow: 4 },
+  "Double Decker": { capacity: 80, seatsPerRow: 5 },
+} as const;
+
+
+const BUS_TYPES = ["Mini Bus", "Coach", "Double Decker"] as const;
+
 const busSchema = z.object({
   plateNo: z.string().min(1, "Plate number is required"),
   capacity: z.coerce.number().int().min(1, "Capacity must be at least 1"),
   seatsPerRow: z.coerce.number().int().min(1, "Seats per row must be at least 1"),
   isActive: z.boolean().default(true),
-  lastMaintenance: z.string().optional(),
+  busType: z.enum(BUS_TYPES),
 });
 
 type BusFormValues = z.infer<typeof busSchema>;
@@ -41,7 +50,7 @@ const BusForm = ({ defaultValues, onSubmit, isSubmitting = false }: BusFormProps
       capacity: 40,
       seatsPerRow: 4,
       isActive: true,
-      lastMaintenance: new Date().toISOString().split("T")[0],
+      busType: "Coach",
     },
   });
 
@@ -113,12 +122,29 @@ const BusForm = ({ defaultValues, onSubmit, isSubmitting = false }: BusFormProps
 
         <FormField
           control={form.control}
-          name="lastMaintenance"
+          name="busType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Last Maintenance Date</FormLabel>
+              <FormLabel>Bus Type Date</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <select
+                  value={field.value}
+                  onChange={(e) => {
+                    const selectedType = e.target.value as keyof typeof BUS_TYPE_CONFIG;
+                    const config = BUS_TYPE_CONFIG[selectedType];
+
+                    field.onChange(selectedType);
+                    form.setValue("capacity", config.capacity);
+                    form.setValue("seatsPerRow", config.seatsPerRow);
+                  }}
+                  className="w-full rounded-md border px-3 py-2 text-sm shadow-sm"
+                >
+                  {BUS_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
               </FormControl>
               <FormMessage />
             </FormItem>
