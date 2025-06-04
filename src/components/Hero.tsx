@@ -132,7 +132,7 @@ const Hero = () => {
       
         <div className="relative h-full flex items-center justify-center text-center px-4">
           <div className="text-white max-w-3xl">
-            <img className="hidden border rounded-2xl" src="/bg.jpg" alt="" />
+            <img className=" border rounded-2xl" src="/bg.jpg" alt="" />
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               {/* Safe Travels for NYSC Corps Members */}
             </h1>
@@ -145,7 +145,7 @@ const Hero = () => {
 
       {/* Booking Widget */}
       <div className="container mx-auto px-4">
-        <div className="relative -mt-[25rem] md:-mt-[32rem] bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-4xl mx-auto">
+        <div className="relative -mt-[25rem] md:-mt-[22rem] bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold mb-6 text-center">Book Your Trip</h2>
           
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
