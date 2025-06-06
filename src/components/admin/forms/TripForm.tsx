@@ -17,21 +17,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 
 // Mock data for routes and buses
-const routes = [
-  { id: "1", name: "Lagos to Abuja" },
-  { id: "2", name: "Lagos to Ibadan" },
-  { id: "3", name: "Abuja to Kaduna" },
-  { id: "4", name: "Lagos to Benin" },
-  { id: "5", name: "Port Harcourt to Calabar" },
-];
+// const routes = [
+//   { id: "1", name: "Lagos to Abuja" },
+//   { id: "2", name: "Lagos to Ibadan" },
+//   { id: "3", name: "Abuja to Kaduna" },
+//   { id: "4", name: "Lagos to Benin" },
+//   { id: "5", name: "Port Harcourt to Calabar" },
+// ];
 
-const buses = [
-  { id: "1", plateNo: "ABC-123XY" },
-  { id: "2", plateNo: "DEF-456XY" },
-  { id: "3", plateNo: "GHI-789XY" },
-  { id: "4", plateNo: "JKL-012XY" },
-  { id: "5", plateNo: "MNO-345XY" },
-];
+// const buses = [
+//   { id: "1", plateNo: "ABC-123XY" },
+//   { id: "2", plateNo: "DEF-456XY" },
+//   { id: "3", plateNo: "GHI-789XY" },
+//   { id: "4", plateNo: "JKL-012XY" },
+//   { id: "5", plateNo: "MNO-345XY" },
+// ];
+
+
 
 const STATUS_OPTIONS = ["scheduled", "completed", "canceled"] as const;
 
@@ -41,19 +43,40 @@ const tripSchema = z.object({
   departTime: z.string().min(1, "Departure time is required"),
   arriveTime: z.string().min(1, "Arrival time is required"),
   price: z.coerce.number().min(0, "Price must be non-negative"),
-  availableSeats: z.coerce.number().int().min(0, "Available seats must be non-negative"),
+  // availableSeats: z.coerce.number().int().min(0, "Available seats must be non-negative"),
   status: z.enum(STATUS_OPTIONS).default("scheduled"),
 });
 
 type TripFormValues = z.infer<typeof tripSchema>;
 
-interface TripFormProps {
-  defaultValues?: Partial<TripFormValues>;
-  onSubmit: (data: TripFormValues) => void;
-  isSubmitting?: boolean;
+interface RouteOption {
+  id: string;
+  name: string,
 }
 
-const TripForm = ({ defaultValues, onSubmit, isSubmitting = false }: TripFormProps) => {
+interface BusOption {
+  id: string;
+  plateNo: string;
+}
+
+interface TripFormProps {
+  defaultValues?: Partial<TripFormValues>;
+  onSubmit: (data: {
+    routeId: number;
+    busId: number;
+    departTime: Date;
+    arriveTime: Date;
+    price: number;
+    status: "SCHEDULED"|"COMPLETED"|"CANCELED";
+  }) => void;
+  isSubmitting?: boolean;
+
+  /**From API */
+  routes: RouteOption[];
+  buses: BusOption[];
+}
+
+const TripForm = ({ defaultValues, onSubmit, isSubmitting = false , routes, buses}: TripFormProps) => {
   const form = useForm<TripFormValues>({
     resolver: zodResolver(tripSchema),
     defaultValues: {
@@ -62,7 +85,7 @@ const TripForm = ({ defaultValues, onSubmit, isSubmitting = false }: TripFormPro
       departTime: "",
       arriveTime: "",
       price: 0,
-      availableSeats: 0,
+      // availableSeats: 0,
       status: "scheduled",
       ...defaultValues,
     },
@@ -73,6 +96,31 @@ const TripForm = ({ defaultValues, onSubmit, isSubmitting = false }: TripFormPro
     if (!dateStr) return "";
     const date = new Date(dateStr);
     return date.toISOString().slice(0, 16); // Format: "YYYY-MM-DDThh:mm"
+  };
+
+  const handleFormSubmit = (data: TripFormValues) => {
+    // 1) parse IDs
+    const routeIdNum = parseInt(data.routeId, 10);
+    const busIdNum   = parseInt(data.busId,   10);
+
+    // 2) build JS Dates (includes seconds & timezone)
+    const departDate = new Date(data.departTime);
+    const arriveDate = new Date(data.arriveTime);
+
+    // 3) uppercase your status to match Prisma enum
+    const prismaStatus = data.status.toUpperCase() as
+      | "SCHEDULED"
+      | "COMPLETED"
+      | "CANCELED";
+
+    onSubmit({
+      routeId:    routeIdNum,
+      busId:      busIdNum,
+      departTime: departDate,
+      arriveTime: arriveDate,
+      price:      data.price,
+      status:     prismaStatus,
+    });
   };
 
   useEffect(() => {
@@ -86,7 +134,7 @@ const TripForm = ({ defaultValues, onSubmit, isSubmitting = false }: TripFormPro
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="routeId"
@@ -115,6 +163,7 @@ const TripForm = ({ defaultValues, onSubmit, isSubmitting = false }: TripFormPro
           )}
         />
 
+          {/*  ——— Bus Select ——— */}
         <FormField
           control={form.control}
           name="busId"
@@ -185,7 +234,7 @@ const TripForm = ({ defaultValues, onSubmit, isSubmitting = false }: TripFormPro
           )}
         />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name="availableSeats"
           render={({ field }) => (
@@ -197,7 +246,7 @@ const TripForm = ({ defaultValues, onSubmit, isSubmitting = false }: TripFormPro
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
         <FormField
           control={form.control}
