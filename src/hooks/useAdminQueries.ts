@@ -84,7 +84,7 @@ export const useRoutes = () => {
       const response = await adminApiService.getRoutes();
       console.log(response.data);
 
-      return response.data;
+      return response.data.data;
     },
   });
 };
@@ -182,7 +182,9 @@ export const useTrips = () => {
     queryKey: ADMIN_QUERY_KEYS.trips,
     queryFn: async () => {
       const response = await adminApiService.getTrips();
-      return response.data;
+      console.log(response.data.data);
+      
+      return response.data.data;
     },
   });
 };
