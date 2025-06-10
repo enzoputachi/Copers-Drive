@@ -1,9 +1,9 @@
-
+// src/components/TripSelection.tsx
 import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { format, isValid } from "date-fns";
+import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -26,182 +26,192 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-
+import { useSearchTripsByRoute } from "@/hooks/useApi";
 
 // Nigerian locations
 const locations = [
-  "Lagos", "Abuja", "Port Harcourt", "Kaduna", "Owerri",
-  "Enugu", "Benin City", "Uyo", "Calabar", "Kano"
+  "Lagos","Abuja","Port Harcourt","Kaduna","Owerri",
+  "Enugu","Benin City","Uyo","Calabar","London"
 ];
 
-// Schema for trip selection form
+// Schema
 const tripSelectionSchema = z.object({
-  tripType: z.enum(["oneWay", "roundTrip"]),
-  departure: z.string().min(1, "Departure location is required"),
-  destination: z.string().min(1, "Destination location is required"),
-  departureDate: z.date({
-    required_error: "Departure date is required",
-  }),
-  returnDate: z.date().optional().refine(
-    (date) => {
-      if (!date) return true; // If no date provided, skip validation
-      return true; // Otherwise perform validation
-    },
-    {
+  tripType: z.enum(["oneWay","roundTrip"]),
+  departure: z.string().min(1, "Departure is required"),
+  destination: z.string().min(1, "Destination is required"),
+  departureDate: z.date({ required_error: "Departure date is required" }),
+  returnDate: z
+    .date()
+    .optional()
+    .refine((date) => !date || true, {
       message: "Return date must be after departure date",
       path: ["returnDate"],
-    }
-  ).optional(),
-  passengers: z.number().int().min(1, "At least one passenger is required").max(10, "Maximum 10 passengers allowed"),
+    }),
+  passengers: z
+    .number()
+    .int()
+    .min(1, "At least one passenger")
+    .max(10, "Max 10 passengers"),
 });
+type FormValues = z.infer<typeof tripSelectionSchema>;
 
-// Props for TripSelection component
-interface TripSelectionProps {
-  onComplete: () => void;
+interface Props {
+  onComplete: (results: any[]) => void;
   setStepComplete: (stepId: string, isComplete: boolean) => void;
 }
 
-const TripSelection = ({ onComplete, setStepComplete }: TripSelectionProps) => {
-  const { 
-    departure, 
-    destination, 
-    date: storeDate, 
-    returnDate: storeReturnDate,
+export default function TripSelection({ onComplete, setStepComplete }: Props) {
+  // store state + setters
+  const {
+    departure,
+    destination,
+    date,
+    returnDate,
     passengers,
-    tripType: storeTripType,
-    setDeparture, 
-    setDestination, 
+    tripType,
+    setDeparture,
+    setDestination,
     setDate,
     setReturnDate,
     setPassengers,
-    setTripType
+    setTripType,
   } = useBookingStore();
 
-  // Track whether returnDate should be shown
-  const [isRoundTrip, setIsRoundTrip] = useState(storeTripType === "roundTrip");
-
-  // Initialize form with existing store data
-  const form = useForm<z.infer<typeof tripSelectionSchema>>({
+  // form
+  const form = useForm<FormValues>({
     mode: "onChange",
     resolver: zodResolver(tripSelectionSchema),
     defaultValues: {
-      tripType: storeTripType || "oneWay",
+      tripType: tripType || "oneWay",
       departure: departure || "",
       destination: destination || "",
-      departureDate: storeDate || undefined,
-      returnDate: storeReturnDate || undefined,
+      departureDate: date!,
+      returnDate: returnDate || undefined,
       passengers: passengers || 1,
     },
   });
 
   const {
+    control,
+    handleSubmit,
+    watch,
     formState: { isValid },
   } = form;
 
-   // Ref to remember last validity
-  const lastValidRef = useRef<boolean>();
-
-  // Monitor form validity to enable/disable the next button
+  // keep parent step enabled/disabled in sync
+  const lastValid = useRef<boolean>();
   useEffect(() => {
-    // console.log("effect triggered; lastValid =", lastValidRef.current, "→", isValid) 
-    // setStepComplete("tripSelection", isValid);   
-    if (lastValidRef.current !== isValid) {
+    if (lastValid.current !== isValid) {
       setStepComplete("tripSelection", isValid);
-      lastValidRef.current = isValid;
+      lastValid.current = isValid;
     }
   }, [isValid, setStepComplete]);
 
-  // Handle trip type change
-  const handleTripTypeChange = (value: "oneWay" | "roundTrip") => {
-    setIsRoundTrip(value === "roundTrip");
-    // If switching to one-way, clear return date
-    if (value === "oneWay") {
+  // round‑trip toggle
+  const [isRoundTrip, setIsRoundTrip] = useState(tripType === "roundTrip");
+  const onTripTypeChange = (val: "oneWay" | "roundTrip") => {
+    setIsRoundTrip(val === "roundTrip");
+    form.setValue("tripType", val);
+    setTripType(val);
+    if (val === "oneWay") {
       form.setValue("returnDate", undefined);
       setReturnDate(null);
     }
   };
 
-  // Submit form data
-  const onSubmit = (data: z.infer<typeof tripSelectionSchema>) => {
-    // Update store with form values
-    setTripType(data.tripType);
-    setDeparture(data.departure);
-    setDestination(data.destination);
-    setDate(data.departureDate);
-    setReturnDate(data.returnDate || null);
-    setPassengers(data.passengers);
-    
-    
-    // Proceed to next step
-    onComplete();
-  };
+  const watchedDeparture = watch("departure");
+  const watchedDestination = watch("destination");
+  const watchedDepDate = watch("departureDate");  // may be undefined
 
-  console.log("For Data", form.getValues()) 
+  // build an ISO date string only if we have a Date
+  const depDateString = watchedDepDate
+    ? format(watchedDepDate, "yyyy-MM-dd")        // using date-fns
+    : "";
+
+  // React Query search hook (starts disabled)
+  const { refetch: searchRoutes, data, isFetching, isError } = useSearchTripsByRoute({
+    origin: watchedDeparture,
+    destination: watchedDestination,
+    date: depDateString,
+  });
+
+  console.log("Trip list:", );
+  
+
+  // on submit: persist store + call API + next
+  const onSubmit = async (formData: FormValues) => {
+    // save into store
+    setTripType(formData.tripType);
+    setDeparture(formData.departure);
+    setDestination(formData.destination);
+    setDate(formData.departureDate);
+    setReturnDate(formData.returnDate || null);
+    setPassengers(formData.passengers);
+
+    // fetch matching routes
+    const res = await searchRoutes();
+
+    const routesArray = res.data ?? [];
+
+    onComplete(routesArray);
+  };
 
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Trip Details</h2>
-      
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Trip Type */}
           <FormField
-            control={form.control}
+            control={control}
             name="tripType"
             render={({ field }) => (
-              <FormItem className="space-y-3">
+              <FormItem>
                 <FormLabel>Trip Type</FormLabel>
-                <FormControl>
-                  <RadioGroup
-                    onValueChange={(value: "oneWay" | "roundTrip") => {
-                      field.onChange(value);
-                      handleTripTypeChange(value);
-                    }}
-                    defaultValue={field.value}
-                    className="flex space-x-4"
-                  >
-                    <FormItem className="flex items-center space-x-2">
-                      <FormControl>
-                        <RadioGroupItem value="oneWay" />
-                      </FormControl>
-                      <FormLabel className="font-normal cursor-pointer">
-                        One Way
-                      </FormLabel>
-                    </FormItem>
-                    {/* <FormItem className="flex items-center space-x-2">
-                      <FormControl>
-                        <RadioGroupItem value="roundTrip" />
-                      </FormControl>
-                      <FormLabel className="font-normal cursor-pointer">
-                        Round Trip
-                      </FormLabel>
-                    </FormItem> */}
-                  </RadioGroup>
-                </FormControl>
+                <RadioGroup
+                  {...field}
+                  onValueChange={onTripTypeChange}
+                  className="flex space-x-4"
+                >
+                  <FormItem className="flex items-center space-x-2">
+                    <FormControl>
+                      <RadioGroupItem value="oneWay" />
+                    </FormControl>
+                    <FormLabel>One Way</FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-2">
+                    <FormControl>
+                      <RadioGroupItem value="roundTrip" />
+                    </FormControl>
+                    <FormLabel>Round Trip</FormLabel>
+                  </FormItem>
+                </RadioGroup>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {/* Departure and Destination */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Departure & Destination */}
+          <div className="grid md:grid-cols-2 gap-6">
             <FormField
-              control={form.control}
+              control={control}
               name="departure"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Departure</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    value={field.value}
+                    onValueChange={(val) => field.onChange(val)}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select departure location" />
+                        <SelectValue placeholder="Select departure" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
-                      {locations.map(location => (
-                        <SelectItem key={location} value={location}>
-                          {location}
+                    <SelectContent className="">
+                      {locations.map((loc) => (
+                        <SelectItem key={loc} value={loc}>
+                          {loc}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -210,14 +220,16 @@ const TripSelection = ({ onComplete, setStepComplete }: TripSelectionProps) => {
                 </FormItem>
               )}
             />
-
             <FormField
-              control={form.control}
+              control={control}
               name="destination"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Destination</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    value={field.value}
+                    onValueChange={(val) => field.onChange(val)}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select destination" />
@@ -225,10 +237,10 @@ const TripSelection = ({ onComplete, setStepComplete }: TripSelectionProps) => {
                     </FormControl>
                     <SelectContent>
                       {locations
-                        .filter(loc => loc !== form.getValues("departure"))
-                        .map(location => (
-                          <SelectItem key={location} value={location}>
-                            {location}
+                        .filter((loc) => loc !== watch("departure"))
+                        .map((loc) => (
+                          <SelectItem key={loc} value={loc}>
+                            {loc}
                           </SelectItem>
                         ))}
                     </SelectContent>
@@ -239,41 +251,30 @@ const TripSelection = ({ onComplete, setStepComplete }: TripSelectionProps) => {
             />
           </div>
 
-          {/* Date Selection */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Date Pickers */}
+          <div className="grid md:grid-cols-2 gap-6">
             <FormField
-              control={form.control}
+              control={control}
               name="departureDate"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem>
                   <FormLabel>Departure Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn("w-full text-left", !field.value && "text-muted-foreground")}
+                      >
+                        {field.value ? format(field.value, "PPP") : "Pick a date"}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent align="start" className="p-0">
                       <Calendar
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                        className="pointer-events-auto"
+                        disabled={(d) => d < new Date()}
                       />
                     </PopoverContent>
                   </Popover>
@@ -281,44 +282,29 @@ const TripSelection = ({ onComplete, setStepComplete }: TripSelectionProps) => {
                 </FormItem>
               )}
             />
-
             {isRoundTrip && (
               <FormField
-                control={form.control}
+                control={control}
                 name="returnDate"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
+                  <FormItem>
                     <FormLabel>Return Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn("w-full text-left", !field.value && "text-muted-foreground")}
+                        >
+                          {field.value ? format(field.value, "PPP") : "Pick a date"}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent align="start" className="p-0">
                         <Calendar
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) => {
-                            const departureDate = form.getValues("departureDate");
-                            return date < (departureDate || new Date());
-                          }}
-                          initialFocus
-                          className="pointer-events-auto"
+                          disabled={(d) => d < watch("departureDate")}
                         />
                       </PopoverContent>
                     </Popover>
@@ -331,24 +317,24 @@ const TripSelection = ({ onComplete, setStepComplete }: TripSelectionProps) => {
 
           {/* Passengers */}
           <FormField
-            control={form.control}
+            control={control}
             name="passengers"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Number of Passengers</FormLabel>
-                <Select 
-                  onValueChange={(value) => field.onChange(parseInt(value))} 
+                <FormLabel>Passengers</FormLabel>
+                <Select
+                  onValueChange={(v) => field.onChange(Number(v))}
                   defaultValue={field.value.toString()}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select number of passengers" />
+                      <SelectValue placeholder="Select number" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num} {num === 1 ? "Passenger" : "Passengers"}
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                      <SelectItem key={n} value={n.toString()}>
+                        {n} {n > 1 ? "Passengers" : "Passenger"}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -358,13 +344,16 @@ const TripSelection = ({ onComplete, setStepComplete }: TripSelectionProps) => {
             )}
           />
 
-          <Button type="submit" className="w-full">
-            Continue to Select Bus
+          <Button type="submit" className="w-full" disabled={isFetching}>
+            {isFetching ? "Searching…" : "Continue"}
           </Button>
+          {isError && (
+            <p className="mt-2 text-sm text-red-600">
+              Unable to fetch routes. Please try again.
+            </p>
+          )}
         </form>
       </Form>
     </div>
   );
-};
-
-export default TripSelection;
+}

@@ -82,11 +82,9 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
         return;
       }
 
-      await bookingsApi.createBooking({
-        paymentMethod: "paystack",
+      await bookingsApi.createBookingDraft({
         amount: totalAmount,
         email: values.email,
-        // Add more fields like busId, seatNos, etc., if required
       });
 
       toast.success("Payment successful and booking created!");
