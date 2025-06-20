@@ -40,7 +40,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
       <div className="flex h-16 items-center justify-center border-b px-4">
         <Link to="/admin" className="flex items-center">
           <span className="text-xl font-bold text-primary">
-            {isOpen ? "TransitX Admin" : "TX"}
+            {isOpen ? "Copers Drive Admin" : "TX"}
           </span>
         </Link>
       </div>

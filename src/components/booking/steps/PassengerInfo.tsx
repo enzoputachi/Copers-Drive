@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { PassengerInfoType, Path, useBookingStore } from "@/stores/bookingStore";
 import { Button } from "@/components/ui/button";
+import { useCreateBookingDraft } from "@/hooks/useApi";
 import {
   Form,
   FormControl,
@@ -34,26 +35,17 @@ const passengerSchema = z.object({
 type PassengerFormDetails = z.infer<typeof passengerSchema>;
 
 const PassengerInfo = ({ onComplete, setStepComplete }: PassengerInfoProps) => {
-  const { passengers, passengerInfo, setPassengerInfo } = useBookingStore();
+  const { passengers, passengerInfo, setPassengerInfo, setSubmittedPassengerData, selectedBus, selectedSeats } = useBookingStore();
+  const { mutate: createDraft, status: mutationStatus, error} = useCreateBookingDraft();
+
+  const isLoading = mutationStatus === "pending";
+  const isError   = mutationStatus === "error";
 
   // Create a dynamic form schema based on the number of passengers
   const createFormSchema = () => {
-    if (passengers <= 1) {
-      return z.object({
-        primaryPassenger: passengerSchema,
-      });
-    }
-
-    // For multiple passengers, create a schema with labeled passengers
-    const schemaShape: Record<string, z.ZodType<PassengerFormDetails>> = {
+    return z.object({
       primaryPassenger: passengerSchema,
-    };
-
-    for (let i = 1; i < passengers; i++) {
-      schemaShape[`additionalPassenger${i}`] = passengerSchema;
-    }
-
-    return z.object(schemaShape);
+    });
   };
 
   // Get the schema for the current number of passengers
@@ -62,31 +54,15 @@ const PassengerInfo = ({ onComplete, setStepComplete }: PassengerInfoProps) => {
   type PassengerFormData = z.infer<typeof formSchema>;
   
   // Create properly typed defaultValues
-  const createDefaultValues = () => {
-    const defaultValues: Record<string, PassengerFormDetails> = {
-      primaryPassenger: passengerInfo?.primaryPassenger || {
+  const createDefaultValues = () => ({
+        primaryPassenger: passengerInfo?.primaryPassenger || {
         fullName: "",
         email: "",
         phone: "",
         nextOfKinName: "",
         nextOfKinPhone: "",
       }
-    };
-    
-    // Add additional passengers if needed
-    for (let i = 1; i < passengers; i++) {
-      const key = `additionalPassenger${i}`;
-      defaultValues[key] = passengerInfo?.[key] || {
-        fullName: "",
-        email: "",
-        phone: "",
-        nextOfKinName: "",
-        nextOfKinPhone: "",
-      };
-    }
-    
-    return defaultValues;
-  };
+  });
 
   // Initialize form with existing data if available
   const form = useForm<z.infer<typeof formSchema>>({
@@ -111,29 +87,94 @@ const PassengerInfo = ({ onComplete, setStepComplete }: PassengerInfoProps) => {
   const onSubmit = (data: PassengerFormData) => {
     // Explicitly cast the data to match the PassengerInfo type
     setPassengerInfo(data as PassengerInfoType);
-    onComplete();
+    const seatIds = selectedSeats.map(seat => seat.seatId);
+
+    const draftPayload = {
+      tripId: Number(selectedBus.id),         // from your booking store
+      seatId: seatIds,                         // likewise  
+      passengerName: data.primaryPassenger.fullName,
+      email:         data.primaryPassenger.email,
+      mobile:         data.primaryPassenger.phone,
+      nextOfKinName:  data.primaryPassenger.nextOfKinName,
+      nextOfKinPhone: data.primaryPassenger.nextOfKinPhone,
+    }
+
+    console.log("draft payload:", draftPayload);
+
+    createDraft(draftPayload, {
+      onSuccess: () => {
+        setSubmittedPassengerData(true);
+        onComplete();
+      },
+      onError: (err) => {
+        console.error("Failed to save draft", err);        
+      }
+    })
+
+    // setSubmittedPassengerData(true);
+    // onComplete();
   };
 
   
   
-
   // Generate passenger form sections
   const renderPassengerForms = () => {
-    const forms = [];
 
-    // Primary passenger
-    forms.push(
-      <div key="primary" className="mb-8">
-        <h3 className="text-lg font-medium mb-4">Primary Passenger</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    // Primary passenger    
+    return (<div key="primary" className="mb-8">
+      <h3 className="text-lg font-medium mb-4">Primary Passenger</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          control={form.control}
+          name="primaryPassenger.fullName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter full name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="primaryPassenger.email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email Address</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="Enter email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="primaryPassenger.phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter phone number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
-            name="primaryPassenger.fullName"
+            name="primaryPassenger.nextOfKinName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>Next of Kin Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter full name" {...field} />
+                  <Input placeholder="Enter next of kin name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -142,150 +183,21 @@ const PassengerInfo = ({ onComplete, setStepComplete }: PassengerInfoProps) => {
 
           <FormField
             control={form.control}
-            name="primaryPassenger.email"
+            name="primaryPassenger.nextOfKinPhone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email Address</FormLabel>
+                <FormLabel>Next of Kin Phone</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="Enter email" {...field} />
+                  <Input placeholder="Enter next of kin phone" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          <FormField
-            control={form.control}
-            name="primaryPassenger.phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone Number</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter phone number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              control={form.control}
-              name="primaryPassenger.nextOfKinName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Next of Kin Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter next of kin name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="primaryPassenger.nextOfKinPhone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Next of Kin Phone</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter next of kin phone" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
         </div>
       </div>
-    );
-
-    // Additional passengers
-    for (let i = 1; i < passengers; i++) {
-      const passengerKey = `additionalPassenger${i}`;
-      
-      forms.push(
-        <div key={passengerKey} className="mb-8 pt-6 border-t">
-          <h3 className="text-lg font-medium mb-4">Passenger {i + 1}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              control={form.control}
-              name={`${passengerKey}.fullName` as Path<PassengerFormData>}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter full name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name={`${passengerKey}.email` as Path<PassengerFormData>}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email Address</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="Enter email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name={`${passengerKey}.phone` as Path<PassengerFormData>}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter phone number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name={`${passengerKey}.nextOfKinName` as Path<PassengerFormData>}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Next of Kin Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter next of kin name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`${passengerKey}.nextOfKinPhone` as Path<PassengerFormData>}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Next of Kin Phone</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter next of kin phone" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    return forms;
+    </div>)
+    
   };
 
   return (
@@ -295,9 +207,16 @@ const PassengerInfo = ({ onComplete, setStepComplete }: PassengerInfoProps) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {renderPassengerForms()}
+
+           {/* Error message goes here */}
+          {error && (
+            <p className="text-red-600 mt-2">
+              Oops, we couldn’t save your info—please try again.
+            </p>
+          )}
           
-          <Button type="submit" className="w-full">
-            Continue to Payment
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? "Saving..." : "Continue to Payment"}
           </Button>
         </form>
       </Form>
