@@ -9,7 +9,9 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/sonner";
 import { useValidateTripDetails } from "@/hooks/useApi";
-import React from "react";
+import SeatContainerProps from "@/components/seatContainer";
+import SeatIcon from "@/components/ui/seat";
+
 
 // Toggle between mock and live at build/config time
 const USE_MOCK_DATA = false;
@@ -39,7 +41,6 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
   // Local selected seats
   const [localSelected, setLocalSelected] = useState<SelectedSeat[]>(selectedSeats || []);
   const lastStepCompleteRef = useRef<boolean>();
-
   
 
   // Sync selection and step
@@ -125,6 +126,7 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
   if (!USE_MOCK_DATA && isLoading) {
     return <p>Loading seats...</p>;
   }
+
   if (!USE_MOCK_DATA && error) {
     return <p className="text-red-600">Error loading seats. Please try again.</p>;
   }
@@ -173,39 +175,34 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
       </Button>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-[500px] max-h-[30rem] w-full">
+        <DialogContent className="max-w-[500px] max-h-[30rem] w-full bg-gray-50">
           <DialogHeader>
             <DialogTitle>Select Your Seats</DialogTitle>
           </DialogHeader>
           <div className="overflow-y-auto scrollbar-hide max-h-[16rem] mt-4 pb-9">
+
             <div className="flex justify-center mb-4">
               <div className="bg-gray-200 h-8 w-32 rounded-t-3xl flex items-center justify-center text-sm">
                 DRIVER
               </div>
             </div>
+
             <div className="mb-6 flex justify-center space-x-4">
               <Legend />
             </div>
+
             <div className="seat-map grid gap-4 px-4">
               {seats.map((row, rIdx) => (
                 <div key={rIdx} className="flex justify-center">
                   {row.map((seat, sIdx) => (
-                    <React.Fragment key={seat.id}>
-                      {sIdx === 2 && <div className="w-8"></div>}
-                      <button
-                        className={`w-10 h-10 rounded-t-lg border flex items-center justify-center ${
-                          !seat.isAvailable
-                            ? 'bg-gray-400 text-white cursor-not-allowed'
-                            : seat.isSelected
-                              ? 'bg-primary text-white'
-                              : 'bg-white hover:border-primary'
-                        }`}
-                        onClick={() => handleSeatClick(seat.label, seat.id, seat.isAvailable)}
-                        disabled={!seat.isAvailable}
-                      >
-                        {seat.label}
-                      </button>
-                    </React.Fragment>
+                    <SeatContainerProps
+                      key={seat.id}
+                      id={seat.id}
+                      isAvailable={seat.isAvailable}
+                      isSelected={seat.isSelected}
+                      seatNo={seat.label}
+                      onClick={(label, id) => handleSeatClick(label, id, seat.isAvailable)}
+                    />
                   ))}
                 </div>
               ))}
@@ -234,14 +231,25 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
 
 const Legend = () => (
   <>
-    <div className="flex items-center space-x-2">
-      <div className="w-5 h-5 bg-white border rounded"></div><span>Available</span>
-    </div>
-    <div className="flex items-center space-x-2">
-      <div className="w-5 h-5 bg-gray-400 rounded"></div><span>Unavailable</span>
-    </div>
-    <div className="flex items-center space-x-2">
-      <div className="w-5 h-5 bg-primary rounded"></div><span>Selected</span>
+    <div className="mb-6 flex justify-center space-x-6 text-xs">
+      <div className="flex items-center space-x-2">
+        <div className="scale-75">
+          <SeatIcon isAvailable={true} isSelected={true} />
+        </div>
+        <span>Selected</span>
+      </div>
+      <div className="flex items-center space-x-2">
+        <div className="scale-75">
+          <SeatIcon isAvailable={true} isSelected={false} />
+        </div>
+        <span>Available</span>
+      </div>
+      <div className="flex items-center space-x-2">
+        <div className="scale-75">
+          <SeatIcon isAvailable={false} isSelected={false} />
+        </div>
+        <span>Occupied</span>
+      </div>
     </div>
   </>
 );

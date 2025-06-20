@@ -210,7 +210,7 @@ const AdminRoutes = () => {
   return (
     <>
       <Helmet>
-        <title>Route Management | TransitX Admin</title>
+        <title>Route Management | Copers Drive Admin</title>
       </Helmet>
 
       <div className="flex items-center justify-between mb-6">

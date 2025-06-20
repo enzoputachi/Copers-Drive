@@ -233,7 +233,8 @@ export const useBookings = () => {
     queryKey: ADMIN_QUERY_KEYS.bookings,
     queryFn: async () => {
       const response = await adminApiService.getBookings();
-      return response.data;
+      console.log('booking response:', response.data.data)
+      return response.data.data;
     },
   });
 };
@@ -269,6 +270,7 @@ export const usePayments = () => {
     queryKey: ADMIN_QUERY_KEYS.payments,
     queryFn: async () => {
       const response = await adminApiService.getPayments();
+      console.log('Payment Log:', response)
       return response.data;
     },
   });

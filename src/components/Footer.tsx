@@ -18,13 +18,13 @@ const Footer = () => {
               Your trusted transportation partner for safe and reliable journeys to and from NYSC camps across Nigeria.
             </p>
             <div className="flex space-x-4">
-              <a href="https://facebook.com" aria-label="Facebook" className="text-gray-200 hover:text-white transition-colors">
+              <a href="https://www.facebook.com/corpersdrive?mibextid=ZbWKwL" aria-label="Facebook" className="text-gray-200 hover:text-white transition-colors">
                 <Facebook />
               </a>
-              <a href="https://twitter.com" aria-label="Twitter" className="text-gray-200 hover:text-white transition-colors">
+              <a href="https://x.com/CorpersDrive?t=DCSOpS5Blc1uzyJQBM3tuw&s=09" aria-label="Twitter" className="text-gray-200 hover:text-white transition-colors">
                 <Twitter />
               </a>
-              <a href="https://instagram.com" aria-label="Instagram" className="text-gray-200 hover:text-white transition-colors">
+              <a href="https://www.instagram.com/corpersdrive?igsh=MWRuMzN2M2s4bjFx" aria-label="Instagram" className="text-gray-200 hover:text-white transition-colors">
                 <Instagram />
               </a>
             </div>
@@ -36,20 +36,20 @@ const Footer = () => {
             <div className="space-y-3 text-gray-200">
               <div>
                 <div className="font-medium">Email Support:</div>
-                <a href="mailto:support@Copers Drive.ng" className="hover:text-white transition-colors">
-                  support@Copers Drive.ng
+                <a href="mailto:copersdrive@gmail.com" className="hover:text-white transition-colors">
+                  copersdrive@gmail.com
                 </a>
               </div>
               <div>
                 <div className="font-medium">Booking Hotline:</div>
                 <a href="tel:+2348012345678" className="hover:text-white transition-colors">
-                  +234 801 234 5678
+                  
                 </a>
               </div>
               <div>
                 <div className="font-medium">Head Office:</div>
                 <address className="not-italic">
-                  23 Olowu Street, Ikeja,<br />
+                  No 1, Jibowu, Yaba,<br />
                   Lagos, Nigeria
                 </address>
               </div>
@@ -66,9 +66,9 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/schedules" className="text-gray-200 hover:text-white transition-colors">
+                {/* <Link to="/schedules" className="text-gray-200 hover:text-white transition-colors">
                   Schedules
-                </Link>
+                </Link> */}
               </li>
               <li>
                 <Link to="/booking" className="text-gray-200 hover:text-white transition-colors">
@@ -86,9 +86,9 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/agent-login" className="text-gray-200 hover:text-white transition-colors">
+                {/* <Link to="/agent-login" className="text-gray-200 hover:text-white transition-colors">
                   Agent Login
-                </Link>
+                </Link> */}
               </li>
             </ul>
           </div>
@@ -99,10 +99,10 @@ const Footer = () => {
             <ul className="space-y-2 text-gray-200">
               <li>Lagos - Ikeja Terminal</li>
               <li>Lagos - Yaba Terminal</li>
-              <li>Abuja - Central Terminal</li>
+              {/* <li>Abuja - Central Terminal</li>
               <li>Port Harcourt - Main Terminal</li>
               <li>Enugu - City Terminal</li>
-              <li>Kaduna - Central Terminal</li>
+              <li>Kaduna - Central Terminal</li> */}
             </ul>
           </div>
         </div>

@@ -66,12 +66,20 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
 
+  const availableSeats = Array.isArray(trip.seats)
+    ? trip.seats.filter(seat => !seat.isBooked).length
+    : undefined;
+
   return {
     id: String(trip.id),
     departureTime: format(dep, 'hh:mm a'),
     arrivalTime: format(arr, 'hh:mm a'),
     duration: `${hours}h ${mins}m`,
     price: trip.price,
+    busType: trip.bus?.busType,
+    availableSeats,
+    busName: trip.bus?.plateNo,
+    amenities: trip.bus?.amenities || [],
   };
 });
 
@@ -199,7 +207,7 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
         {/* <p className="text-gray-600">
           {date ? format(date, "EEEE, MMMM d, yyyy") : "Date not selected"}
         </p> */}
-         <span className="text-gray-600">Travel Date:</span>
+         <span className="text-gray-600 pr-4">Travel Date:</span>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -238,13 +246,13 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
               onClick={() => handleSelectBus(trip)}
               className={`border rounded-lg p-4 cursor-pointer transition-all ${
                 localSelectedBus === trip.id
-                  ? "border-primary ring-1 ring-primary"
+                  ? "border-primary ring-1 ring-primary bg-green-200"
                   : "hover:border-gray-400"
               }`}
             >
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="font-semibold">{trip.busName}</h3>
+                  <h3 className="font-semibold">{trip.busType}</h3>
                   <p className="text-sm">
                     {trip.departureTime} → {trip.arrivalTime} ({trip.duration})
                   </p>

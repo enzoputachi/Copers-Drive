@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-
 import {
   Form,
   FormControl,
@@ -47,7 +46,7 @@ const BusForm = ({ defaultValues, onSubmit, isSubmitting = false }: BusFormProps
     resolver: zodResolver(busSchema),
     defaultValues: defaultValues || {
       plateNo: "",
-      capacity: 40,
+      capacity: 20,
       seatsPerRow: 4,
       isActive: true,
       busType: "Coach",

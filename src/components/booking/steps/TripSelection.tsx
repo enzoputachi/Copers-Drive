@@ -30,8 +30,8 @@ import { useSearchTripsByRoute } from "@/hooks/useApi";
 
 // Nigerian locations
 const locations = [
-  "Lagos","Abuja","Port Harcourt","Kaduna","Owerri",
-  "Enugu","Benin City","Uyo","Calabar","London"
+  "Jibowu, Lagos State", "Abuja", "Umuawulu, Anambra State","Kaduna","Owerri",
+  "Enugu","Benin City","Uyo","Abijan","London", "Lagos"
 ];
 
 // Schema
@@ -147,6 +147,8 @@ export default function TripSelection({ onComplete, setStepComplete }: Props) {
     setDate(formData.departureDate);
     setReturnDate(formData.returnDate || null);
     setPassengers(formData.passengers);
+
+    console.log("Trip Form data:", formData)
 
     // fetch matching routes
     const res = await searchRoutes();

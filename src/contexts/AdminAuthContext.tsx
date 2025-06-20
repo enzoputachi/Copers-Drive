@@ -20,7 +20,7 @@ export const useAdminAuth = () => {
 
 // Mock admin credentials - in a real app, this would be handled by your backend
 const ADMIN_CREDENTIALS = {
-  email: 'admin@transitx.ng',
+  email: 'admin@Copers Drive.ng',
   password: 'admin123'
 };
 

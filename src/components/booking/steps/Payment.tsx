@@ -5,14 +5,15 @@ import { useBookingStore } from "@/stores/bookingStore";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { toast } from "@/components/ui/sonner";
-import { bookingsApi } from "@/services/api";
+// import { bookingsApi } from "@/services/api";
 import OrderSummary from "./payment/OrderSummary";
 import SimplePaymentForm from "./payment/SimplePaymentForm";
 import {
   simplePaymentSchema,
   SimplePaymentFormData,
 } from "./payment/paymentTypes";
-import { processPaystackPayment } from "./payment/paymentHelpers";
+import { usePaystackPayment } from "@/hooks/useApi";
+// import { processPaystackPayment } from "@/services/paystackService";
 
 interface PaymentProps {
   onComplete: () => void;
@@ -26,6 +27,8 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
     selectedSeats,
     paymentInfo,
     setPaymentInfo,
+    bookingDraftId,
+    bookingToken,
   } = useBookingStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,35 +60,44 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
     return () => subscription.unsubscribe();
   }, [form, setStepComplete, paymentInfo]);
 
+  const { mutateAsync, isPending } = usePaystackPayment()
+
+  // Call Paystack on submit
   const onSubmit = async (values: SimplePaymentFormData) => {
-    if (selectedSeats.length === 0) {
-      toast.error("Please select seats before proceeding to payment");
+    if (!bookingDraftId) {
+      toast.error("No booking draft found. Please start over.");
       return;
     }
 
     try {
       setIsSubmitting(true);
 
+      // Persist paymen in zustand
       setPaymentInfo({
         method: "paystack",
         amount: totalAmount,
         email: values.email,
       });
 
-      const paymentSuccessful = await processPaystackPayment(
-        values.email,
-        totalAmount
-      );
+      // // Paystack launches
+      // const paymentSuccessful = await processPaystackPayment(
+      //   values.email,
+      //   totalAmount
+      // );
+
+      const amountInKobo = (Math.round(totalAmount * 100))
+
+      const paymentSuccessful = await mutateAsync({
+        email: values.email,
+        amount: amountInKobo,
+        bookingId: bookingDraftId,
+      })
 
       if (!paymentSuccessful) {
         setIsSubmitting(false);
         return;
       }
 
-      await bookingsApi.createBookingDraft({
-        amount: totalAmount,
-        email: values.email,
-      });
 
       toast.success("Payment successful and booking created!");
       onComplete();
@@ -115,7 +127,7 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
 
           <Button
             type="submit"
-            disabled={isSubmitting || selectedSeats.length === 0}
+            disabled={isPending || selectedSeats.length === 0}
             className="w-full"
           >
             {isSubmitting

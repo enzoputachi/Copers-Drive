@@ -27,6 +27,7 @@ import AdminTripSeats from "./pages/admin/TripSeats";
 import AdminLayout from "./components/admin/AdminLayout";
 import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute";
 import { AdminAuthProvider } from "./contexts/AdminAuthContext";
+import About from './pages/About';
 
 // Define window.gtag to avoid TypeScript errors
 declare global {
@@ -85,6 +86,7 @@ const App = () => {
                 {/* Customer Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/booking" element={<Booking />} />
+                <Route path="/about" element={<About />} />
                 <Route path="/manage-booking" element={<ManageBooking />} />
                 <Route path="/contact" element={<Contact />} />
                 {/* Admin Login Route (Public) */}

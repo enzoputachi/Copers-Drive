@@ -85,7 +85,7 @@ const AdminRoles = () => {
   return (
     <>
       <Helmet>
-        <title>Role Management | TransitX Admin</title>
+        <title>Role Management | Copers Drive Admin</title>
       </Helmet>
 
       <div className="flex items-center justify-between mb-6">
@@ -110,7 +110,7 @@ const AdminRoles = () => {
           <CardContent className="space-y-2">
             <p className="text-sm text-muted-foreground">
               Permissions are grouped by resource type and action. Each role can be assigned 
-              different combinations of permissions to control access to TransitX features.
+              different combinations of permissions to control access to Copers Drive features.
             </p>
             <ul className="list-disc pl-5 space-y-1 text-sm">
               <li><span className="font-medium">View:</span> Read-only access</li>
@@ -128,7 +128,7 @@ const AdminRoles = () => {
           </CardHeader>
           <CardContent className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              TransitX comes with predefined roles to help you get started quickly. These roles 
+              Copers Drive comes with predefined roles to help you get started quickly. These roles 
               can be modified to suit your organizational needs.
             </p>
             <ul className="list-disc pl-5 space-y-1 text-sm">

@@ -9,8 +9,18 @@ import Payment from "./steps/Payment";
 import Confirmation from "./steps/Confirmation";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/sonner";
 import { useNavigate } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogCancel,
+} from "@radix-ui/react-alert-dialog";
+import { AlertDialogFooter, AlertDialogHeader } from "../ui/alert-dialog";
+// import { useNavigationGuard } from "@/hooks/useNavigationGuard";
+import { useNavigationGuard } from '@/hooks/useNavigationGuard';
 
 // Define all steps in the booking process
 const STEPS = [
@@ -22,11 +32,45 @@ const STEPS = [
   { id: "confirmation", label: "Confirmation" }
 ];
 
+
+  const slides = [
+    {
+      image: "/cm1.jpeg",
+      alt: "Copers Drive luxury bus"
+    },
+    {
+      image: "/cm2.jpeg",
+      alt: "NYSC corps members traveling"
+    },
+    {
+      image: "/cm2.jpeg",
+      alt: "Modern transportation hub"
+    }
+  ];
+
 const BookingWizard = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isCompleted, setIsCompleted] = useState<Record<string, boolean>>({});
-  const { departure, destination, date } = useBookingStore();
+  const [showRestrictedDialog, setShowRestrictedDialogue] = useState(false);
+  const [showNavigationWarning, setShowNavigationWarning] = useState(false);
+
+  const { 
+    departure, 
+    destination, 
+    date, 
+    hasSubmittedPassengerData, 
+    resetForm 
+  } = useBookingStore();
+
+
+  // Prevent navigation when passenger data has been submitted
+  useNavigationGuard({
+    shouldPrevent: hasSubmittedPassengerData && currentStep < STEPS.length - 1,
+    message: "Your booking is in progress. Leaving now will lose your progress.",
+    onNavigationAttempt: () => setShowNavigationWarning(true)
+  });
+
 
   // Check if initial booking data exists when component mounts
   useEffect(() => {
@@ -47,6 +91,13 @@ const BookingWizard = () => {
   };
 
   const goToPrevStep = () => {
+    // 1️⃣ Block if passenger data has been submitted and we’re on or before step 3
+    if (hasSubmittedPassengerData && currentStep <= 3) {
+      setShowRestrictedDialogue(true);
+      return;
+    }
+
+    // 2️⃣ Otherwise, navigate as normal
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
       window.scrollTo(0, 0);
@@ -54,6 +105,25 @@ const BookingWizard = () => {
       // If at first step, go back to home
       navigate("/");
     }
+  };
+
+  const handleStepClick = (stepIndex: number) => {
+    if (hasSubmittedPassengerData && stepIndex < 4 ) {
+      setShowRestrictedDialogue(true);
+      return;
+    }
+
+    // Allow navigation to completed steps only
+    if (stepIndex <= currentStep) {
+      setCurrentStep(stepIndex);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const handleForceNavigation = () => {
+    resetForm();
+    setShowNavigationWarning(false);
+    navigate("/");
   };
 
   // Update step complete status
@@ -88,14 +158,18 @@ const BookingWizard = () => {
   const showNavButtons = currentStep !== STEPS.length - 1;
 
   return (
-    <div className="max-w-4xl mx-auto ">
+    <div className="max-w-4xl mx-auto">
+      
       {/* Progress Steps */}
       <div className="mb-8 overflow-x-auto">
         <div className="flex min-w-max">
           {STEPS.map((step, index) => (
             <div key={step.id} className="flex items-center">
               <div 
-                className={`flex flex-col items-center ${index <= currentStep ? "text-primary" : "text-gray-400"}`}
+                className={`flex flex-col items-center ${index <= currentStep ? "text-primary" : "text-gray-400"}
+                ${hasSubmittedPassengerData && index < 4 ? "cursor-not-allowed opacity-60" : ""}
+                `}
+                onClick={() => handleStepClick(index)}
               >
                 <div 
                   className={`
@@ -120,6 +194,16 @@ const BookingWizard = () => {
           ))}
         </div>
       </div>
+
+      {/* Progress Protection Warning */}
+      {hasSubmittedPassengerData && currentStep !== STEPS.length - 1 && (
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-sm text-yellow-800">
+            <strong>Booking in Progress:</strong> Your passenger information has been saved. 
+            Please complete the payment process to secure your booking.
+          </p>
+        </div>
+      )}
 
       {/* Current Step Content */}
       <div className="bg-white rounded-lg shadow-md p-6">
@@ -148,8 +232,52 @@ const BookingWizard = () => {
           </Button>
         </div>
       )}
+
+       {/* Restricted Access Dialog */}
+      <AlertDialog open={showRestrictedDialog} onOpenChange={setShowRestrictedDialogue}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Changes Not Allowed</AlertDialogTitle>
+            <AlertDialogDescription>
+              You cannot go back and modify your trip details, bus selection, or seat selection 
+              after submitting passenger information. This ensures your booking remains secure 
+              and prevents conflicts with seat reservations.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowRestrictedDialogue(false)}>
+              I Understand
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Navigation Warning Dialog */}
+      <AlertDialog open={showNavigationWarning} onOpenChange={setShowNavigationWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave Booking Process?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your booking is in progress and passenger information has been saved. 
+              If you leave now, you will lose all progress and need to start over.
+              Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowNavigationWarning(false)}>
+              Stay and Complete Booking
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleForceNavigation} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Leave and Lose Progress
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 };
+
+
 
 export default BookingWizard;

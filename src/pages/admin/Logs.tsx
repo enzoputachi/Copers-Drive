@@ -43,7 +43,7 @@ const adminLogs: SystemLog[] = [
     id: "4",
     type: "admin",
     action: "user_created",
-    details: "New user support@transitx.ng created by admin",
+    details: "New user support@Copers Drive.ng created by admin",
     timestamp: "2023-05-09T11:15:00Z",
     ipAddress: "192.168.1.10",
   },
@@ -136,7 +136,7 @@ const AdminLogs = () => {
   return (
     <>
       <Helmet>
-        <title>System Logs | TransitX Admin</title>
+        <title>System Logs | Copers Drive Admin</title>
       </Helmet>
 
       <div className="mb-6">

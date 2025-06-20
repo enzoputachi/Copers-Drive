@@ -1,39 +1,67 @@
-
-import React from "react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselApi,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { User } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
 
 const testimonials = [
   {
     id: 1,
-    name: "Chioma Okafor",
+    name: "Omobomi Iyanu Bisola",
     role: "NYSC Corps Member - Lagos",
     quote: "Copers Drive made my journey to the NYSC orientation camp stress-free and comfortable. The online booking was easy and the bus was clean and comfortable.",
-    avatar: "https://randomuser.me/api/portraits/women/12.jpg",
+    avatar: "",
+    bgColor: "bg-green-50",
   },
   {
     id: 2,
-    name: "Emmanuel Adebayo",
+    name: "Emmanuel Oluwakoya",
     role: "NYSC Corps Member - Abuja",
-    quote: "I was worried about finding reliable transportation to camp, but Copers Drive exceeded my expectations. The staff were friendly and the journey was smooth.",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+    quote: "Corpers Drive showed that you can get safety and comfort at an affordable price. I went to a lot of other companies and I was being offered less for more prizes. Corpers Drive is truly the best",
+    avatar: "",
+    bgColor: "bg-pink-50",
   },
   {
     id: 3,
-    name: "Blessing Nwachukwu",
+    name: "Adelabu Jesutomisin Mathaihas",
     role: "NYSC Corps Member - Kaduna",
-    quote: "The special NYSC discount saved me a lot of money. I've been recommending Copers Drive to all my friends heading to camp.",
-    avatar: "https://randomuser.me/api/portraits/women/65.jpg",
-  },
-  {
-    id: 4,
-    name: "Oluwaseun Ogunleye",
-    role: "NYSC Corps Member - Enugu",
-    quote: "The e-ticket system was so convenient, and the reminders helped me prepare for my journey. Copers Drive really understands corps members' needs.",
-    avatar: "https://randomuser.me/api/portraits/men/67.jpg",
+    quote: "Ever since I followed Corpers Drive, I have always been using and referring them to all that I know. They offered us free refreshments, Full AC, Charging Ports, Toilet in the bus and even music all through the journey. It was seamless I would say.",
+    avatar: "",
+    bgColor: "bg-purple-50"
   },
 ];
 
 const Testimonials = () => {
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+
+  const scrollNext = useCallback(() => {
+    if (api) {
+      api.scrollNext();
+    }
+  }, [api]);
+
+  useEffect(() => {
+    if (!api) return;
+
+    // Set up auto-scroll
+    const interval = setInterval(() => {
+      scrollNext();
+    }, 4000); // Changed to 4 seconds for better readability
+
+    // Update current index when carousel changes
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+
+    return () => clearInterval(interval);
+  }, [api, scrollNext]);
+
   return (
     <section className="py-16 bg-gradient-to-b from-white to-gray-200">
       <div className="container mx-auto px-4">
@@ -46,45 +74,53 @@ const Testimonials = () => {
         
         <div className="max-w-4xl mx-auto">
           <Carousel 
+            setApi={setApi}
             opts={{
               loop: true,
+              align: "center"
             }}
             className="w-full"
           >
-            <CarouselContent>
+            <CarouselContent className="ml-0">
               {testimonials.map((testimonial) => (
                 <CarouselItem key={testimonial.id} className="pl-8">
-                  <div className="flex items-start gap-10 max-w-4xl">
-                  {/* Image (outside bubble) */}
-                  <img
-                    src={testimonial.avatr}
-                    alt={testimonial.name}
-                    className="w-24 h-24 rounded-full object-cover"
-                  />
-
-                  {/* Speech bubble */}
-                  <div className="relative bg-white p-6 rounded-2xl shadow-md ml-6">
-                    {/* Triangle (bubble tail) */}
-
-                          <div className="absolute left-0 top-[2rem] -translate-x-full">
-                            <div className="w-0 h- border-t-[0rem] border-b-[3rem] border-r-[2rem] border-transparent border-r-white"></div>
-                          </div>
-                    
-                    {/* Content */}
-                    <h3 className="text-xl font-semibold text-gray-600">{testimonial.role}</h3>
-                    <div className="font-bold text-gray-800 uppercase">{testimonial.name}</div>
-                    <p className="text-gray-700 mt-2">
-                      {testimonial.quote}
-                    </p>
+                  <div className="flex items-start max-w-4xl">
+                    {/* Speech bubble */}
+                    <div className={`${testimonial.bgColor} p-6 rounded-2xl shadow-md ml-6 w-full`}>
+                      {/* Content */}
+                      <div className="flex space-x-4">
+                        <div className="bg-white p-4 w-[4rem] h-[4rem] flex items-center justify-center rounded-full shadow-md transition-shadow">
+                          <User className="h-8 w-8 text-gray-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-semibold text-gray-600">{testimonial.role}</h3>
+                          <div className="font-bold text-gray-800 uppercase">{testimonial.name}</div>
+                        </div>
+                      </div>
+                      <p className="text-gray-700 mt-4 leading-relaxed">
+                        "{testimonial.quote}"
+                      </p>
+                    </div>
                   </div>
-                </div>
-
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="flex justify-center mt-8">
-              <CarouselPrevious className="mr-4" />
+            
+            <div className="flex justify-center mt-8 space-x-4">
+              <CarouselPrevious />
               <CarouselNext />
+            </div>
+            
+            {/* Dots indicator */}
+            <div className="flex justify-center mt-4 space-x-2">
+              {testimonials.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-2 h-2 rounded-full transition-colors ${
+                    index === current ? 'bg-gray-800' : 'bg-gray-300'
+                  }`}
+                />
+              ))}
             </div>
           </Carousel>
         </div>

@@ -20,8 +20,10 @@ const Confirmation = () => {
     selectedSeats,
     passengerInfo,
     paymentInfo,
+    bookingToken,
     resetForm
   } = useBookingStore();
+
 
   // Simulate sending a confirmation email
   useEffect(() => {
@@ -48,6 +50,8 @@ const Confirmation = () => {
 
   const totalAmount = selectedBus ? selectedBus.price * passengers : 0;
 
+   const seatNo = selectedSeats[0]?.seatNo;
+
   return (
     <div>
       <div className="text-center mb-8">
@@ -63,7 +67,7 @@ const Confirmation = () => {
       {/* Booking Reference */}
       <div className="bg-primary/5 p-4 rounded-lg text-center mb-6">
         <p className="text-sm text-gray-600 mb-1">Booking Reference</p>
-        <p className="text-2xl font-bold">{bookingRef}</p>
+        <p className="text-2xl font-bold">{bookingToken}</p>
       </div>
 
       {/* Trip Details */}
@@ -125,7 +129,7 @@ const Confirmation = () => {
           </div>
           <div className="flex justify-between">
             <p className="text-gray-600">Seat Number(s)</p>
-            <p className="font-medium">{selectedSeats.join(", ")}</p>
+            <p className="font-medium">{seatNo}</p>
           </div>
           <div className="flex justify-between">
             <p className="text-gray-600">Passengers</p>

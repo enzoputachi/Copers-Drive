@@ -40,12 +40,12 @@ const FormModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg h-[30rem] overflow-auto bg-gray-100">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
+        <div>
           <div className="grid gap-4 py-4">{children}</div>
           {footer ? (
             <DialogFooter>{footer}</DialogFooter>
@@ -63,7 +63,7 @@ const FormModal = ({
               </Button>
             </DialogFooter>
           ) : null}
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
