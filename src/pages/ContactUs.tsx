@@ -25,8 +25,8 @@ const Contact = () => {
   return (
     <>
       <Helmet>
-        <title>Contact Us | Copers Drive</title>
-        <meta name="description" content="Get in touch with Copers Drive customer service for any queries or support related to NYSC transport services." />
+        <title>Contact Us | Corpers Drive</title>
+        <meta name="description" content="Get in touch with Corpers Drive customer service for any queries or support related to NYSC transport services." />
       </Helmet>
       <Navbar />
       <main className="container mx-auto px-4 py-8 min-h-screen bg-gray-100">
@@ -74,8 +74,8 @@ const Contact = () => {
                     <Mail className="h-6 w-6 text-primary mt-1" />
                     <div>
                       <h3 className="font-semibold mb-2">Email</h3>
-                      <p className="text-gray-600">support@Copers Drive.ng</p>
-                      <p className="text-gray-600">bookings@Copers Drive.ng</p>
+                      <p className="text-gray-600">support@Corpers Drive.ng</p>
+                      <p className="text-gray-600">bookings@Corpers Drive.ng</p>
                     </div>
                   </div>
                 </CardContent>

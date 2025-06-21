@@ -10,9 +10,14 @@ function extract<T>(res: AxiosResponse<{ data: T }>): T{
   return res.data.data;
 }
 // Routes
+export const useGetFeaturedRoutes = () => useQuery({
+  queryKey: ['featuredRoutes'],
+  queryFn: routesApi.getFeaturedRoutes,
+});
+
 export const useListRoutes = () => useQuery({
   queryKey: ['routes'],
-  queryFn: routesApi.getFeaturedRoutes,
+  queryFn: routesApi.listRoutes,
 });
 
 export const useGetRoute = (routeId: number) => useQuery({
