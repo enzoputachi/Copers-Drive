@@ -14,7 +14,7 @@ const testimonials = [
     id: 1,
     name: "Omobomi Iyanu Bisola",
     role: "NYSC Corps Member - Lagos",
-    quote: "Copers Drive made my journey to the NYSC orientation camp stress-free and comfortable. The online booking was easy and the bus was clean and comfortable.",
+    quote: "Corpers Drive made my journey to the NYSC orientation camp stress-free and comfortable. The online booking was easy and the bus was clean and comfortable.",
     avatar: "",
     bgColor: "bg-green-50",
   },
@@ -68,7 +68,7 @@ const Testimonials = () => {
         <div className="mb-12 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Customers Say</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Hear from NYSC corps members who have traveled with Copers Drive
+            Hear from NYSC corps members who have traveled with Corpers Drive
           </p>
         </div>
         

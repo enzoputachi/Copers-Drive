@@ -16,7 +16,7 @@ describe('Navbar Component', () => {
     render(<NavbarWithRouter />);
     
     // Check if logo is displayed
-    expect(screen.getByText('Copers Drive')).toBeInTheDocument();
+    expect(screen.getByText('Corpers Drive')).toBeInTheDocument();
     
     // Check if desktop navigation links are displayed
     expect(screen.getByText('Home')).toBeInTheDocument();
