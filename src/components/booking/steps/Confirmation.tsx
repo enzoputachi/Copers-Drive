@@ -60,7 +60,7 @@ const Confirmation = () => {
         </div>
         <h2 className="text-2xl font-bold mb-2">Booking Confirmed!</h2>
         <p className="text-gray-600">
-          Thank you for booking with Copers Drive. Your booking has been confirmed.
+          Thank you for booking with Corpers Drive. Your booking has been confirmed.
         </p>
       </div>
 

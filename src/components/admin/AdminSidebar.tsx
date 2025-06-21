@@ -18,9 +18,9 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
     { icon: Users, label: "Users", href: "/admin/users" },
-    { icon: Map, label: "Routes", href: "/admin/routes" },
-    { icon: Calendar, label: "Trips", href: "/admin/trips" },
+    { icon: Map, label: "Routes", href: "/admin/routes" },   
     { icon: Bus, label: "Buses", href: "/admin/buses" },
+     { icon: Calendar, label: "Trips", href: "/admin/trips" },
     { icon: BookText, label: "Bookings", href: "/admin/bookings" },
     { icon: CreditCard, label: "Payments", href: "/admin/payments" },
     { icon: Bell, label: "Notifications", href: "/admin/notifications" },
@@ -32,15 +32,15 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-10 flex flex-col bg-white shadow-lg transition-all duration-300 ease-in-out",
+        "fixed inset-y-0 left-0 z-10 flex flex-col bg-white shadow-lg ",
         isOpen ? "w-64" : "w-16"
       )}
     >
       {/* Logo */}
       <div className="flex h-16 items-center justify-center border-b px-4">
         <Link to="/admin" className="flex items-center">
-          <span className="text-xl font-bold text-primary">
-            {isOpen ? "Copers Drive Admin" : "TX"}
+          <span className="text-xl font-bold text-primary transition-opacity duration-300">
+            {isOpen ? "Corpers Drive Admin" : "CD"}
           </span>
         </Link>
       </div>

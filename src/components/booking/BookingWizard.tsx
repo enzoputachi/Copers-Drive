@@ -36,7 +36,7 @@ const STEPS = [
   const slides = [
     {
       image: "/cm1.jpeg",
-      alt: "Copers Drive luxury bus"
+      alt: "Corpers Drive luxury bus"
     },
     {
       image: "/cm2.jpeg",

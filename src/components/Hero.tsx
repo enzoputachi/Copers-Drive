@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useBookingStore } from "@/stores/bookingStore";
 import { toast } from "@/components/ui/sonner";
 import { useNavigate } from "react-router-dom";
+import { useListRoutes } from "@/hooks/useApi";
 
 const locations = [
   "Jibowu, Lagos State", "Lagos", "Abuja", "Umuawulu,	Anambra State", "Kaduna", "Owerri",
@@ -35,6 +36,20 @@ type BookingFormData = z.infer<typeof bookingSchema>;
 const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const navigate = useNavigate();
+  const { data: routes, isLoading, error } = useListRoutes();
+  const routesArrays = routes?.data?.data || [];
+  console.log('Routes:', routesArrays, 'Loading:', isLoading, 'Error:', error);
+
+  if (error) {
+  return (
+    <section className="container mx-auto px-4 py-10 text-center">
+      <h2 className="text-2xl font-bold text-red-600 mb-4">Failed to load routes</h2>
+      <p className="text-lg">Please try again later or contact support.</p>
+    </section>
+    );
+  }
+ 
+  
   
   const { 
     departure, 
@@ -72,7 +87,7 @@ const Hero = () => {
   const slides = [
     {
       image: "/cm1.jpeg",
-      alt: "Copers Drive luxury bus"
+      alt: "Corpers Drive luxury bus"
     },
     {
       image: "/cm2.jpeg",
@@ -161,8 +176,8 @@ const Hero = () => {
                   })}
                 >
                   <option value="">Select departure</option>
-                  {locations.map((loc) => (
-                    <option key={loc} value={loc}>{loc}</option>
+                  {routesArrays.map((route) => (
+                    <option key={route.id} value={route.origin}>{route.origin}</option>
                   ))}
                 </select>
                 {errors.departure && (
@@ -181,8 +196,8 @@ const Hero = () => {
                   })}
                 >
                   <option value="">Select destination</option>
-                  {locations.map((loc) => (
-                    <option key={loc} value={loc}>{loc}</option>
+                  {routesArrays.map((route) => (
+                    <option key={route.id} value={route.destination}>{route.destination}</option>
                   ))}
                 </select>
                 {errors.destination && (
