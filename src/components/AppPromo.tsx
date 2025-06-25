@@ -15,7 +15,7 @@ const AppPromo = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="md:w-1/2 mb-8 md:mb-0">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-black p-4 rounded-xl">Download the Copers Drive App</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-black p-4 rounded-xl">Download the Corpers Drive App</h2>
             <p className="text-lg mb-6 opacity-90">
               Book tickets, manage your journeys, and get real-time updates on your mobile device.
             </p>
@@ -55,7 +55,7 @@ const AppPromo = () => {
               <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-primary/30 to-primary/10 rounded-2xl transform rotate-6"></div>
               <img 
                 src="/ad.png" 
-                alt="Copers Drive Mobile App" 
+                alt="Corpers Drive Mobile App" 
                 className="relative z-10 rounded-2xl shadow-xl"
               />
               <div className="absolute -bottom-4 -right-4 bg-yellow-400 text-black font-bold rounded-full p-3 z-20 transform rotate-12">

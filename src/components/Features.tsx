@@ -33,7 +33,7 @@ const Features = () => {
     <section className="py-16 bg-green-800">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
-          <h2 className="text-3xl text-white md:text-4xl font-bold mb-4">Why Choose Copers Drive</h2>
+          <h2 className="text-3xl text-white md:text-4xl font-bold mb-4">Why Choose Corpers Drive</h2>
           <p className="text-white max-w-2xl mx-auto">
             We provide more than just transportation - we offer peace of mind for NYSC corps members traveling to their service locations
           </p>

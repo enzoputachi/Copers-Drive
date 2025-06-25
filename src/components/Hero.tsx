@@ -38,19 +38,8 @@ const Hero = () => {
   const navigate = useNavigate();
   const { data: routes, isLoading, error } = useListRoutes();
   const routesArrays = routes?.data?.data || [];
-  console.log('Routes:', routesArrays, 'Loading:', isLoading, 'Error:', error);
-
-  if (error) {
-  return (
-    <section className="container mx-auto px-4 py-10 text-center">
-      <h2 className="text-2xl font-bold text-red-600 mb-4">Failed to load routes</h2>
-      <p className="text-lg">Please try again later or contact support.</p>
-    </section>
-    );
-  }
- 
-  
-  
+  // console.log('Routes:', routesArrays, 'Loading:', isLoading, 'Error:', error);
+    
   const { 
     departure, 
     destination, 
@@ -63,6 +52,7 @@ const Hero = () => {
     setPassengers,
     setSeatClass
   } = useBookingStore();
+
 
   const { register, handleSubmit, setValue, formState: { errors }, watch } = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
@@ -125,6 +115,16 @@ const Hero = () => {
       setBookingDate(date);
     }
   };
+
+  if (error) {
+    return (
+      <section className="container mx-auto px-4 py-10 text-center">
+        <h2 className="text-2xl font-bold text-red-600 mb-4">Failed to load routes</h2>
+        <p className="text-lg">Please try again later or contact support.</p>
+      </section>
+    );
+  }
+
 
   return (
     <section className="relative">
