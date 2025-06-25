@@ -26,35 +26,35 @@ const recentActivities: ActivityItem[] = [
     action: "created a new route",
     subject: "Lagos to Abuja",
     timestamp: "2 minutes ago",
-    user: { name: "Admin User", email: "admin@Copers Drive.ng" }
+    user: { name: "Admin User", email: "admin@Corpers Drive.ng" }
   },
   {
     id: "2",
     action: "updated bus",
     subject: "ABC-123XY",
     timestamp: "15 minutes ago",
-    user: { name: "Operation Manager", email: "ops@Copers Drive.ng" }
+    user: { name: "Operation Manager", email: "ops@Corpers Drive.ng" }
   },
   {
     id: "3",
     action: "canceled booking",
     subject: "TX-2023-05-10",
     timestamp: "3 hours ago",
-    user: { name: "Support Staff", email: "support@Copers Drive.ng" }
+    user: { name: "Support Staff", email: "support@Corpers Drive.ng" }
   },
   {
     id: "4",
     action: "processed payment",
     subject: "₦25,000.00",
     timestamp: "5 hours ago",
-    user: { name: "Finance Admin", email: "finance@Copers Drive.ng" }
+    user: { name: "Finance Admin", email: "finance@Corpers Drive.ng" }
   },
   {
     id: "5",
     action: "added a new trip",
     subject: "Lagos to Ibadan",
     timestamp: "Yesterday",
-    user: { name: "Admin User", email: "admin@Copers Drive.ng" }
+    user: { name: "Admin User", email: "admin@Corpers Drive.ng" }
   }
 ];
 
@@ -99,7 +99,7 @@ const AdminDashboard = () => {
   return (
     <>
       <Helmet>
-        <title>Dashboard | Copers Drive Admin</title>
+        <title>Dashboard | Corpers Drive Admin</title>
       </Helmet>
 
       <div className="flex items-center justify-between mb-6">

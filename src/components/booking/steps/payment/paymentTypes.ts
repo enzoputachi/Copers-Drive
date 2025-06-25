@@ -26,6 +26,11 @@ export const simplePaymentSchema = z.object({
   amount: z.number().min(100, "Amount must be at least ₦100"),
 });
 
+// Empty schema for split payments
+export const splitPaymentSchema = z.object({});
+
+export type SplitPaymentFormData = z.infer<typeof splitPaymentSchema>;
+
 
 // Empty schema for wallet payments
 export const walletSchema = z.object({});
@@ -40,6 +45,9 @@ export type SimplePaymentFormData = z.infer<typeof simplePaymentSchema>;
 export interface PaymentInfo {
   method: "card" | "transfer" | "wallet";
   amount: number;
+  isSplitPayment?: boolean; // Optional, only for split payment
+  commitmentAmount?: number; // Optional, only for split payment
+  remainingAmount?: number; // Optional, only for split payment
   cardDetails?: CardFormData;
   transferDetails?: BankTransferFormData;
 }

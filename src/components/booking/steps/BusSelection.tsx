@@ -6,10 +6,11 @@ import { toast } from "@/components/ui/sonner";
 import { useSearchTripsByRoute } from "@/hooks/useApi";
 import { format, parseISO, differenceInMinutes } from 'date-fns';
 // import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
-import { CalendarIcon } from "lucide-react";
+import { Bus, Star, Crown, CalendarIcon } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+
 
 
 interface BusSelectionProps {
@@ -54,7 +55,7 @@ const BusSelection = ({ onComplete, setStepComplete }: BusSelectionProps) => {
     date: formattedDate,
   });
 
-  console.log("apiTripsRaw:", apiTripsRaw, typeof apiTripsRaw);
+  console.log("apiTripsRaw:", apiTripsRaw, "payload:", origin, destination, formattedDate );
 
 
 
@@ -98,7 +99,7 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
       price: 5500,
       busType: "Standard",
       availableSeats: 23,
-      busName: "Copers Drive Express",
+      busName: "Corpers Drive Express",
       amenities: ["Air Conditioned", "Free WiFi", "USB Charging"],
     },
     {
@@ -109,7 +110,7 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
       price: 8000,
       busType: "Executive",
       availableSeats: 15,
-      busName: "Copers Drive Premium",
+      busName: "Corpers Drive Premium",
       amenities: ["Air Conditioned", "Free WiFi", "USB Charging", "Refreshments", "Extra Legroom"],
     },
     {
@@ -120,7 +121,7 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
       price: 12000,
       busType: "VIP",
       availableSeats: 8,
-      busName: "Copers Drive Luxury",
+      busName: "Corpers Drive Luxury",
       amenities: [
         "Air Conditioned",
         "Free WiFi",
@@ -197,6 +198,25 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
     );
   }
 
+  // Function to get bus image based on type (not implemented yet)
+  const getBusImage = (busType?: string) => {
+    switch (busType) {
+      case "Sprinter":
+        // return "/images/bus-sprinter.jpg";
+        return <Bus className="h-6 w-6 text-gray-500" />;
+      case "Coach":
+        // return "/images/bus-executive.jpg";
+        return <Bus className="h-6 w-6 text-gray-500" />;
+      case "Mini Bus":
+        // return "/images/bus-vip.jpg";
+        return <Star className="h-6 w-6 text-gray-500" />;
+      case "Standard":
+      default:
+        // return "/images/bus-default.jpg";
+        return <Bus className="h-6 w-6 text-gray-500" />;
+    } 
+  }
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Select Bus</h2>
@@ -251,14 +271,17 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
               }`}
             >
               <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-semibold">{trip.busType}</h3>
-                  <p className="text-sm">
-                    {trip.departureTime} → {trip.arrivalTime} ({trip.duration})
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    {trip.availableSeats} seats available
-                  </p>
+                <div className="flex items-center gap-3">
+                  {getBusImage(trip.busType)}
+                  <div>
+                    <h3 className="font-semibold">{trip.busType}</h3>
+                    <p className="text-sm">
+                      {trip.departureTime} → {trip.arrivalTime} ({trip.duration})
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      {trip.availableSeats} seats available
+                    </p>
+                  </div>
                 </div>
                 <div className="text-xl font-bold">
                   ₦{trip.price.toLocaleString()}

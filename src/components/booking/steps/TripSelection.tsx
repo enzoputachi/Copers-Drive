@@ -26,12 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useSearchTripsByRoute } from "@/hooks/useApi";
+import { useListRoutes, useSearchTripsByRoute } from "@/hooks/useApi";
 
 // Nigerian locations
 const locations = [
-  "Jibowu, Lagos State", "Abuja", "Umuawulu, Anambra State","Kaduna","Owerri",
-  "Enugu","Benin City","Uyo","Abijan","London", "Lagos"
+  "Jibowu, Lagos State", "Lagos", "Abuja", "Umuawulu, Anambra State", "Kaduna", "Owerri",
+  "Enugu", "Benin City", "Abijan", "Calabar", "London"
 ];
 
 // Schema
@@ -61,6 +61,9 @@ interface Props {
 }
 
 export default function TripSelection({ onComplete, setStepComplete }: Props) {
+  const { data: routes = [], isLoading, error } = useListRoutes();
+  const routeArrays = routes?.data?.data
+
   // store state + setters
   const {
     departure,
@@ -135,7 +138,7 @@ export default function TripSelection({ onComplete, setStepComplete }: Props) {
     date: depDateString,
   });
 
-  console.log("Trip list:", );
+  console.log("Trip list:", data );
   
 
   // on submit: persist store + call API + next
@@ -148,12 +151,12 @@ export default function TripSelection({ onComplete, setStepComplete }: Props) {
     setReturnDate(formData.returnDate || null);
     setPassengers(formData.passengers);
 
-    console.log("Trip Form data:", formData)
+    // console.log("Trip Form data:", formData)
 
     // fetch matching routes
     const res = await searchRoutes();
 
-    const routesArray = res.data ?? [];
+    const routesArray = res?.data ?? [];
 
     onComplete(routesArray);
   };
@@ -211,9 +214,9 @@ export default function TripSelection({ onComplete, setStepComplete }: Props) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="">
-                      {locations.map((loc) => (
-                        <SelectItem key={loc} value={loc}>
-                          {loc}
+                      {Array.isArray(routeArrays) && routeArrays.map((route) => (
+                        <SelectItem key={route.id} value={route.origin}>
+                          {route.origin}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -238,11 +241,11 @@ export default function TripSelection({ onComplete, setStepComplete }: Props) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {locations
-                        .filter((loc) => loc !== watch("departure"))
-                        .map((loc) => (
-                          <SelectItem key={loc} value={loc}>
-                            {loc}
+                      {Array.isArray(routeArrays) && routeArrays
+                        .filter((route) => route !== watch("departure"))
+                        .map((route) => (
+                          <SelectItem key={route.id} value={route.destination}>
+                            {route.destination}
                           </SelectItem>
                         ))}
                     </SelectContent>

@@ -48,13 +48,13 @@ const AdminLogin = () => {
   return (
     <>
       <Helmet>
-        <title>Admin Login | Copers Drive</title>
+        <title>Admin Login | Corpers Drive</title>
       </Helmet>
       
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900">Copers Drive</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Corpers Drive</h1>
             <p className="mt-2 text-sm text-gray-600">Admin Portal</p>
           </div>
           
@@ -78,7 +78,7 @@ const AdminLogin = () => {
                       autoComplete="email"
                       required
                       className="pl-10"
-                      placeholder="admin@Copers Drive.ng"
+                      placeholder="example@gmail.ng"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
@@ -123,13 +123,13 @@ const AdminLogin = () => {
                 </Button>
               </form>
               
-              <div className="mt-4 p-3 bg-blue-50 rounded-md">
+              {/* <div className="mt-4 p-3 bg-blue-50 rounded-md">
                 <p className="text-sm text-blue-800">
                   <strong>Demo Credentials:</strong><br />
-                  Email: admin@Copers Drive.ng<br />
+                  Email: admin@Corpers Drive.ng<br />
                   Password: admin123
                 </p>
-              </div>
+              </div> */}
             </CardContent>
           </Card>
         </div>

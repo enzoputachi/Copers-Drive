@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import DataTable from "@/components/admin/DataTable";
 import { usePayments } from "@/hooks/useAdminQueries";
+import api from "@/services/api";
+import { render } from "@testing-library/react";
 
 // —————————————————————————————————————————————
 // 1) Mock payments data (IDs as strings)
@@ -57,7 +59,8 @@ const AdminPayments = () => {
   // —————————————————————————————————————————————
   // 3) React Query hook
   // —————————————————————————————————————————————
-  const { data: apiPayments = [], isLoading, error } = usePayments();
+  const { data: apiPaymentsRaw = [], isLoading, error } = usePayments();
+  const apiPayments = apiPaymentsRaw?.data?.data;
 
   // —————————————————————————————————————————————
   // 4) Effect: if mock flag is on, set mock. Otherwise, when API finishes, copy/format it.
@@ -66,9 +69,7 @@ const AdminPayments = () => {
     console.log('payments:', apiPayments)
     if (USE_MOCK_PAYMENTS) {
       setPaymentsData(initialPayments);
-    } 
-
-    if (!isLoading && Array.isArray(apiPayments)) {
+    } else if (!isLoading && Array.isArray(apiPayments)) {
       const formatted = apiPayments.map((p: any) => ({
         ...p,
         id: String(p.id),
@@ -77,7 +78,7 @@ const AdminPayments = () => {
       
     }
 
-  }, []);
+  }, [apiPayments, isLoading]);
 
   // —————————————————————————————————————————————
   // 5) Loader/error only when not using mock
@@ -102,16 +103,19 @@ const AdminPayments = () => {
   // 6) Define columns for DataTable
   // —————————————————————————————————————————————
   const columns = [
-    { key: "bookingToken", title: "Booking ID" },
+    { key: "bookingToken", 
+      title: "Booking Token" ,
+      render: (payment: any) => <span>{payment.booking.bookingToken}</span>
+    },
     {
       key: "amount",
       title: "Amount",
       render: (payment: any) => `₦${payment.amount.toLocaleString()}`,
     },
     {
-      key: "method",
-      title: "Method",
-      render: (payment: any) => <span className="capitalize">{payment.method}</span>,
+      key: "provider",
+      title: "Provider",
+      render: (payment: any) => <span className="capitalize">{payment.provider}</span>,
     },
     {
       key: "status",
@@ -119,9 +123,9 @@ const AdminPayments = () => {
       render: (payment: any) => (
         <span
           className={`capitalize ${
-            payment.status === "successful"
+            payment.status === "PAID"
               ? "text-green-600"
-              : payment.status === "pending"
+              : payment.status === "PENDING"
               ? "text-yellow-600"
               : "text-red-600"
           }`}
@@ -136,13 +140,13 @@ const AdminPayments = () => {
       render: (payment: any) =>
         payment.paidAt ? new Date(payment.paidAt).toLocaleString() : "N/A",
     },
-    { key: "reference", title: "Reference" },
+    { key: "paystackRef", title: "Reference" },
   ];
 
   return (
     <>
       <Helmet>
-        <title>Payment Oversight | Copers Drive Admin</title>
+        <title>Payment Oversight | Corpers Drive Admin</title>
       </Helmet>
 
       <div className="mb-6">

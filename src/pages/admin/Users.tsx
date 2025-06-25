@@ -38,7 +38,7 @@ import { User } from "@/services/adminApi";
 const initialUsers: User[] = [
   {
     id: "1",
-    email: "admin@Copers Drive.ng",
+    email: "admin@Corpers Drive.ng",
     name: "Admin User",
     role: "admin",
     lastLogin: "2023-05-20T10:30:00Z",
@@ -49,7 +49,7 @@ const initialUsers: User[] = [
   },
   {
     id: "2",
-    email: "manager@Copers Drive.ng",
+    email: "manager@Corpers Drive.ng",
     name: "Operations Manager",
     role: "manager",
     lastLogin: "2023-05-19T14:20:00Z",
@@ -60,7 +60,7 @@ const initialUsers: User[] = [
   },
   {
     id: "3",
-    email: "support@Copers Drive.ng",
+    email: "support@Corpers Drive.ng",
     name: "Support Staff",
     role: "support",
     lastLogin: "2023-05-18T09:15:00Z",
@@ -71,7 +71,7 @@ const initialUsers: User[] = [
   },
   {
     id: "4",
-    email: "finance@Copers Drive.ng",
+    email: "finance@Corpers Drive.ng",
     name: "Finance Admin",
     role: "finance",
     lastLogin: "2023-05-17T16:45:00Z",
@@ -82,7 +82,7 @@ const initialUsers: User[] = [
   },
   {
     id: "5",
-    email: "driver@Copers Drive.ng",
+    email: "driver@Corpers Drive.ng",
     name: "Driver User",
     role: "driver",
     lastLogin: "2023-05-16T08:00:00Z",
@@ -362,7 +362,7 @@ const AdminUsers = () => {
   return (
     <>
       <Helmet>
-        <title>User Management | Copers Drive Admin</title>
+        <title>User Management | Corpers Drive Admin</title>
       </Helmet>
 
       <div className="flex items-center justify-between mb-6">

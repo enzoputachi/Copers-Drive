@@ -13,7 +13,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <div className="text-2xl font-bold mb-4">Copers Drive</div>
+            <div className="text-2xl font-bold mb-4">Corpers Drive</div>
             <p className="text-gray-200 mb-4">
               Your trusted transportation partner for safe and reliable journeys to and from NYSC camps across Nigeria.
             </p>
@@ -36,8 +36,8 @@ const Footer = () => {
             <div className="space-y-3 text-gray-200">
               <div>
                 <div className="font-medium">Email Support:</div>
-                <a href="mailto:copersdrive@gmail.com" className="hover:text-white transition-colors">
-                  copersdrive@gmail.com
+                <a href="mailto:corpersdrive@gmail.com" className="hover:text-white transition-colors">
+                  corpersdrive@gmail.com
                 </a>
               </div>
               <div>
@@ -111,7 +111,7 @@ const Footer = () => {
         
         <div className="flex flex-col md:flex-row justify-between items-center text-gray-200 text-sm">
           <div>
-            &copy; {year} Copers Drive Transportation Ltd. All rights reserved.
+            &copy; {year} Corpers Drive Transportation Ltd. All rights reserved.
           </div>
           <div className="mt-4 md:mt-0 flex space-x-6">
             <Link to="/terms" className="hover:text-white transition-colors">

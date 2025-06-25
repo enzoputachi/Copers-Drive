@@ -277,7 +277,7 @@ const AdminBuses = () => {
   return (
     <>
       <Helmet>
-        <title>Bus Management | Copers Drive Admin</title>
+        <title>Bus Management | Corpers Drive Admin</title>
       </Helmet>
 
       <div className="flex items-center justify-between mb-6">

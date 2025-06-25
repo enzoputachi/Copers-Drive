@@ -24,6 +24,12 @@ const Confirmation = () => {
     resetForm
   } = useBookingStore();
 
+  const paidAmountInKobo = paymentInfo?.amount || 0;
+  const paidAmountInNaira = paidAmountInKobo / 100;
+  const totalAmount = selectedBus ? selectedBus.price * passengers : 0;
+  const totalAmountInNaira = totalAmount;
+
+  const isSplitPayment = paidAmountInKobo < totalAmount * 100;
 
   // Simulate sending a confirmation email
   useEffect(() => {
@@ -48,7 +54,7 @@ const Confirmation = () => {
   // Create a "fake" booking reference number
   const bookingRef = `TX${Math.floor(100000 + Math.random() * 900000)}`;
 
-  const totalAmount = selectedBus ? selectedBus.price * passengers : 0;
+  // const totalAmount = selectedBus ? selectedBus.price * passengers : 0;
 
    const seatNo = selectedSeats[0]?.seatNo;
 
@@ -153,10 +159,29 @@ const Confirmation = () => {
             <p className="text-gray-600">Price per Seat</p>
             <p className="font-medium">₦{selectedBus?.price.toLocaleString()}</p>
           </div>
-          <div className="flex justify-between font-semibold pt-2 border-t">
-            <p>Total Amount</p>
-            <p>₦{totalAmount.toLocaleString()}</p>
-          </div>
+          {isSplitPayment ? (
+            <>
+              <div className="flex justify-between">
+                <p className="text-gray-600">Commitment Fee Paid</p>
+                <p className="font-medium">₦{paidAmountInNaira.toLocaleString()}</p>
+              </div>
+              <div className="flex justify-between">
+                <p className="text-gray-600">Balance Remaining</p>
+                <p className="font-medium">
+                  ₦{(totalAmountInNaira - paidAmountInNaira).toLocaleString()}
+                </p>
+              </div>
+              <div className="flex justify-between font-semibold pt-2 border-t">
+                <p>Total Amount</p>
+                <p>₦{totalAmountInNaira.toLocaleString()}</p>
+              </div>
+            </>
+          ) : (
+            <div className="flex justify-between font-semibold pt-2 border-t">
+              <p>Total Amount Paid</p>
+              <p>₦{paidAmountInNaira.toLocaleString()}</p>
+            </div>
+          )}
         </div>
       </div>
 

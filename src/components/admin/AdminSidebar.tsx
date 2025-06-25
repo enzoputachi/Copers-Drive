@@ -23,10 +23,10 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
      { icon: Calendar, label: "Trips", href: "/admin/trips" },
     { icon: BookText, label: "Bookings", href: "/admin/bookings" },
     { icon: CreditCard, label: "Payments", href: "/admin/payments" },
-    { icon: Bell, label: "Notifications", href: "/admin/notifications" },
-    { icon: FileText, label: "Logs", href: "/admin/logs" },
-    { icon: Settings, label: "Settings", href: "/admin/settings" },
-    { icon: Shield, label: "Roles", href: "/admin/roles" },
+    // { icon: Bell, label: "Notifications", href: "/admin/notifications" },
+    // { icon: FileText, label: "Logs", href: "/admin/logs" },
+    // { icon: Settings, label: "Settings", href: "/admin/settings" },
+    // { icon: Shield, label: "Roles", href: "/admin/roles" },
   ];
 
   return (

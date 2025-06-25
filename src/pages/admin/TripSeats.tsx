@@ -86,7 +86,7 @@ const AdminTripSeats = () => {
   return (
     <>
       <Helmet>
-        <title>Trip Seat Map | Copers Drive Admin</title>
+        <title>Trip Seat Map | Corpers Drive Admin</title>
       </Helmet>
       
       <div className="mb-6">

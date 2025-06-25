@@ -14,13 +14,17 @@ import {
 } from "./payment/paymentTypes";
 import { usePaystackPayment } from "@/hooks/useApi";
 // import { processPaystackPayment } from "@/services/paystackService";
+import SplitPayment from './payment/SplitPayment';
+import PaymentMethodSelector from './payment/PaymentMethodSelector';
 
 interface PaymentProps {
   onComplete: () => void;
   setStepComplete: (stepId: string, isComplete: boolean) => void;
 }
 
+
 const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
+  const [paymentMethod, setPaymentMethod] = useState<"full" | "split">("full");
   const {
     selectedBus,
     passengers,
@@ -33,20 +37,24 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Calculate total amount based on selected bus and passengers
   const totalAmount = selectedBus ? selectedBus.price * passengers : 0;
+  const commitmentFee = 5000; 
+
+  const amountToPayInKobo = paymentMethod === "split" ? (Math.round(commitmentFee * 100)) : (Math.round(totalAmount * 100))
 
   const form = useForm<SimplePaymentFormData>({
     resolver: zodResolver(simplePaymentSchema),
     defaultValues: {
       email: paymentInfo?.email || "",
-      amount: totalAmount,
+      amount: amountToPayInKobo,
     },
     mode: "onChange",
   });
 
   useEffect(() => {
-    form.setValue("amount", totalAmount);
-  }, [totalAmount, form]);
+    form.setValue("amount", amountToPayInKobo);
+  }, [amountToPayInKobo, form]);
 
   useEffect(() => {
     const subscription = form.watch(() => {
@@ -72,10 +80,10 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
     try {
       setIsSubmitting(true);
 
-      // Persist paymen in zustand
+      // Persist payment in zustand
       setPaymentInfo({
         method: "paystack",
-        amount: totalAmount,
+        amount: amountToPayInKobo,
         email: values.email,
       });
 
@@ -85,11 +93,10 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
       //   totalAmount
       // );
 
-      const amountInKobo = (Math.round(totalAmount * 100))
 
       const paymentSuccessful = await mutateAsync({
         email: values.email,
-        amount: amountInKobo,
+        amount: amountToPayInKobo,
         bookingId: bookingDraftId,
       })
 
@@ -108,6 +115,12 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
     }
   };
 
+  const handlePaymentMethodchange = (value: "full" | "split") => {
+    setPaymentMethod(value);
+  };
+
+
+
   
 
   return (
@@ -120,10 +133,22 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
         passengers={passengers}
         totalAmount={totalAmount}
       />
+      <PaymentMethodSelector
+        paymentMethod={paymentMethod}
+        onPaymentMethodChange={handlePaymentMethodchange}
+      />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <SimplePaymentForm form={form} />
+         
+          {paymentMethod === "split" ? (
+            <SplitPayment
+              totalAmount={totalAmount}
+              commitmentAmount={commitmentFee}
+            />
+          ) : null}
+          <SimplePaymentForm form={form} amount={amountToPayInKobo / 100} />
+          
 
           <Button
             type="submit"
@@ -132,7 +157,7 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
           >
             {isSubmitting
               ? "Processing Payment..."
-              : `Pay ₦${totalAmount.toLocaleString()}`}
+              : `Pay ₦${(amountToPayInKobo / 100).toLocaleString()}`}
           </Button>
 
           <p className="text-center text-sm text-gray-500">

@@ -113,6 +113,8 @@ const AdminRoutes = () => {
       return;
     }
 
+    console.log("Updating route with data:", data);
+
     if (!currentRoute) return;
     updateRouteMutation.mutate(
       { id: currentRoute.id, routeData: data },
@@ -210,7 +212,7 @@ const AdminRoutes = () => {
   return (
     <>
       <Helmet>
-        <title>Route Management | Copers Drive Admin</title>
+        <title>Route Management | Corpers Drive Admin</title>
       </Helmet>
 
       <div className="flex items-center justify-between mb-6">

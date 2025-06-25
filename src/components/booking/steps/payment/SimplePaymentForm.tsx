@@ -5,9 +5,10 @@ import { UseFormReturn } from "react-hook-form";
 
 interface SimplePaymentFormProps {
   form: UseFormReturn<any>;
+  amount: number; // Amount in Naira (₦)
 }
 
-const SimplePaymentForm: React.FC<SimplePaymentFormProps> = ({ form }) => {
+const SimplePaymentForm: React.FC<SimplePaymentFormProps> = ({ form, amount }) => {
   return (
     <div className="space-y-6">
       <FormField
@@ -34,7 +35,9 @@ const SimplePaymentForm: React.FC<SimplePaymentFormProps> = ({ form }) => {
               <Input
                 type="number"
                 placeholder="1000"
-                {...field}
+                value={amount}
+                readOnly
+                tabIndex={-1} // Prevents focus
                 onChange={(e) => {
                   // Convert to kobo if needed when sending to Paystack
                   const value = parseInt(e.target.value.replace(/\D/g, ""), 10) || 0;

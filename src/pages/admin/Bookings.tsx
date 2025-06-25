@@ -57,7 +57,9 @@ const AdminBookings = () => {
   // —————————————————————————————————————————————
   // 3) React Query hooks
   // —————————————————————————————————————————————
-  const { data: apiBookings = [], isLoading, error } = useBookings();
+  const { data: apiBookingsRaw = [], isLoading, error } = useBookings();
+
+  const apiBookings = apiBookingsRaw.data
 
   // —————————————————————————————————————————————
   // 4) Effect: if mock flag is on, set mock. Otherwise, when API finishes, copy/format it.
@@ -67,16 +69,17 @@ const AdminBookings = () => {
 
     if (USE_MOCK_BOOKINGS) {
       setBookingsData(initialBookings);
-    } 
-
-    if (!isLoading && Array.isArray(apiBookings)) {
+    } else if (!isLoading && Array.isArray(apiBookings)) {
       // Convert IDs to strings (in case API returns numeric IDs)
       const formatted = apiBookings.map((b: any) => ({
         ...b,
         id: String(b.id),
       }));
       console.log("Formattted booking:", formatted);        
-      setBookingsData(formatted);
+      setBookingsData((prev) => {
+        if (JSON.stringify(prev) === JSON.stringify(formatted)) return prev;
+        return formatted;
+      });
     } 
     
   }, [apiBookings, isLoading]);
@@ -104,9 +107,16 @@ const AdminBookings = () => {
   // 6) Define columns for DataTable
   // —————————————————————————————————————————————
   const columns = [
-    { key: "bookingToken", title: "Booking ID" },
-    { key: "trip", title: "Trip" },
-    { key: "seatNo", title: "Seat" },
+    { key: "bookingToken", title: "Booking Token" },
+    { key: "trip", 
+      title: "Trip",
+      render: (booking: any) => <span>{`${booking?.trip?.route?.origin} ➡️ ${booking?.trip?.route?.destination}`}</span>
+    },
+    { key: "seatNo", 
+      title: "Seat",
+      render: (booking: any) => <span>{`${booking?.seat.map(seat => seat.seatNo)}`}</span>
+ 
+    },
     { key: "passengerName", title: "Passenger" },
     {
       key: "status",
@@ -114,11 +124,11 @@ const AdminBookings = () => {
       render: (booking: any) => (
         <span
           className={`capitalize ${
-            booking.status === "confirmed"
+            booking.status === "CONFIRMED"
               ? "text-green-600"
-              : booking.status === "completed"
+              : booking.status === "PENDING"
               ? "text-blue-600"
-              : booking.status === "pending"
+              : booking.status === "DRAFT"
               ? "text-yellow-600"
               : "text-red-600"
           }`}
@@ -138,7 +148,7 @@ const AdminBookings = () => {
   return (
     <>
       <Helmet>
-        <title>Booking Management | Copers Drive Admin</title>
+        <title>Booking Management | Corpers Drive Admin</title>
       </Helmet>
 
       <div className="mb-6">

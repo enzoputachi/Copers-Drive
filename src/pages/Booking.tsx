@@ -9,8 +9,8 @@ const Booking = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Helmet>
-        <title>Book Your Trip | Copers Drive</title>
-        <meta name="description" content="Book your NYSC trip with Copers Drive - Safe and reliable transportation for corps members" />
+        <title>Book Your Trip | Corpers Drive</title>
+        <meta name="description" content="Book your NYSC trip with Corpers Drive - Safe and reliable transportation for corps members" />
       </Helmet>
       <Navbar />
       <BookingProvider>

@@ -50,7 +50,10 @@ const STEPS = [
 
 const BookingWizard = () => {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(0);
+  // const [currentStep, setCurrentStep] = useState(0);
+  const currentStep = useBookingStore((state) => state.currentStep);
+  const setCurrentStep = useBookingStore((state) => state.setCurrentStep);
+  // Remove: const [currentStep, setCurrentStep] = useState(0);
   const [isCompleted, setIsCompleted] = useState<Record<string, boolean>>({});
   const [showRestrictedDialog, setShowRestrictedDialogue] = useState(false);
   const [showNavigationWarning, setShowNavigationWarning] = useState(false);
@@ -62,6 +65,9 @@ const BookingWizard = () => {
     hasSubmittedPassengerData, 
     resetForm 
   } = useBookingStore();
+
+  console.log("departure:", departure, "destination:", destination, "date:", date, "hasSubmittedPassengerData:", hasSubmittedPassengerData);
+  
 
 
   // Prevent navigation when passenger data has been submitted
@@ -113,8 +119,8 @@ const BookingWizard = () => {
       return;
     }
 
-    // Allow navigation to completed steps only
-    if (stepIndex <= currentStep) {
+  // Allow navigation to completed steps only
+  if (stepIndex <= currentStep) {
       setCurrentStep(stepIndex);
       window.scrollTo(0, 0);
     }

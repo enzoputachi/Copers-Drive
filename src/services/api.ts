@@ -52,7 +52,7 @@ export interface Seat {
 export interface Booking {
   id: number;
   tripId: number;
-  seatId: number;
+  seatId: number | number[];
   passengerTitle?: string;
   passengerName: string;
   passengerAge?: number;

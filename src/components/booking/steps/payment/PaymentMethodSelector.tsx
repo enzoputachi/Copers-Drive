@@ -1,11 +1,10 @@
-
 import React from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CreditCard, Wallet } from "lucide-react";
+import { CreditCard, Split, Wallet } from "lucide-react";
 
 interface PaymentMethodSelectorProps {
-  paymentMethod: "card" | "transfer" | "wallet";
-  onPaymentMethodChange: (value: "card" | "transfer" | "wallet") => void;
+  paymentMethod: "full" | "split";
+  onPaymentMethodChange: (value: "full" | "split") => void;
 }
 
 const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
@@ -17,63 +16,45 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       <h3 className="font-medium mb-4">Select Payment Method</h3>
       <RadioGroup
         value={paymentMethod}
-        onValueChange={(value: "card" | "transfer" | "wallet") => onPaymentMethodChange(value)}
+        onValueChange={(value: "full" | "split") => onPaymentMethodChange(value)}
         className="space-y-4"
       >
         <div
           className={`flex items-start space-x-3 p-4 border rounded-lg transition-all ${
-            paymentMethod === "card" ? "border-primary bg-primary/5" : "hover:bg-gray-50"
+            paymentMethod === "full" ? "border-primary bg-primary/5" : "hover:bg-gray-50"
           }`}
         >
-          <RadioGroupItem value="card" id="card" />
+          <RadioGroupItem value="full" id="full" />
           <div className="flex-1">
             <label
-              htmlFor="card"
+              htmlFor="full"
               className="flex items-center text-base font-medium cursor-pointer"
             >
               <CreditCard className="mr-2 h-5 w-5" />
-              Credit/Debit Card
+              Full Payment
             </label>
             <p className="text-gray-500 text-sm mt-1">
-              Pay with Visa, Mastercard, or other card via Paystack
+              Pay the full amount now
             </p>
           </div>
         </div>
 
         <div
           className={`flex items-start space-x-3 p-4 border rounded-lg transition-all ${
-            paymentMethod === "transfer" ? "border-primary bg-primary/5" : "hover:bg-gray-50"
+            paymentMethod === "split" ? "border-primary bg-primary/5" : "hover:bg-gray-50"
           }`}
         >
-          <RadioGroupItem value="transfer" id="transfer" />
+          <RadioGroupItem value="split" id="split" />
           <div className="flex-1">
             <label
-              htmlFor="transfer"
+              htmlFor="split"
               className="flex items-center text-base font-medium cursor-pointer"
             >
-              <Wallet className="mr-2 h-5 w-5" />
-              Bank Transfer
-            </label>
-            <p className="text-gray-500 text-sm mt-1">Pay via bank transfer</p>
-          </div>
-        </div>
-
-        <div
-          className={`flex items-start space-x-3 p-4 border rounded-lg transition-all ${
-            paymentMethod === "wallet" ? "border-primary bg-primary/5" : "hover:bg-gray-50"
-          }`}
-        >
-          <RadioGroupItem value="wallet" id="wallet" />
-          <div className="flex-1">
-            <label
-              htmlFor="wallet"
-              className="flex items-center text-base font-medium cursor-pointer"
-            >
-              <Wallet className="mr-2 h-5 w-5" />
-              Copers Drive Wallet
+              <Split className="mr-2 h-5 w-5" />
+              Split Payment
             </label>
             <p className="text-gray-500 text-sm mt-1">
-              Pay using your Copers Drive wallet balance
+              Pay a commitment fee now, balance later
             </p>
           </div>
         </div>

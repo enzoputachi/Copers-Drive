@@ -218,7 +218,7 @@ const AdminNotifications = () => {
   return (
     <>
       <Helmet>
-        <title>Notifications | Copers Drive Admin</title>
+        <title>Notifications | Corpers Drive Admin</title>
       </Helmet>
 
       <div className="flex items-center justify-between mb-6">

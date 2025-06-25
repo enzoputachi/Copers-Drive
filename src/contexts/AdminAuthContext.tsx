@@ -20,8 +20,8 @@ export const useAdminAuth = () => {
 
 // Mock admin credentials - in a real app, this would be handled by your backend
 const ADMIN_CREDENTIALS = {
-  email: 'admin@Copers Drive.ng',
-  password: 'admin123'
+  email: 'you@gmail.com',
+  password: 'you'
 };
 
 export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -29,6 +29,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setIsAuthenticated(true);
     // Check if user is already logged in (from localStorage)
     const adminToken = localStorage.getItem('admin_token');
     if (adminToken) {

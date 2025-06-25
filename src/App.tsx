@@ -64,16 +64,16 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <AdminAuthProvider>
           <Helmet>
-            <title>Copers Drive - Safe Travels for NYSC Corps Members</title>
-            <meta name="description" content="Copers Drive provides reliable transportation services for NYSC corps members traveling to and from orientation camps across Nigeria." />
-            <meta property="og:title" content="Copers Drive - Safe Travels for NYSC Corps Members" />
-            <meta property="og:description" content="Book safe, reliable, and comfortable transport to NYSC camps with Copers Drive - the preferred transport service for corps members." />
+            <title>Corpers Drive - Safe Travels for NYSC Corps Members</title>
+            <meta name="description" content="Corpers Drive provides reliable transportation services for NYSC corps members traveling to and from orientation camps across Nigeria." />
+            <meta property="og:title" content="Corpers Drive - Safe Travels for NYSC Corps Members" />
+            <meta property="og:description" content="Book safe, reliable, and comfortable transport to NYSC camps with Corpers Drive - the preferred transport service for corps members." />
             <meta property="og:type" content="website" />
             <meta property="og:url" content="/logo.png" />
             <meta property="og:image" content="/logo.png" />
             <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content="Copers Drive - Safe Travels for NYSC Corps Members" />
-            <meta name="twitter:description" content="Book safe, reliable, and comfortable transport to NYSC camps with Copers Drive." />
+            <meta name="twitter:title" content="Corpers Drive - Safe Travels for NYSC Corps Members" />
+            <meta name="twitter:description" content="Book safe, reliable, and comfortable transport to NYSC camps with Corpers Drive." />
             <meta name="twitter:image" content="" />
             <link rel="canonical" href="/logo.png" />
             <meta name="theme-color" content="#6366F1" />

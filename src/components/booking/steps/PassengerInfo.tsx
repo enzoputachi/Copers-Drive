@@ -25,6 +25,7 @@ interface PassengerInfoProps {
 // Base schema for a single passenger
 const passengerSchema = z.object({
   fullName: z.string().min(3, "Full name is required"),
+  address: z.string().min(3, "Address is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
   nextOfKinName: z.string().min(3, "Next of kin name is required"),
@@ -58,6 +59,7 @@ const PassengerInfo = ({ onComplete, setStepComplete }: PassengerInfoProps) => {
         primaryPassenger: passengerInfo?.primaryPassenger || {
         fullName: "",
         email: "",
+        address: "",
         phone: "",
         nextOfKinName: "",
         nextOfKinPhone: "",
@@ -93,6 +95,7 @@ const PassengerInfo = ({ onComplete, setStepComplete }: PassengerInfoProps) => {
       tripId: Number(selectedBus.id),         // from your booking store
       seatId: seatIds,                         // likewise  
       passengerName: data.primaryPassenger.fullName,
+      passengerAddress: data.primaryPassenger.address,
       email:         data.primaryPassenger.email,
       mobile:         data.primaryPassenger.phone,
       nextOfKinName:  data.primaryPassenger.nextOfKinName,
@@ -160,6 +163,20 @@ const PassengerInfo = ({ onComplete, setStepComplete }: PassengerInfoProps) => {
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
                 <Input placeholder="Enter phone number" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField 
+          control={form.control}
+          name="primaryPassenger.address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Address</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter address" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

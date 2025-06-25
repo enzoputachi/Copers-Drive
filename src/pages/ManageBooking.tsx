@@ -29,8 +29,8 @@ const ManageBooking = () => {
   return (
     <>
       <Helmet>
-        <title>Manage Your Booking | Copers Drive</title>
-        <meta name="description" content="Retrieve, modify or cancel your existing Copers Drive bookings." />
+        <title>Manage Your Booking | Corpers Drive</title>
+        <meta name="description" content="Retrieve, modify or cancel your existing Corpers Drive bookings." />
       </Helmet>
       <Navbar />
       <main className="bg-gray-100 container mx-auto px-4 py-8 min-h-screen">
@@ -88,7 +88,7 @@ const ManageBooking = () => {
                 <span className="font-medium">Phone:</span> +234 801 234 5678
               </p>
               <p>
-                <span className="font-medium">Email:</span> support@Copers Drive.ng
+                <span className="font-medium">Email:</span> support@Corpers Drive.ng
               </p>
             </div>
           </div>

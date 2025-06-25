@@ -103,7 +103,7 @@ const AdminTrips = () => {
         const formatted = trips.map((trip: any) => ({
           ...trip,
           id: String(trip.id),
-          route: `${trip.route.origin} to ${trip.route.destination}`,
+          route: `${trip.route.origin} ➡️ ${trip.route.destination}`,
           bus: trip.bus.busType,
           busId: trip.bus.id,
           availableSeats: trip.availableSeatsCount,
@@ -268,9 +268,9 @@ const AdminTrips = () => {
       render: (trip: any) => (
         <span 
           className={`capitalize ${
-            trip.status === "scheduled" 
+            trip.status === "SCHEDULED" 
               ? "text-blue-600" 
-              : trip.status === "completed" 
+              : trip.status === "COMPLETED" 
                 ? "text-green-600" 
                 : "text-red-600"
           }`}
@@ -316,7 +316,7 @@ const AdminTrips = () => {
   return (
     <>
       <Helmet>
-        <title>Trip Management | Copers Drive Admin</title>
+        <title>Trip Management | Corpers Drive Admin</title>
       </Helmet>
 
       <div className="flex items-center justify-between mb-6">

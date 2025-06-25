@@ -2,6 +2,7 @@
 import { createContext, useContext, ReactNode } from "react";
 import { create } from "zustand";
 import { boolean } from 'zod';
+import { persist } from "zustand/middleware";
 
 // Types
 type SeatClass = "Standard" | "Executive" | "VIP";
@@ -34,13 +35,17 @@ interface Bus {
 interface PassengerDetails {
   fullName: string;
   email: string;
+  address: string;
   phone: string;
   nextOfKinName: string;
   nextOfKinPhone: string;
 }
 
 interface PaymentInfo {
-  method: "paystack";
+  method: "paystack" | "splitPayment";
+  isSplitPayment?: boolean; // Optional, only for split payment
+  commitmentAmount?: number; // Optional, only for split payment
+  remainingAmount?: number; // Optional, only for split payment
   amount: number;
   email: string;
   reference?: string;
@@ -53,6 +58,7 @@ export interface PassengerInfoType {
 }
 
 type BookingState = {
+
   bookingDraftId?: number;
   bookingToken?: string;
 
@@ -76,6 +82,10 @@ type BookingState = {
   // New: Track pasenger data submission
   hasSubmittedPassengerData: boolean;
 
+  // Current step in the booking process
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+
   // Actions
   setBookingDraftId: (id: number) => void;
   setBookingToken: (bookingToken: string) => void;
@@ -95,54 +105,69 @@ type BookingState = {
   resetForm: () => void;
 };
 
-const useBookingStore = create<BookingState>((set) => ({
-  // Initial state
-  bookingDraftId: undefined,
-  bookingToken: "",
-  departure: "",
-  destination: "",
-  date: null,
-  returnDate: null,
-  passengers: 1,
-  seatClass: "Standard",
-  tripType: "oneWay",
-  selectedBus: null,
-  selectedSeats: [],
-  passengerInfo: null,
-  paymentInfo: null,
-  hasSubmittedPassengerData: false,
 
-  // Actions
-  setBookingDraftId: (id: number) => set({ bookingDraftId: id }),
-  setBookingToken: (bookingToken: string) => set({ bookingToken: bookingToken }),
-  
-  setDeparture: (departure: string) => set({ departure }),
-  setDestination: (destination: string) => set({ destination }),
-  setDate: (date: Date | null) => set({ date }),
-  setReturnDate: (date: Date | null) => set({ returnDate: date }),
-  setPassengers: (passengers: number) => set({ passengers }),
-  setSeatClass: (seatClass: SeatClass) => set({ seatClass }),
-  setTripType: (tripType: TripType) => set({ tripType }),
-  setSelectedBus: (bus: Bus) => set({ selectedBus: bus }),
-  setSelectedSeats: (seats: SelectedSeat[]) => set({ selectedSeats: seats }),
-  setPassengerInfo: (info: PassengerInfoType) => set({ passengerInfo: info }),
-  setPaymentInfo: (info: PaymentInfo) => set({ paymentInfo: info }),
-  setSubmittedPassengerData: (hasSubmitted: boolean) => set({ hasSubmittedPassengerData: hasSubmitted }),
-  resetForm: () => set({
-    departure: "",
-    destination: "",
-    date: null,
-    returnDate: null,
-    passengers: 1,
-    seatClass: "Standard",
-    tripType: "oneWay",
-    selectedBus: null,
-    selectedSeats: [],
-    passengerInfo: null,
-    paymentInfo: null,
-    hasSubmittedPassengerData: false,
-  }),
-}));
+// ...types...
+
+const useBookingStore = create<BookingState>()(
+  persist(
+    (set) => ({
+      // Initial state
+      bookingDraftId: undefined,
+      bookingToken: "",
+      departure: "",
+      destination: "",
+      date: null,
+      returnDate: null,
+      passengers: 1,
+      seatClass: "Standard",
+      tripType: "oneWay",
+      selectedBus: null,
+      selectedSeats: [],
+      passengerInfo: null,
+      paymentInfo: null,
+      hasSubmittedPassengerData: false,
+
+      // Current step in the booking process
+      currentStep: 0,
+      setCurrentStep: (step: number) => set({ currentStep: step }),
+
+      // Actions
+      setBookingDraftId: (id: number) => set({ bookingDraftId: id }),
+      setBookingToken: (bookingToken: string) => set({ bookingToken: bookingToken }),
+      setDeparture: (departure: string) => set({ departure }),
+      setDestination: (destination: string) => set({ destination }),
+      setDate: (date: Date | null) => set({ date }),
+      setReturnDate: (date: Date | null) => set({ returnDate: date }),
+      setPassengers: (passengers: number) => set({ passengers }),
+      setSeatClass: (seatClass: SeatClass) => set({ seatClass }),
+      setTripType: (tripType: TripType) => set({ tripType }),
+      setSelectedBus: (bus: Bus) => set({ selectedBus: bus }),
+      setSelectedSeats: (seats: SelectedSeat[]) => set({ selectedSeats: seats }),
+      setPassengerInfo: (info: PassengerInfoType) => set({ passengerInfo: info }),
+      setPaymentInfo: (info: PaymentInfo) => set({ paymentInfo: info }),
+      setSubmittedPassengerData: (hasSubmitted: boolean) => set({ hasSubmittedPassengerData: hasSubmitted }),
+      resetForm: () => set({
+        departure: "",
+        destination: "",
+        date: null,
+        returnDate: null,
+        passengers: 1,
+        seatClass: "Standard",
+        tripType: "oneWay",
+        selectedBus: null,
+        selectedSeats: [],
+        passengerInfo: null,
+        paymentInfo: null,
+        hasSubmittedPassengerData: false,
+        currentStep: 0, // Reset step as well
+      }),
+    }),
+    {
+      name: "booking-storage",      
+      // partialize: (state) => ({ currentStep: state.currentStep }),
+    }
+  )
+);
 
 // Context for components that can't use Zustand directly
 const BookingContext = createContext<ReturnType<typeof useBookingStore> | null>(null);

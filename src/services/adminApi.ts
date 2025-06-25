@@ -257,7 +257,7 @@ export const adminApiService = {
   // Routes
   getRoutes: () => adminApi.get<{ status: string, data: Route[] }>('/routes'),  // ✅
   createRoute: (routeData: Omit<Route, 'id'>) => adminApi.post<Route>('/routes', routeData),
-  updateRoute: (id: string, routeData: Partial<Route>) => adminApi.put<Route>(`/routes/${id}`, routeData),
+  updateRoute: (id: string, routeData: Partial<Route>) => adminApi.patch<Route>(`/routes/${id}`, routeData),
   deleteRoute: (id: string) => adminApi.delete(`/routes/${id}`),
 
   // Buses

@@ -20,8 +20,8 @@ import { toast } from "sonner";
 // 1) Mock defaults for SystemSettings
 // —————————————————————————————————————————————
 const initialMockSettings: SystemSettings = {
-  companyName: "Copers Drive Nigeria",
-  contactEmail: "contact@Copers Drive.ng",
+  companyName: "Corpers Drive Nigeria",
+  contactEmail: "contact@Corpers Drive.ng",
   contactPhone: "+234 801 234 5678",
   maintenanceMode: false,
   seatHoldMinutes: 15,
@@ -126,7 +126,7 @@ const AdminSettings = () => {
   return (
     <>
       <Helmet>
-        <title>Settings | Copers Drive Admin</title>
+        <title>Settings | Corpers Drive Admin</title>
       </Helmet>
 
       <div className="mb-6">
@@ -149,7 +149,7 @@ const AdminSettings = () => {
             <CardHeader>
               <CardTitle>General Settings</CardTitle>
               <CardDescription>
-                Manage system-wide settings for the Copers Drive platform
+                Manage system-wide settings for the Corpers Drive platform
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
