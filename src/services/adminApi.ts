@@ -2,8 +2,10 @@ import axios from 'axios';
 import { toast } from '@/components/ui/sonner';
 
 // Create an admin axios instance with admin-specific config
+
+
 const adminApi = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: 'https://booking-api-tuso.onrender.com',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

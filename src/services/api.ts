@@ -89,7 +89,7 @@ export interface Notification {
 
 // ----- Config & Error Handling -----
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: 'https://booking-api-tuso.onrender.com',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 });
