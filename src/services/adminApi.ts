@@ -5,7 +5,7 @@ import { toast } from '@/components/ui/sonner';
 
 
 const adminApi = axios.create({
-  baseURL: 'https://booking-api-tuso.onrender.com',
+  baseURL: 'https:/booking-api-tuso.onrender.com',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
