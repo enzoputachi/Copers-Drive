@@ -14,7 +14,7 @@ dist-ssr
 
 design.md
 .env
-cypress
+cypress/
 
 # Editor directories and files
 .vscode/*
