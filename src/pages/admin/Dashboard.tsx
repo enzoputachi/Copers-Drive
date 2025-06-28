@@ -10,14 +10,14 @@ import { useDashboardStats } from "@/hooks/useAdminQueries";
 
 // Mock Data for fallback
 const mockStats = {
-  totalUsers: 2345,
-  userGrowth: 12,
+  totalBookings: 2345,
+  // userGrowth: 12,
   activeTrips: 48,
   tripGrowth: 5,
   pendingBookings: 124,
   bookingGrowth: -2,
   monthlyRevenue: 1345200,
-  revenueGrowth: 18
+  revenueGrowth: 18 
 };
 
 const recentActivities: ActivityItem[] = [
@@ -60,11 +60,13 @@ const recentActivities: ActivityItem[] = [
 
 
 // Toggle this to true or false to control mock data usage
-const USE_MOCK_STATS = true;
+const USE_MOCK_STATS = false;
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { data, isLoading, error } = useDashboardStats();
+  const { data: dataRaw, isLoading, error } = useDashboardStats();
+  const data = dataRaw.data;
+  console.log( "Dashboard", data);
 
   const [stats, setStats] = useState<typeof mockStats | null>(null);
 
@@ -114,25 +116,25 @@ const AdminDashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <SummaryCard
           title="Total Users"
-          value={stats?.totalUsers.toLocaleString() || "0"}
+          value={stats?.totalBookings?.toLocaleString() || "0"}
           icon={<Users className="h-6 w-6" />}
-          change={{ value: stats?.userGrowth || 0, positive: (stats?.userGrowth || 0) > 0 }}
+          change={{ value: stats?.bookingGrowth || 0, positive: (stats?.bookingGrowth || 0) > 0 }}
         />
         <SummaryCard
           title="Active Trips"
-          value={stats?.activeTrips.toString() || "0"}
+          value={stats?.activeTrips?.toString() || "0"}
           icon={<Calendar className="h-6 w-6" />}
           change={{ value: stats?.tripGrowth || 0, positive: (stats?.tripGrowth || 0) > 0 }}
         />
         <SummaryCard
           title="Pending Bookings"
-          value={stats?.pendingBookings.toString() || "0"}
+          value={stats?.pendingBookings?.toString() || "0"}
           icon={<Bus className="h-6 w-6" />}
           change={{ value: stats?.bookingGrowth || 0, positive: (stats?.bookingGrowth || 0) > 0 }}
         />
         <SummaryCard
           title="Revenue (This Month)"
-          value={`₦${stats?.monthlyRevenue.toLocaleString() || "0"}`}
+          value={`₦${stats?.monthlyRevenue?.toLocaleString() || "0"}`}
           icon={<CreditCard className="h-6 w-6" />}
           change={{ value: stats?.revenueGrowth || 0, positive: (stats?.revenueGrowth || 0) > 0 }}
         />

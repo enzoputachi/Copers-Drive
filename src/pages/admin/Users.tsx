@@ -31,6 +31,7 @@ import {
   useDeleteUser,
 } from "@/hooks/useAdminQueries";
 import { User } from "@/services/adminApi";
+import { api } from '@/services/api';
 
 // —————————————————————————————————————————————
 // 1) Mock user data (IDs as strings, including all User fields)
@@ -99,6 +100,7 @@ const USE_MOCK_USERS = false;
 // Form schema
 const userFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   email: z.string().email("Please enter a valid email"),
   role: z.enum(["admin", "manager", "support", "finance", "driver"]),
 });
@@ -120,11 +122,15 @@ const AdminUsers = () => {
   // —————————————————————————————————————————————
   // 3) React Query hooks
   // —————————————————————————————————————————————
-  const { data: apiUsers = [], isLoading, error } = useUsers();
+  const { data: apiUsersRaw = [], isLoading, error } = useUsers();
   const createUserMutation = useCreateUser();
   const updateUserMutation = useUpdateUser();
   const deleteUserMutation = useDeleteUser();
 
+  const apiUsers = apiUsersRaw.data
+
+  console.log("API Users:", apiUsers);
+  
   // —————————————————————————————————————————————
   // 4) Effect: “if mock‐flag is on, ignore API and always load initialUsers;
   //           otherwise, once loading finishes, copy/format the API rows”
@@ -151,6 +157,7 @@ const AdminUsers = () => {
     defaultValues: {
       name: "",
       email: "",
+      password: "",
       role: "support",
     },
   });
@@ -163,6 +170,7 @@ const AdminUsers = () => {
     form.reset({
       name: "",
       email: "",
+      password: "",
       role: "support",
     });
     setOpenModal(true);
@@ -181,7 +189,7 @@ const AdminUsers = () => {
           lastLogin: nowIso,
           createdAt: nowIso,
           status: "active",
-          password: "", // placeholder
+          password: values.password, // placeholder
           logs: [],     // placeholder
         };
         setUsersData((prev) => [...prev, newUser]);
@@ -197,7 +205,7 @@ const AdminUsers = () => {
           role: values.role,
           status: "active",
           lastLogin: new Date().toISOString(),
-          password: "",
+          password: values.password,
           logs: [],
         },
         {
@@ -219,6 +227,7 @@ const AdminUsers = () => {
     form.reset({
       name: user.name,
       email: user.email,
+      password: user.password,
       role: user.role as any,
     });
     setOpenModal(true);
@@ -396,6 +405,7 @@ const AdminUsers = () => {
             }
             className="space-y-4"
           >
+            
             <FormField
               control={form.control}
               name="name"
@@ -408,6 +418,7 @@ const AdminUsers = () => {
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="email"
@@ -420,6 +431,25 @@ const AdminUsers = () => {
                 </FormItem>
               )}
             />
+            
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Password"
+                      {...field}
+                      // disabled={modalType === "edit"} Disable in edit mode
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="role"
@@ -437,12 +467,13 @@ const AdminUsers = () => {
                       <SelectItem value="manager">Manager</SelectItem>
                       <SelectItem value="support">Support</SelectItem>
                       <SelectItem value="finance">Finance</SelectItem>
-                      <SelectItem value="driver">Driver</SelectItem>
+                      {/* <SelectItem value="driver">Driver</SelectItem> */}
                     </SelectContent>
                   </Select>
                 </FormItem>
               )}
             />
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpenModal(false)}>
                 Cancel

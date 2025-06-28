@@ -5,7 +5,7 @@ import { toast } from '@/components/ui/sonner';
 
 
 const adminApi = axios.create({
-  baseURL: "http://localhost:3000", // 'https://booking-api-tuso.onrender.com',
+  baseURL: "http://localhost:3000/api", // 'https://booking-api-tuso.onrender.com',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -196,11 +196,10 @@ export interface AdminActivityLog {
 
 // =================== DASHBOARD STATS===================
 export interface DashboardStats {
-  totalUsers: number;
+  totalBookings: number;
   activeTrips: number;
   pendingBookings: number;
   monthlyRevenue: number;
-  userGrowth: number;
   tripGrowth: number;
   bookingGrowth: number;
   revenueGrowth: number;
@@ -228,7 +227,22 @@ export interface SystemLog {
 
 // =================== SYATEM SETTINGS ===================
 export interface SystemSettings {
+  // Prisma schema fields
+  id: number;
   companyName: string;
+  supportEmail: string;
+  supportPhone?: string | null;
+  websiteUrl?: string;
+  facebookUrl?: string;
+  twitterUrl?: string;
+  whatsAppUrl?: string;
+  instagramUrl?: string;
+  linkedinUrl?: string;
+  address?: string;
+  createdAt: Date;
+  updatedAt: Date;
+
+  // Your original system settings fields
   contactEmail: string;
   contactPhone: string;
   maintenanceMode: boolean;
@@ -245,10 +259,12 @@ export interface SystemSettings {
 }
 
 
+
+
 // API functions
 export const adminApiService = {
   // Dashboard
-  getDashboardStats: () => adminApi.get<DashboardStats>('/dashboard/stats'),
+  getDashboardStats: () => adminApi.get<DashboardStats>('/dashboardStats'),
 
   // Users
   getUsers: () => adminApi.get<User[]>('/users'),
@@ -281,7 +297,7 @@ export const adminApiService = {
 
   // Payments
   getPayments: () => adminApi.get<Payment[]>('/payments'),
-  processPayment: (id: string) => adminApi.pVERIost(`/payments/${id}/process`),
+  processPayment: (id: string) => adminApi.post(`/payments/${id}/process`),
 
   // Logs
   getLogs: (type?: 'booking' | 'admin') => {

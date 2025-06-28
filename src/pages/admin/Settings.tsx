@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,8 +20,23 @@ import { toast } from "sonner";
 // 1) Mock defaults for SystemSettings
 // —————————————————————————————————————————————
 const initialMockSettings: SystemSettings = {
+  // Prisma schema fields
+  id: 1,
   companyName: "Corpers Drive Nigeria",
-  contactEmail: "contact@Corpers Drive.ng",
+  supportEmail: "contact@corpersdrive.ng",
+  supportPhone: "+234 801 234 5678",
+  websiteUrl: "https://corpersdrive.ng",
+  facebookUrl: null,
+  twitterUrl: null,
+  whatsAppUrl: null,
+  instagramUrl: null,
+  linkedinUrl: null,
+  address: "No 1, Jibowu, Yaba, Lagos State",
+  createdAt: new Date("2025-06-28T00:00:00Z"),
+  updatedAt: new Date("2025-06-28T00:00:00Z"),
+
+  // Your original system settings fields
+  contactEmail: "contact@corpersdrive.ng",
   contactPhone: "+234 801 234 5678",
   maintenanceMode: false,
   seatHoldMinutes: 15,
@@ -35,6 +50,7 @@ const initialMockSettings: SystemSettings = {
   reminderSmsEnabled: true,
   reminderHours: 24,
 };
+
 
 // Toggle to force‐use mock data instead of hitting the API
 const USE_MOCK_SETTINGS = true;
@@ -136,9 +152,9 @@ const AdminSettings = () => {
       <Tabs defaultValue="general" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="booking">Booking</TabsTrigger>
-          <TabsTrigger value="payment">Payment</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          {/* <TabsTrigger value="booking">Booking</TabsTrigger> */}
+          {/* <TabsTrigger value="payment">Payment</TabsTrigger> */}
+          {/* <TabsTrigger value="notifications">Notifications</TabsTrigger> */}
         </TabsList>
 
         {/* —————————————————————————————————————————————

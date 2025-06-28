@@ -22,6 +22,7 @@ export const useDashboardStats = () => {
     queryKey: ADMIN_QUERY_KEYS.dashboard,
     queryFn: async () => {
       const response = await adminApiService.getDashboardStats();
+      console.log("Dashboard stats:", response);      
       return response.data;
     },
   });
@@ -33,6 +34,8 @@ export const useUsers = () => {
     queryKey: ADMIN_QUERY_KEYS.users,
     queryFn: async () => {
       const response = await adminApiService.getUsers();
+      console.log('Users:', response.data);
+      
       return response.data;
     },
   });
@@ -44,8 +47,10 @@ export const useCreateUser = () => {
   return useMutation({
     mutationFn: (userData: Omit<User, 'id' | 'createdAt'>) => 
       adminApiService.createUser(userData),
-    onSuccess: () => {
+         
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.users });
+      console.log('User created:', response.data);
       toast.success('User created successfully');
     },
   });

@@ -25,8 +25,8 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
     { icon: CreditCard, label: "Payments", href: "/admin/payments" },
     // { icon: Bell, label: "Notifications", href: "/admin/notifications" },
     // { icon: FileText, label: "Logs", href: "/admin/logs" },
-    // { icon: Settings, label: "Settings", href: "/admin/settings" },
-    // { icon: Shield, label: "Roles", href: "/admin/roles" },
+    { icon: Settings, label: "Settings", href: "/admin/settings" },
+    { icon: Shield, label: "Roles", href: "/admin/roles" },
   ];
 
   return (
