@@ -167,4 +167,9 @@ export const notificationsApi = {
     api.post<Notification>('/notifications', data),
 };
 
+// Settings
+export const settingsApi = {
+  getSettings: () => api.get('/companySettings'),
+}
+
 export default api;
