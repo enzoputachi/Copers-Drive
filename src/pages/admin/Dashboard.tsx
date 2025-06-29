@@ -64,11 +64,11 @@ const USE_MOCK_STATS = false;
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { data: dataRaw, isLoading, error } = useDashboardStats();
-  const data = dataRaw.data;
+  const { data, isLoading, error } = useDashboardStats();
+  // const data = dataRaw.data;
   console.log( "Dashboard", data);
 
-  const [stats, setStats] = useState<typeof mockStats | null>(null);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
     if (USE_MOCK_STATS) {

@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { useSettings, useUpdateSettings } from "@/hooks/useAdminQueries";
-import { SystemSettings } from "@/services/adminApi";
+import { SystemSettings, SystemSettingsResponse } from "@/services/adminApi";
 import { toast } from "sonner";
 
 // —————————————————————————————————————————————
@@ -53,18 +53,18 @@ const initialMockSettings: SystemSettings = {
 
 
 // Toggle to force‐use mock data instead of hitting the API
-const USE_MOCK_SETTINGS = true;
+const USE_MOCK_SETTINGS = false;
 
 const AdminSettings = () => {
   // —————————————————————————————————————————————
   // 2) Hooks and mutations
   // —————————————————————————————————————————————
   const { data: apiSettings, isLoading, error } = useSettings();
-  const updateSettingsMutation = useUpdateSettings();
-
-  // Local form state holds “the object to display/edit”
-  const [settingsData, setSettingsData] =
-    useState<Partial<SystemSettings>>(initialMockSettings);
+  const updateSettingsMutation = useUpdateSettings();;
+  const [settingsData, setSettingsData] = useState<Partial<SystemSettings> | null>({});
+  const [originalSettings, setOriginalSettings] = useState<Partial<SystemSettings> | null>(null)
+  // const apiSettings = apiSettingsRaw.data;
+  console.log('Api settings', apiSettings)
 
   // —————————————————————————————————————————————
   // 3) Sync API → form state (or load mock)
@@ -73,9 +73,11 @@ const AdminSettings = () => {
     if (USE_MOCK_SETTINGS) {
       // Always load mock defaults
       setSettingsData(initialMockSettings);
+      setOriginalSettings(apiSettings);
     } else if (!isLoading && apiSettings) {
       // Copy API fields into form state
       setSettingsData(apiSettings);
+      setOriginalSettings(apiSettings);
     }
   }, [apiSettings, isLoading]);
 
@@ -119,13 +121,29 @@ const AdminSettings = () => {
       ...overrides,
     };
 
+    // console.log("PAylod settings:", payload);
+    
+
+    const hasChanges = Object.keys(overrides).some(
+      (key) => payload[key] !== originalSettings?.[key]
+    )
+
+    if (!hasChanges) {
+      toast.info("No changes detected")
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to save changes?")) {
+      return;
+    }
+
     if (USE_MOCK_SETTINGS) {
       toast.success("Settings saved (mock).");
       setSettingsData(payload);
       return;
     }
 
-    updateSettingsMutation.mutate(payload, {
+    updateSettingsMutation.mutate( { id: payload.id, settings: payload as Partial<SystemSettingsResponse> }, {
       onSuccess: () => {
         toast.success("Settings updated successfully.");
         setSettingsData(payload);
@@ -152,6 +170,7 @@ const AdminSettings = () => {
       <Tabs defaultValue="general" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="links">Links</TabsTrigger>
           {/* <TabsTrigger value="booking">Booking</TabsTrigger> */}
           {/* <TabsTrigger value="payment">Payment</TabsTrigger> */}
           {/* <TabsTrigger value="notifications">Notifications</TabsTrigger> */}
@@ -160,7 +179,7 @@ const AdminSettings = () => {
         {/* —————————————————————————————————————————————
             General Settings Tab
            ————————————————————————————————————————————— */}
-        <TabsContent value="general">
+        <TabsContent value="general" >
           <Card>
             <CardHeader>
               <CardTitle>General Settings</CardTitle>
@@ -202,6 +221,29 @@ const AdminSettings = () => {
                   }
                 />
               </div>
+{/* 
+              <div className="space-y-2">
+                <Label htmlFor="website-url">Website Url</Label>
+                <Input
+                  id="website-url"
+                  value={settingsData.websiteUrl || ""}
+                  onChange={(e) =>
+                    updateField("websiteUrl", e.target.value)
+                  }
+                />
+              </div> */}
+
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={settingsData.address || ""}
+                  onChange={(e) =>
+                    updateField("address", e.target.value)
+                  }
+                />
+              </div>
+
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
@@ -227,6 +269,106 @@ const AdminSettings = () => {
                     contactEmail: settingsData.contactEmail,
                     contactPhone: settingsData.contactPhone,
                     maintenanceMode: settingsData.maintenanceMode,
+                    address: settingsData.address,
+                  })
+                }
+                disabled={updateSettingsMutation.isPending}
+              >
+                {updateSettingsMutation.isPending
+                  ? "Saving..."
+                  : "Save Changes"}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+         {/* —————————————————————————————————————————————
+            Links Settings Tab
+           ————————————————————————————————————————————— */}
+          <TabsContent value="links">
+          <Card>
+            <CardHeader>
+              <CardTitle>Links Settings</CardTitle>
+              <CardDescription>
+                Manage Link settings for the Corpers Drive platform
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="website-url">Website Url</Label>
+                <Input
+                  id="website-url"
+                  value={settingsData.websiteUrl || ""}
+                  onChange={(e) =>
+                    updateField("websiteUrl", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="facebook-url">Facebook Url</Label>
+                <Input
+                  id="facebook-url"
+                  value={settingsData.facebookUrl || ""}
+                  onChange={(e) =>
+                    updateField("facebookUrl", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="twitter-url">Twitter Url</Label>
+                <Input
+                  id="twitter-url"
+                  value={settingsData.twitterUrl || ""}
+                  onChange={(e) =>
+                    updateField("twitterUrl", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="whatsapp-url">WhatsApp Url</Label>
+                <Input
+                  id="whatsapp-url"
+                  value={settingsData.whatsAppUrl || ""}
+                  onChange={(e) =>
+                    updateField("whatsAppUrl", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="instagram-url">Instagram Url</Label>
+                <Input
+                  id="instagram-url"
+                  value={settingsData.instagramUrl || ""}
+                  onChange={(e) =>
+                    updateField("instagramUrl", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="linkedin-url">Linkedin Url</Label>
+                <Input
+                  id="linkedin-url"
+                  value={settingsData.linkedinUrl || ""}
+                  onChange={(e) =>
+                    updateField("linkedinUrl", e.target.value)
+                  }
+                />
+              </div>
+
+              <Button
+                onClick={() =>
+                  handleSave({
+                    websiteUrl: settingsData.websiteUrl,
+                    facebookUrl: settingsData.facebookUrl,
+                    twitterUrl: settingsData.twitterUrl,
+                    whatsAppUrl: settingsData.whatsAppUrl,
+                    instagramUrl: settingsData.instagramUrl,
+                    linkedinUrl: settingsData.linkedinUrl,
                   })
                 }
                 disabled={updateSettingsMutation.isPending}

@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { bookingsApi, routesApi, tripsApi, busesApi, seatsApi, paymentsApi, notificationsApi, Trip } from '@/services/api';
+import { bookingsApi, routesApi, tripsApi, busesApi, seatsApi, paymentsApi, notificationsApi, Trip, settingsApi } from '@/services/api';
 import { AxiosResponse } from 'axios';
-import { QueryClient } from '@tanstack/react-query';
 import { PaystackParams, payWithPaystack } from '@/services/paystackService';
 import { useBookingStore } from '@/stores/bookingStore';
 import { toast } from "@/components/ui/sonner";
@@ -144,3 +143,9 @@ export const useSendNotification = () => useMutation({
   mutationFn: (data: { bookingId?: number; contactInfo: string; type: string; message: string }) =>
     notificationsApi.sendNotification(data),
 });
+
+// Settings
+export const useSettings = () =>useQuery({
+  queryKey: ['companySettings', ],
+  queryFn: () => settingsApi.getSettings(),
+})
