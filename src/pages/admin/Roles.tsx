@@ -9,41 +9,79 @@ import { toast } from "@/components/ui/sonner";
 
 // Mock roles data
 const roles = [
-  { 
-    id: "1", 
-    name: "Admin", 
+  {
+    id: "1",
+    name: "Admin",
     description: "Full system access",
-    usersCount: 2,
-    permissions: ["users.view", "users.create", "users.edit", "users.delete", "routes.view", "routes.create", "routes.edit", "routes.delete", "trips.view", "trips.create", "trips.edit", "trips.delete", "buses.view", "buses.create", "buses.edit", "buses.delete", "bookings.view", "bookings.edit", "bookings.delete", "payments.view", "payments.process", "settings.view", "settings.edit"]
+    usersCount: 0,
+    permissions: [
+      "users.view",
+      "users.create",
+      "users.edit",
+      "users.delete",
+      "routes.view",
+      "routes.create",
+      "routes.edit",
+      "routes.delete",
+      "trips.view",
+      "trips.create",
+      "trips.edit",
+      "trips.delete",
+      "buses.view",
+      "buses.create",
+      "buses.edit",
+      "buses.delete",
+      "bookings.view",
+      "bookings.edit",
+      "bookings.delete",
+      "payments.view",
+      "payments.process",
+      "settings.view",
+      "settings.edit",
+    ],
   },
-  { 
-    id: "2", 
-    name: "Manager", 
+  {
+    id: "2",
+    name: "Manager",
     description: "Can manage trips and bookings",
-    usersCount: 5,
-    permissions: ["users.view", "routes.view", "routes.create", "routes.edit", "trips.view", "trips.create", "trips.edit", "buses.view", "buses.create", "buses.edit", "bookings.view", "bookings.edit", "payments.view"]
+    usersCount: 0,
+    permissions: [
+      "users.view",
+      "routes.view",
+      "routes.create",
+      "routes.edit",
+      "trips.view",
+      "trips.create",
+      "trips.edit",
+      "buses.view",
+      "buses.create",
+      "buses.edit",
+      "bookings.view",
+      "bookings.edit",
+      "payments.view",
+    ],
   },
-  { 
-    id: "3", 
-    name: "Support", 
-    description: "Customer support staff",
-    usersCount: 8,
-    permissions: ["routes.view", "trips.view", "bookings.view", "bookings.edit", "payments.view"]
-  },
-  { 
-    id: "4", 
-    name: "Finance", 
+  // {
+  //   id: "3",
+  //   name: "Support",
+  //   description: "Customer support staff",
+  //   usersCount: 0,
+  //   permissions: ["routes.view", "trips.view", "bookings.view", "bookings.edit", "payments.view"]
+  // },
+  {
+    id: "4",
+    name: "Finance",
     description: "Handles payments and refunds",
-    usersCount: 3,
-    permissions: ["bookings.view", "payments.view", "payments.process"]
+    usersCount: 0,
+    permissions: ["bookings.view", "payments.view", "payments.process"],
   },
-  { 
-    id: "5", 
-    name: "Driver", 
-    description: "Bus drivers",
-    usersCount: 12,
-    permissions: ["trips.view"]
-  },
+  // {
+  //   id: "5",
+  //   name: "Driver",
+  //   description: "Bus drivers",
+  //   usersCount: 0,
+  //   permissions: ["trips.view"]
+  // },
 ];
 
 const AdminRoles = () => {
