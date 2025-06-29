@@ -31,7 +31,7 @@ import {
   useDeleteUser,
 } from "@/hooks/useAdminQueries";
 import { User } from "@/services/adminApi";
-import { api } from '@/services/api';
+import DeleteConfirmation from "@/components/admin/DeleteConfirmation";
 
 // —————————————————————————————————————————————
 // 1) Mock user data (IDs as strings, including all User fields)
@@ -118,6 +118,10 @@ const AdminUsers = () => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Add delete dialogue
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
 
   // —————————————————————————————————————————————
   // 3) React Query hooks
@@ -295,18 +299,41 @@ const AdminUsers = () => {
   // —————————————————————————————————————————————
   // 9) Handle “delete”
   // —————————————————————————————————————————————
-  const handleDeleteUser = (userId: string) => {
+  // const handleDeleteUser = (userId: string) => {
+  //   if (USE_MOCK_USERS) {
+  //     setIsDeleting(true);
+  //     setTimeout(() => {
+  //       setUsersData((prev) => prev.filter((u) => u.id !== userId));
+  //       setIsDeleting(false);
+  //       toast.success("User deleted successfully (mock)!");
+  //     }, 500);
+  //   } else {
+  //     deleteUserMutation.mutate(userId);
+  //     console.log("User Id:", userId)
+  //   }
+  // };
+
+  const confirmDeleteUser = (user: User) => {
+    setUserToDelete(user);
+    setIsDeleteDialogOpen(true);
+  }
+
+  const handleDeleteUser = () => {
+    if (!userToDelete) return;
+    setIsDeleteDialogOpen(false);
+    setIsDeleting(true);
     if (USE_MOCK_USERS) {
       setIsDeleting(true);
       setTimeout(() => {
-        setUsersData((prev) => prev.filter((u) => u.id !== userId));
+        setUsersData((prev) => prev.filter((u) => u.id !== userToDelete.id));
         setIsDeleting(false);
         toast.success("User deleted successfully (mock)!");
       }, 500);
     } else {
-      deleteUserMutation.mutate(userId);
+      deleteUserMutation.mutate(userToDelete.id, { onSettled: () => setIsDeleting(false)});
+      // console.log("User Id:", userId)
     }
-  };
+  }
 
   // —————————————————————————————————————————————
   // 10) Loading/Error states (only in API mode)
@@ -354,16 +381,17 @@ const AdminUsers = () => {
       <Button variant="ghost" size="icon" onClick={() => handleViewUser(u)}>
         <Eye className="h-4 w-4" />
       </Button>
-      <Button variant="ghost" size="icon" onClick={() => handleEditUser(u)}>
+      <Button variant="outline" size="icon" onClick={() => handleEditUser(u)}>
         <Pencil className="h-4 w-4" />
       </Button>
       <Button
-        variant="ghost"
+        variant="outline"
         size="icon"
-        onClick={() => handleDeleteUser(u.id)}
+        className="text-destructive hover:text-destructive"
+        onClick={() => confirmDeleteUser(u)}
         disabled={deleteUserMutation.isPending || isDeleting}
       >
-        <Trash className="h-4 w-4" />
+        <Trash className="h-4 w-4 " />
       </Button>
     </div>
   );
@@ -409,12 +437,15 @@ const AdminUsers = () => {
             <FormField
               control={form.control}
               name="name"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input placeholder="Full name" {...field} />
                   </FormControl>
+                  {fieldState.error && (
+                    <p className="text-sm text-red-500">{fieldState.error.message}</p>
+                  )}
                 </FormItem>
               )}
             />
@@ -422,12 +453,15 @@ const AdminUsers = () => {
             <FormField
               control={form.control}
               name="email"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="Email address" {...field} />
                   </FormControl>
+                  {fieldState.error && (
+                    <p className="text-sm text-red-500">{fieldState.error.message}</p>
+                  )}
                 </FormItem>
               )}
             />
@@ -435,7 +469,7 @@ const AdminUsers = () => {
             <FormField
               control={form.control}
               name="password"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
@@ -446,6 +480,9 @@ const AdminUsers = () => {
                       // disabled={modalType === "edit"} Disable in edit mode
                     />
                   </FormControl>
+                  {fieldState.error && (
+                    <p className="text-sm text-red-500">{fieldState.error.message}</p>
+                  )}
                 </FormItem>
               )}
             />
@@ -453,7 +490,7 @@ const AdminUsers = () => {
             <FormField
               control={form.control}
               name="role"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Role</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
@@ -462,6 +499,9 @@ const AdminUsers = () => {
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
                     </FormControl>
+                    {fieldState.error && (
+                      <p className="text-sm text-red-500">{fieldState.error.message}</p>
+                    )}
                     <SelectContent>
                       <SelectItem value="admin">Admin</SelectItem>
                       <SelectItem value="manager">Manager</SelectItem>
@@ -490,6 +530,17 @@ const AdminUsers = () => {
           </form>
         </Form>
       </FormModal>
+
+      <DeleteConfirmation
+        title="Delete User"
+        description={
+          `Are you sure you want to delete ${userToDelete?.name}? This action cannot be undone.`
+        }
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteUser}
+        isDeleting={isDeleting}
+      />
 
       {/* User Details Modal */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>

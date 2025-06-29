@@ -3,8 +3,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Instagram } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useSettings } from "@/hooks/useApi";
 
 const Footer = () => {
+  const { data, isLoading, error } = useSettings()
+  const settings = data?.data?.data;
+  console.log("Seetings DATA:", settings);
+  
   const year = new Date().getFullYear();
   
   return (
@@ -18,13 +23,13 @@ const Footer = () => {
               Your trusted transportation partner for safe and reliable journeys to and from NYSC camps across Nigeria.
             </p>
             <div className="flex space-x-4">
-              <a href="https://www.facebook.com/corpersdrive?mibextid=ZbWKwL" aria-label="Facebook" className="text-gray-200 hover:text-white transition-colors">
+              <a href={`${settings?.facebookUrl}` || "#"} aria-label="Facebook" className="text-gray-200 hover:text-white transition-colors">
                 <Facebook />
               </a>
-              <a href="https://x.com/CorpersDrive?t=DCSOpS5Blc1uzyJQBM3tuw&s=09" aria-label="Twitter" className="text-gray-200 hover:text-white transition-colors">
+              <a href={`${settings?.twitterUrl}` || "#"} aria-label="Twitter" className="text-gray-200 hover:text-white transition-colors">
                 <Twitter />
               </a>
-              <a href="https://www.instagram.com/corpersdrive?igsh=MWRuMzN2M2s4bjFx" aria-label="Instagram" className="text-gray-200 hover:text-white transition-colors">
+              <a href={`${settings?.instagramUrl}` || "#"} aria-label="Instagram" className="text-gray-200 hover:text-white transition-colors">
                 <Instagram />
               </a>
             </div>
@@ -37,7 +42,7 @@ const Footer = () => {
               <div>
                 <div className="font-medium">Email Support:</div>
                 <a href="mailto:corpersdrive@gmail.com" className="hover:text-white transition-colors">
-                  corpersdrive@gmail.com
+                  {`${settings?.contactEmail}`}
                 </a>
               </div>
               <div>
@@ -49,8 +54,7 @@ const Footer = () => {
               <div>
                 <div className="font-medium">Head Office:</div>
                 <address className="not-italic">
-                  No 1, Jibowu, Yaba,<br />
-                  Lagos, Nigeria
+                  {`${settings?.address}`}
                 </address>
               </div>
             </div>
