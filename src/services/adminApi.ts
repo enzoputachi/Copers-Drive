@@ -205,6 +205,10 @@ export interface DashboardStats {
   revenueGrowth: number;
 }
 
+export interface DashboardResponse {
+  data: DashboardStats;
+}
+
 // =================== SYSTEM LOG ===================
 export interface SystemLog {
   id: string;
@@ -258,13 +262,16 @@ export interface SystemSettings {
   reminderHours: number;
 }
 
+export interface SystemSettingsResponse {
+  data: SystemSettings;
+}
 
 
 
 // API functions
 export const adminApiService = {
   // Dashboard
-  getDashboardStats: () => adminApi.get<DashboardStats>('/dashboardStats'),
+  getDashboardStats: () => adminApi.get<DashboardResponse>('/dashboardStats'),
 
   // Users
   getUsers: () => adminApi.get<User[]>('/users'),
@@ -311,8 +318,8 @@ export const adminApiService = {
     adminApi.post<Notification>('/notifications', notificationData),
 
   // Settings
-  getSettings: () => adminApi.get<SystemSettings>('/settings'),
-  updateSettings: (settings: Partial<SystemSettings>) => adminApi.put<SystemSettings>('/settings', settings),
+  getSettings: () => adminApi.get<SystemSettings>('/companySettings'),
+  updateSettings: (id, settings: Partial<SystemSettingsResponse>) => adminApi.patch<SystemSettingsResponse>(`/companySettings/${id}`, settings),
 };
 
 
