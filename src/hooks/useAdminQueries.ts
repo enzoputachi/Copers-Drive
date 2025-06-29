@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminApiService, User, Route, Bus, Trip, Booking, Payment, DashboardStats, SystemSettings, Notification } from '@/services/adminApi';
+import { adminApiService, User, Route, Bus, Trip, Booking, Payment, DashboardStats, SystemSettingsResponse, Notification } from '@/services/adminApi';
 import { toast } from '@/components/ui/sonner';
 
 // Query keys
@@ -335,7 +335,8 @@ export const useSettings = () => {
     queryKey: ADMIN_QUERY_KEYS.settings,
     queryFn: async () => {
       const response = await adminApiService.getSettings();
-      return response.data;
+      console.log('Settings data:', response)
+      return response.data.data;
     },
   });
 };
@@ -344,8 +345,8 @@ export const useUpdateSettings = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (settings: Partial<SystemSettings>) => 
-      adminApiService.updateSettings(settings),
+    mutationFn: ( { id, settings }: { id: number, settings: Partial<SystemSettingsResponse> }) => 
+      adminApiService.updateSettings(id, settings),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.settings });
       toast.success('Settings updated successfully');
