@@ -1,7 +1,9 @@
 import type { Config } from "tailwindcss";
+import animate from "tailwindcss-animate";
+// import scrollbar from "tailwind-scrollbar";
 
 export default {
-	darkMode: ["class"],
+	darkMode: "class",
 	content: [
 		"./pages/**/*.{ts,tsx}",
 		"./components/**/*.{ts,tsx}",
@@ -18,6 +20,11 @@ export default {
 			}
 		},
 		extend: {
+			gridTemplateColumns: {
+				'row-1': '60px 1fr 60px',
+				'row-2345': '60px 60px 1fr 60px',
+				'row-last': '60px 60px 60px 60px',
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -105,7 +112,8 @@ export default {
 		}
 	},
 	plugins: [
-		require("tailwindcss-animate"),
+		animate,
+		// scrollbar,
 		function({ addUtilities }) {
 			addUtilities({
 				'.perspective-1000': {

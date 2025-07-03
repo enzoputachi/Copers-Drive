@@ -11,7 +11,7 @@ import { toast } from "@/components/ui/sonner";
 import { useValidateTripDetails } from "@/hooks/useApi";
 import SeatContainerProps from "@/components/seatContainer";
 import SeatIcon from "@/components/ui/seat";
-
+import BusSeatLayout from "@/components/seatLayout";
 
 // Toggle between mock and live at build/config time
 const USE_MOCK_DATA = false;
@@ -37,6 +37,8 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
     isLoading,
     error,
   } = useValidateTripDetails(Number(selectedBus?.id));
+
+  console.log("SEATS:", apiSeats)
 
   // Local selected seats
   const [localSelected, setLocalSelected] = useState<SelectedSeat[]>(selectedSeats || []);
@@ -85,20 +87,60 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
 
   // Generate grid from API data
   const generateFromApi = () => {
-    const rows = [] as any[];
-    const flat = apiSeats.map(seat => ({
+    const flat = [...apiSeats]
+      .sort((a, b) => Number(a.seatNo) - Number(b.seatNo))
+      .map(seat => ({
       id: seat.id,
       label: seat.seatNo,
       isAvailable: seat.status === 'AVAILABLE',
       isSelected: localSelected.some(s => s.seatNo === seat.seatNo),
+      type: 'seat' as const,
     }));
-    for (let i = 0; i < flat.length; i += BUS_LAYOUT.seatsPerRow) {
-      rows.push(flat.slice(i, i + BUS_LAYOUT.seatsPerRow));
+    
+    const rows = [] as any[];
+    const perRow = BUS_LAYOUT.seatsPerRow;
+
+    for (let i = 0; i < flat.length; i += perRow) {
+      rows.push(flat.slice(i, i + perRow));
     }
+    console.log("Rows:", rows);
+    
     return rows;
   };
 
   const seats = USE_MOCK_DATA ? generateMock() : generateFromApi();
+
+  // NEW: Map seats for BusSeatLayout (14-seat bus format)
+  const mapSeatsForBusLayout = () => {
+    // Create 14 seats for the sprinter bus layout
+    const busType = getBusType();
+    const maxSeats = busType === "sprinter" ? 14 : 44;
+    
+    if (USE_MOCK_DATA) {
+      // Use mock data - convert first 14 seats
+      const flatSeats = seats.flat().slice(0, 14);
+      return flatSeats.map((seat, index) => ({
+        id: index + 1,
+        seatNo: (index + 1).toString(),
+        label: (index + 1).toString(),
+        isAvailable: seat.isAvailable,
+        status: seat.isAvailable ? 'AVAILABLE' : 'OCCUPIED'
+      }));
+    } else {
+      // Use API data - convert first 14 seats
+      const sortedSeats = [...apiSeats]
+        .sort((a, b) => Number(a.seatNo) - Number(b.seatNo))
+        .slice(0, 14);
+      
+      return sortedSeats.map((seat, index) => ({
+        id: seat.id,
+        seatNo: (index + 1).toString(), // Convert to sequential 1-14
+        label: (index + 1).toString(),
+        isAvailable: seat.status === 'AVAILABLE',
+        status: seat.status
+      }));
+    }
+  };
 
   // Handle seat click
   const handleSeatClick = (label: string, id: number, available: boolean) => {
@@ -114,7 +156,7 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
     });
   };
 
-  // “Continue” outside dialog opens it when exactly right number selected
+  // "Continue" outside dialog opens it when exactly right number selected
   const handleContinue = () => {
     if (localSelected.length === passengers) {
       setDialogOpen(true);
@@ -129,6 +171,17 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
 
   if (!USE_MOCK_DATA && error) {
     return <p className="text-red-600">Error loading seats. Please try again.</p>;
+  };
+
+  const getBusType = () => {
+    const totalSeats = apiSeats.length;
+    if (totalSeats <= 14) {
+      return "sprinter";
+    } else if (totalSeats <= 44) {
+      return "coaster44";
+    }
+
+    return "sprinter"
   }
 
   return (
@@ -155,7 +208,7 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
         Please select <strong>{passengers}</strong> seat{passengers > 1 && 's'}. You have selected <strong>{localSelected.length}</strong>.
       </p>
 
-      {/* Show “Change Seats” once full selection is made */}
+      {/* Show "Change Seats" once full selection is made */}
       {(
         <Button
           variant="outline"
@@ -175,37 +228,34 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
       </Button>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-[500px] max-h-[30rem] w-full bg-gray-50">
+        <DialogContent className="max-w-[480px]  max-h-[85vh] w-full bg-gray-50 p-4 border rounded-xl">
           <DialogHeader>
             <DialogTitle>Select Your Seats</DialogTitle>
           </DialogHeader>
-          <div className="overflow-y-auto scrollbar-hide max-h-[16rem] mt-4 pb-9">
+          <div className="overflow-y-auto max-h-[70vh] mt-4 pb-4 scrollbar-minimal">
 
-            <div className="flex justify-center mb-4">
+            {/* Driver section */}
+            {/* <div className="flex justify-center mb-4">
               <div className="bg-gray-200 h-8 w-32 rounded-t-3xl flex items-center justify-center text-sm">
                 DRIVER
               </div>
-            </div>
+            </div> */}
 
+            {/* Legend */}
             <div className="mb-6 flex justify-center space-x-4">
               <Legend />
             </div>
 
-            <div className="seat-map grid gap-4 px-4">
-              {seats.map((row, rIdx) => (
-                <div key={rIdx} className="flex justify-center">
-                  {row.map((seat, sIdx) => (
-                    <SeatContainerProps
-                      key={seat.id}
-                      id={seat.id}
-                      isAvailable={seat.isAvailable}
-                      isSelected={seat.isSelected}
-                      seatNo={seat.label}
-                      onClick={(label, id) => handleSeatClick(label, id, seat.isAvailable)}
-                    />
-                  ))}
-                </div>
-              ))}
+            {/* Seat map with proper alignment */}
+            {/* NEW: Use BusSeatLayout instead of the old grid */}
+            <div className="seat-map mx-auto">
+              <BusSeatLayout
+                busType={getBusType()}
+                selectedSeats={localSelected}
+                availableSeats={mapSeatsForBusLayout()}
+                onSeatClick={handleSeatClick}
+                maxSeats={passengers}
+              />
             </div>
 
             <div className="mt-6 flex justify-between">
@@ -231,7 +281,7 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
 
 const Legend = () => (
   <>
-    <div className="mb-6 flex justify-center space-x-6 text-xs">
+    <div className="flex justify-center space-x-6 text-xs">
       <div className="flex items-center space-x-2">
         <div className="scale-75">
           <SeatIcon isAvailable={true} isSelected={true} />

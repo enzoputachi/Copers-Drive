@@ -17,13 +17,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 const BUS_TYPE_CONFIG = {
-  "Mini Bus": { capacity: 20, seatsPerRow: 4 },
+  "Sprinter": { capacity: 14, seatsPerRow: 4 },
   "Coach": { capacity: 50, seatsPerRow: 4 },
   "Double Decker": { capacity: 80, seatsPerRow: 5 },
 } as const;
 
 
-const BUS_TYPES = ["Mini Bus", "Coach", "Double Decker"] as const;
+const BUS_TYPES = ["Sprinter", "Coach", "Double Decker"] as const;
 
 const busSchema = z.object({
   plateNo: z.string().min(1, "Plate number is required"),

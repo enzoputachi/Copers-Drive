@@ -181,6 +181,9 @@ const AdminTrips = () => {
       return;
     }
 
+    console.log("trip update:", data);
+    
+
     if (!currentTrip) return;
     updateTripMutation.mutate(
       { id: currentTrip.id, tripData: data },

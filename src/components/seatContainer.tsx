@@ -25,11 +25,11 @@ const SeatContainerProps = ({
             onClick={() => isAvailable && onClick(seatNo, id)}
         >
             <SeatIcon isAvailable={isAvailable} isSelected={isSelected} />
-            {isSelected && (
+            { (
                 <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2
                       bg-black text-white text-xs px-1 rounded
                       opacity-0 group-hover:opacity-100 transition-opacity">
-                    {/* <span className="text-sm font-semibold text-gray-800">{seatNo}</span> */}
+                    <span className="text-sm font-semibold text-white">{seatNo}</span>
                 </div>
             )}
         </div>

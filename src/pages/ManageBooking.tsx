@@ -85,10 +85,10 @@ const ManageBooking = () => {
             </p>
             <div className="space-y-2">
               <p>
-                <span className="font-medium">Phone:</span> +234 801 234 5678
+                <span className="font-medium">Phone:</span> coming soon
               </p>
               <p>
-                <span className="font-medium">Email:</span> support@Corpers Drive.ng
+                <span className="font-medium">Email:</span> scoming soon
               </p>
             </div>
           </div>

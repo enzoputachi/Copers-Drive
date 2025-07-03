@@ -3,8 +3,8 @@ import {
   CarouselApi,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  // CarouselNext,
+  // CarouselPrevious,
 } from "@/components/ui/carousel";
 import { User } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
@@ -81,7 +81,7 @@ const Testimonials = () => {
             }}
             className="w-full"
           >
-            <CarouselContent className="ml-0">
+            <CarouselContent className="ml-0 mr-[2rem]">
               {testimonials.map((testimonial) => (
                 <CarouselItem key={testimonial.id} className="pl-8">
                   <div className="flex items-start max-w-4xl">
@@ -107,8 +107,8 @@ const Testimonials = () => {
             </CarouselContent>
             
             <div className="flex justify-center mt-8 space-x-4">
-              <CarouselPrevious />
-              <CarouselNext />
+              {/* <CarouselPrevious /> */}
+              {/* <CarouselNext /> */}
             </div>
             
             {/* Dots indicator */}

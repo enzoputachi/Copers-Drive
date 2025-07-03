@@ -4,6 +4,9 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
+import { useBookingStore } from "@/stores/bookingStore";
+import { toast } from "sonner";
 
 type Route = {
   id: number;
@@ -74,6 +77,9 @@ const featuredRoutes: Route[] = [
 ];
 
 const PromoLabel = ({ type, discount }: { type: string; discount: number }) => {
+  
+
+
   let bgColor = "";
   let label = "";
   
@@ -102,8 +108,34 @@ const PromoLabel = ({ type, discount }: { type: string; discount: number }) => {
   );
 };
 
+
 const FeaturedRoutes = () => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+
+   const { 
+      departure, 
+      destination, 
+      date: storeDate,
+      passengers, 
+      seatClass,
+      setDeparture, 
+      setDestination, 
+      setDate: setBookingDate,
+      setPassengers,
+      setSeatClass
+    } = useBookingStore();
+
+  const onSubmit = (data) => {
+      setDeparture(data.departure);
+      setDestination(data.destination);
+      setBookingDate(data.date);
+      setPassengers(data.passengers);
+      setSeatClass(data.seatClass);
+        
+      toast.success("Redirecting to booking wizard...");
+    navigate("/booking");
+  }
   
   return (
     <section className="py-[5rem] bg-gray-100">
@@ -152,7 +184,13 @@ const FeaturedRoutes = () => {
                             ₦{route.price.toLocaleString()}
                           </div>
                         </div>
-                        <Button className="px-6">Book</Button>
+                        <Button
+                          type="submit"
+                          className="px-6"
+                          onClick={() => onSubmit(route)}
+                        >
+                          Book
+                        </Button>
                       </div>
                     </div>
                   </div>

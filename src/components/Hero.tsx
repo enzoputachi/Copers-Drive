@@ -38,7 +38,8 @@ const Hero = () => {
   const navigate = useNavigate();
   const { data: routes, isLoading, error } = useListRoutes();
   const routesArrays = routes?.data?.data || [];
-  // console.log('Routes:', routesArrays, 'Loading:', isLoading, 'Error:', error);
+  console.log('Routes:', routesArrays, 'Loading:', isLoading, 'Error:', error);
+
     
   const { 
     departure, 
@@ -50,7 +51,8 @@ const Hero = () => {
     setDestination, 
     setDate: setBookingDate,
     setPassengers,
-    setSeatClass
+    setSeatClass,
+    setPaymentType,
   } = useBookingStore();
 
 
@@ -61,16 +63,16 @@ const Hero = () => {
       destination: destination || "",
       passengers: passengers || 1,
       seatClass: seatClass || "Standard",
-      date: storeDate || undefined
+      date: undefined,
     }
   });
 
   // Important: Register the date with react-hook-form
-  useEffect(() => {
-    if (storeDate) {
-      setValue("date", storeDate);
-    }
-  }, [storeDate, setValue]);
+  // useEffect(() => {
+  //   if (storeDate) {
+  //     setValue("date", storeDate);
+  //   }
+  // }, [storeDate, setValue]);
 
   const selectedDate = watch("date");
 
@@ -104,6 +106,7 @@ const Hero = () => {
     setBookingDate(data.date);
     setPassengers(data.passengers);
     setSeatClass(data.seatClass);
+    setPaymentType(routesArrays.filter(item => item.paymentType))
     
     toast.success("Redirecting to booking wizard...");
     navigate("/booking");

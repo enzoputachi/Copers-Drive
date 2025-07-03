@@ -59,8 +59,15 @@ export interface PassengerInfoType {
 
 type BookingState = {
 
+  createdAt?: string;
+  setCreatedAt: (date: string) => void;
+
   bookingDraftId?: number;
   bookingToken?: string;
+
+  // Route
+  paymetType: string,
+  setPaymentType: (paymetType: string )=> void,
 
   // Trip basics
   departure: string;
@@ -111,6 +118,8 @@ type BookingState = {
 const useBookingStore = create<BookingState>()(
   persist(
     (set) => ({
+      createdAt: undefined,
+      setCreatedAt: (date: string) => set({ createdAt: date }),
       // Initial state
       bookingDraftId: undefined,
       bookingToken: "",
@@ -126,6 +135,10 @@ const useBookingStore = create<BookingState>()(
       passengerInfo: null,
       paymentInfo: null,
       hasSubmittedPassengerData: false,
+
+      // Routes
+      paymetType: "",
+      setPaymentType: (paymetType: string ) => set({ paymetType: paymetType}),
 
       // Current step in the booking process
       currentStep: 0,
@@ -163,7 +176,18 @@ const useBookingStore = create<BookingState>()(
       }),
     }),
     {
-      name: "booking-storage",      
+      name: "booking-storage", 
+      version: 1,
+      onRehydrateStorage: (state) => {
+        return (storedState) => {
+          const expiryHours = 6;
+          const now = new Date();
+          const createdAt = storedState?.createdAt ? new Date(storedState.createdAt) : null;
+          if (createdAt && (now.getTime() - createdAt.getTime()) > expiryHours * 3600 * 1000) {
+            state?.resetForm();
+          }
+        }
+      }     
       // partialize: (state) => ({ currentStep: state.currentStep }),
     }
   )

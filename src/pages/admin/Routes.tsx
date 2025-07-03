@@ -170,7 +170,15 @@ const AdminRoutes = () => {
   const columns = [
     { key: "origin", title: "Origin" },
     { key: "destination", title: "Destination" },
-    { key: "distance", title: "Distance (km)" },
+    { 
+      key: "paymentType", 
+      title: "Payment Type",
+      render: (route: any) => (
+        <span className={route.paymentType === "Full" ? "text-green-600" : "text-yellow-500"}>
+          {route.paymentType ? `Full` : "Split"}
+        </span>
+      ),
+    },
     { key: "duration", title: "Duration" },
     {
       key: "isActive",

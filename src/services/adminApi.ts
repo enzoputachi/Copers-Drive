@@ -294,7 +294,7 @@ export const adminApiService = {
   // Trips
   getTrips: () => adminApi.get<{ status: string, data: Trip[] }>('/trips'),
   createTrip: (tripData: Omit<Trip, 'id' | 'availableSeats'>) => adminApi.post<Trip>('/trips', tripData),
-  updateTrip: (id: string, tripData: Partial<Trip>) => adminApi.put<Trip>(`/trips/${id}`, tripData),
+  updateTrip: (id: string, tripData: Partial<Trip>) => adminApi.patch<Trip>(`/trips/${id}`, tripData),
   deleteTrip: (id: string) => adminApi.delete(`/trips/${id}`),
 
   // Bookings

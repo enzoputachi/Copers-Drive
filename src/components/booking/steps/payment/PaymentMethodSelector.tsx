@@ -1,16 +1,22 @@
 import React from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CreditCard, Split, Wallet } from "lucide-react";
+import { useBookingStore } from "@/stores/bookingStore";
 
 interface PaymentMethodSelectorProps {
   paymentMethod: "full" | "split";
   onPaymentMethodChange: (value: "full" | "split") => void;
 }
 
+
+
 const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   paymentMethod,
   onPaymentMethodChange,
 }) => {
+
+  const { paymetType } = useBookingStore();
+
   return (
     <div className="mb-6">
       <h3 className="font-medium mb-4">Select Payment Method</h3>
@@ -39,7 +45,8 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           </div>
         </div>
 
-        <div
+        { paymetType === "Split" && (
+          <div
           className={`flex items-start space-x-3 p-4 border rounded-lg transition-all ${
             paymentMethod === "split" ? "border-primary bg-primary/5" : "hover:bg-gray-50"
           }`}
@@ -58,6 +65,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
             </p>
           </div>
         </div>
+        )}
       </RadioGroup>
     </div>
   );

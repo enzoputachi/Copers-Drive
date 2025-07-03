@@ -100,3 +100,61 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-custom {
+    /* Scrollbar track */
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    /* Track background */
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    /* Scrollbar handle */
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      border-radius: 10px;
+      border: 2px solid #f1f1f1;
+    }
+    
+    /* Handle on hover */
+    &::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(45deg, #764ba2, #667eea);
+    }
+  }
+
+  .scrollbar-minimal {
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: transparent;
+      margin: 10rem 10rem;
+      /* height: 3px; */
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      height: 4px
+    }
+    
+    &::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.5);
+    }
+  }
+}
