@@ -29,6 +29,25 @@ const busConfig = {
       { type: "row", seats: [37, 38, 39, 40], arrangement: "2-2" },
       { type: "back", seats: [41, 42, 43, 44], arrangement: "full" },
     ]
+  },
+  coaster51: {
+    totalSeats: 51,
+    layout: [
+      { type: "driver", seats: [], arrangement: "2-1" },
+      { type: "row", seats: [1, 2, 3, 4], arrangement: "2-2" },
+      { type: "row", seats: [5, 6, 7, 8], arrangement: "2-2" },
+      { type: "row", seats: [9, 10, 11, 12], arrangement: "2-2" },
+      { type: "row", seats: [13, 14, 15, 16], arrangement: "2-2" },
+      { type: "row", seats: [17, 18, 19, 20], arrangement: "2-2" },
+      { type: "row", seats: [21, 22, 23, 24], arrangement: "2-2" },
+      { type: "row", seats: [25, 26, 27, 28], arrangement: "2-2" },
+      { type: "row", seats: [29, 30, 31, 32], arrangement: "2-2" },
+      { type: "row", seats: [33, 34, 35, 36], arrangement: "2-2" }, // Fixed duplicate seats
+      { type: "row", seats: [37, 38, 39, 40], arrangement: "2-2" },
+      { type: "row", seats: [41, 42, [], []], arrangement: "2-0" },
+      { type: "row", seats: [43, 44, 45, 46], arrangement: "2-2" },
+      { type: "back", seats: [47, 48, 49, 50, 51], arrangement: "full" },
+    ]
   }
 };
 
@@ -118,12 +137,12 @@ const BusSeatLayout = ({
     switch (type) {
       case "driver":
         return (
-          <div key={index} className="flex items-center justify-between px-2 mb-2">
+          <div key={index} className="flex items-center justify-between px-2">
             <div className="flex items-center justify-center w-10 h-8 bg-gray-600 text-white rounded text-sm font-bold">
               ✇
             </div>
-            <div className="w-4"></div>
-            <div className="w-10 h-8"></div> {/* Empty space for balance */}
+            {/* <div className="w-4"></div> */}
+            {/* <div className="w-10 h-8"></div> Empty space for balance */}
           </div>
         );
 
@@ -191,8 +210,8 @@ const BusSeatLayout = ({
                   onClick={handleSeatClick}
                 />
               </div>
-              <div className="w-6 border-l border-dashed border-gray-400 h-8 flex items-center justify-center">
-                <div className="text-xs text-gray-500">|</div>
+              <div className="w-[2rem] border-l border-dashed h-8 flex items-center justify-center">
+                <div className="text-xs text-gray-500"></div>
               </div>
               <div className="flex space-x-2">
                 <SeatContainerProps
@@ -209,6 +228,42 @@ const BusSeatLayout = ({
                   seatNo={seats[3].toString()}
                   onClick={handleSeatClick}
                 />
+              </div>
+            </div>
+          );
+        } else if (arrangement === "2-0") {
+          return (
+            <div
+              key={index}
+              className="flex items-center justify-between px-2 mb-2"
+            >
+              <div className="flex space-x-2">
+                <SeatContainerProps
+                  id={getSeatId(seats[0])}
+                  isAvailable={getSeatAvailability(seats[0])}
+                  isSelected={isSeatSelected(seats[0])}
+                  seatNo={seats[0].toString()}
+                  onClick={handleSeatClick}
+                />
+                <SeatContainerProps
+                  id={getSeatId(seats[1])}
+                  isAvailable={getSeatAvailability(seats[1])}
+                  isSelected={isSeatSelected(seats[1])}
+                  seatNo={seats[1].toString()}
+                  onClick={handleSeatClick}
+                />
+              </div>
+              <div className="w-[2rem] border-l border-dashed h-8 flex items-center justify-center">
+                <div className="text-xs text-gray-500"></div>
+              </div>
+              <div className="flex space-x-2">
+                {/* Empty space for exit/aisle */}
+                <div className="w-10 h-8 bg-yellow-100 border-2 border-yellow-300 rounded flex items-center justify-center">
+                  <span className="text-yellow-600 font-bold text-xs">
+                    EXIT
+                  </span>
+                </div>
+                <div className="w-10 h-8"></div> {/* Empty seat space */}
               </div>
             </div>
           );
@@ -237,8 +292,8 @@ const BusSeatLayout = ({
   };
 
   return (
-    <div className="bus-layout bg-white p-4 rounded-lg border shadow-sm">
-      <div className="bus-container max-w-xs mx-auto">
+    <div className="flex flex-col items-center space-y-4 p-4 bg-white rounded-lg shadow-sm">
+      <div className="flex flex-col space-y-3 border-2 border-gray-300 rounded-2xl p-4 bg-gray-50 relative">
         {currentBusConfig.layout.map((row, index) => renderRow(row, index))}
       </div>
     </div>

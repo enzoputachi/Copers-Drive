@@ -47,7 +47,7 @@ const FormModal = ({
         </DialogHeader>
         <div>
           <div className="grid gap-4 py-4">{children}</div>
-          {footer ? (
+          {/* {footer ? (
             <DialogFooter>{footer}</DialogFooter>
           ) : onSubmit ? (
             <DialogFooter>
@@ -58,11 +58,14 @@ const FormModal = ({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button 
+                type="submit" 
+                disabled={loading}
+                >
                 {loading ? "Processing..." : "Save"}
               </Button>
             </DialogFooter>
-          ) : null}
+          ) : null} */}
         </div>
       </DialogContent>
     </Dialog>

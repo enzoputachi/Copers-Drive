@@ -18,12 +18,12 @@ import { Button } from "@/components/ui/button";
 
 const BUS_TYPE_CONFIG = {
   "Sprinter": { capacity: 14, seatsPerRow: 4 },
-  "Coach": { capacity: 50, seatsPerRow: 4 },
-  "Double Decker": { capacity: 80, seatsPerRow: 5 },
+  "Coaster44": { capacity: 44, seatsPerRow: 4 },
+  "Luxry51": { capacity: 51, seatsPerRow: 4 },
 } as const;
 
 
-const BUS_TYPES = ["Sprinter", "Coach", "Double Decker"] as const;
+const BUS_TYPES = ["Sprinter", "Coaster44", "Luxry51"] as const;
 
 const busSchema = z.object({
   plateNo: z.string().min(1, "Plate number is required"),
@@ -39,17 +39,18 @@ interface BusFormProps {
   defaultValues?: BusFormValues;
   onSubmit: (data: BusFormValues) => void;
   isSubmitting?: boolean;
+  onCancel?: () => void;
 }
 
-const BusForm = ({ defaultValues, onSubmit, isSubmitting = false }: BusFormProps) => {
+const BusForm = ({ defaultValues, onSubmit, onCancel, isSubmitting = false }: BusFormProps) => {
   const form = useForm<BusFormValues>({
     resolver: zodResolver(busSchema),
     defaultValues: defaultValues || {
       plateNo: "",
-      capacity: 20,
+      capacity: 14,
       seatsPerRow: 4,
       isActive: true,
-      busType: "Coach",
+      busType: "Sprinter",
     },
   });
 
@@ -64,6 +65,37 @@ const BusForm = ({ defaultValues, onSubmit, isSubmitting = false }: BusFormProps
               <FormLabel>Plate Number</FormLabel>
               <FormControl>
                 <Input placeholder="ABC-123XY" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="busType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bus Type</FormLabel>
+              <FormControl>
+                <select
+                  value={field.value}
+                  onChange={(e) => {
+                    const selectedType = e.target.value as keyof typeof BUS_TYPE_CONFIG;
+                    const config = BUS_TYPE_CONFIG[selectedType];
+
+                    field.onChange(selectedType);
+                    form.setValue("capacity", config.capacity);
+                    form.setValue("seatsPerRow", config.seatsPerRow);
+                  }}
+                  className="w-full rounded-md border px-3 py-2 text-sm shadow-sm"
+                >
+                  {BUS_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -119,40 +151,19 @@ const BusForm = ({ defaultValues, onSubmit, isSubmitting = false }: BusFormProps
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="busType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bus Type Date</FormLabel>
-              <FormControl>
-                <select
-                  value={field.value}
-                  onChange={(e) => {
-                    const selectedType = e.target.value as keyof typeof BUS_TYPE_CONFIG;
-                    const config = BUS_TYPE_CONFIG[selectedType];
-
-                    field.onChange(selectedType);
-                    form.setValue("capacity", config.capacity);
-                    form.setValue("seatsPerRow", config.seatsPerRow);
-                  }}
-                  className="w-full rounded-md border px-3 py-2 text-sm shadow-sm"
-                >
-                  {BUS_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Save Bus"}
-        </Button>
+        <div className="flex justify-between">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            className="border-2"
+          >
+            Cancel Bus
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save Bus"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
