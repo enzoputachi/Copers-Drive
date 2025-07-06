@@ -300,9 +300,9 @@ const AdminBuses = () => {
         description="Enter the details of the new bus."
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
-        onSubmit={() => {}}
+        onSubmit={handleCreateBus}
       >
-        <BusForm onSubmit={handleCreateBus} isSubmitting={isSubmitting} />
+        <BusForm onSubmit={handleCreateBus} isSubmitting={isSubmitting}  onCancel={() => setIsCreateModalOpen(false)}/>
       </FormModal>
 
       {/* Edit Bus Modal */}
@@ -311,13 +311,14 @@ const AdminBuses = () => {
         description="Update the bus details."
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
-        onSubmit={() => {}}
+        onSubmit={handleEditBus}
       >
         {currentBus && (
           <BusForm
             defaultValues={currentBus}
             onSubmit={handleEditBus}
             isSubmitting={isSubmitting}
+            onCancel={() => setIsEditModalOpen(false)}
           />
         )}
       </FormModal>

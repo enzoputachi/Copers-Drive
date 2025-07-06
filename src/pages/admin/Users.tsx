@@ -515,17 +515,19 @@ const AdminUsers = () => {
             />
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpenModal(false)}>
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading || createUserMutation.isPending || updateUserMutation.isPending}
-              >
-                {loading || createUserMutation.isPending || updateUserMutation.isPending
-                  ? "Processing..."
-                  : "Save"}
-              </Button>
+              <div className="flex justify-between">
+                <Button type="button" variant="outline" onClick={() => setOpenModal(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading || createUserMutation.isPending || updateUserMutation.isPending}
+                >
+                  {loading || createUserMutation.isPending || updateUserMutation.isPending
+                    ? "Processing..."
+                    : "Save"}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>

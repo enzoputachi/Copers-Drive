@@ -29,7 +29,7 @@ const BUS_LAYOUT = {
 
 const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
   const { selectedBus, passengers, selectedSeats, setSelectedSeats } = useBookingStore();
-  const [dialogOpen, setDialogOpen] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
   
   // Fetch seats via React Query hook when live
   const {
@@ -114,7 +114,7 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
   const mapSeatsForBusLayout = () => {
     // Create 14 seats for the sprinter bus layout
     const busType = getBusType();
-    const maxSeats = busType === "sprinter" ? 14 : 44;
+    const maxSeats = busType === "sprinter" ? 14 : busType === "coaster44" ? 44 : 51;
     
     if (USE_MOCK_DATA) {
       // Use mock data - convert first 14 seats
@@ -130,7 +130,7 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
       // Use API data - convert first 14 seats
       const sortedSeats = [...apiSeats]
         .sort((a, b) => Number(a.seatNo) - Number(b.seatNo))
-        .slice(0, 14);
+        .slice(0, maxSeats);
       
       return sortedSeats.map((seat, index) => ({
         id: seat.id,
@@ -179,9 +179,11 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
       return "sprinter";
     } else if (totalSeats <= 44) {
       return "coaster44";
+    } else if (totalSeats <= 51) {
+      return "coaster51"
     }
 
-    return "sprinter"
+    return "coaster44"
   }
 
   return (

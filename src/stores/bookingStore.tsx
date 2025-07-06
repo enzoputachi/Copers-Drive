@@ -134,10 +134,11 @@ const useBookingStore = create<BookingState>()(
       selectedSeats: [],
       passengerInfo: null,
       paymentInfo: null,
+      // paymetType: null,
       hasSubmittedPassengerData: false,
 
       // Routes
-      paymetType: "",
+      paymetType: null,
       setPaymentType: (paymetType: string ) => set({ paymetType: paymetType}),
 
       // Current step in the booking process
@@ -173,6 +174,10 @@ const useBookingStore = create<BookingState>()(
         paymentInfo: null,
         hasSubmittedPassengerData: false,
         currentStep: 0, // Reset step as well
+        bookingToken: "",
+        bookingDraftId: undefined,
+        createdAt: undefined,
+        paymetType: null,
       }),
     }),
     {
@@ -183,7 +188,7 @@ const useBookingStore = create<BookingState>()(
           const expiryHours = 6;
           const now = new Date();
           const createdAt = storedState?.createdAt ? new Date(storedState.createdAt) : null;
-          if (createdAt && (now.getTime() - createdAt.getTime()) > expiryHours * 3600 * 1000) {
+          if (createdAt && (now.getTime() - createdAt.getTime()) > expiryHours * 60 * 1000) {
             state?.resetForm();
           }
         }

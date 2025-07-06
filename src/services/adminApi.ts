@@ -276,7 +276,7 @@ export const adminApiService = {
   // Users
   getUsers: () => adminApi.get<User[]>('/users'),
   createUser: (userData: Omit<User, 'id' | 'createdAt'>) => adminApi.post<User>('/users', userData),
-  updateUser: (id: string, userData: Partial<User>) => adminApi.put<User>(`/users/${id}`, userData),
+  updateUser: (id: string, userData: Partial<User>) => adminApi.patch<User>(`/users/${id}`, userData),
   deleteUser: (id: string) => adminApi.delete(`/users/${id}`),
 
   // Routes
@@ -288,7 +288,7 @@ export const adminApiService = {
   // Buses
   getBuses: () => adminApi.get<{ status: string; data: Bus[] }>('/buses'), // ✅
   createBus: (busData: Omit<Bus, 'id'>) => adminApi.post<Bus>('/buses', busData), // ✅
-  updateBus: (id: string, busData: Partial<Bus>) => adminApi.put<Bus>(`/buses/${id}`, busData),
+  updateBus: (id: string, busData: Partial<Bus>) => adminApi.patch<Bus>(`/buses/${id}`, busData),
   deleteBus: (id: string) => adminApi.delete(`/buses/${id}`),
 
   // Trips
@@ -299,7 +299,7 @@ export const adminApiService = {
 
   // Bookings
   getBookings: () => adminApi.get<{ data: Booking[], status: string }>('/bookings'),
-  updateBooking: (id: string, bookingData: Partial<Booking>) => adminApi.put<Booking>(`/bookings/${id}`, bookingData),
+  updateBooking: (id: string, bookingData: Partial<Booking>) => adminApi.patch<Booking>(`/bookings/${id}`, bookingData),
   deleteBooking: (id: string) => adminApi.delete(`/bookings/${id}`),
 
   // Payments

@@ -6,19 +6,22 @@ import PaystackPop from '@paystack/inline-js'
 export interface PaystackParams {
   email: string;
   amount: number;
-  bookingId: number  
+  bookingId: number,
+  isSplitPayment?: boolean;
 }
 
 export const payWithPaystack = async ({
   email,
   amount,
   bookingId,
+  isSplitPayment,
 }: PaystackParams): Promise<{ success: boolean; ticketUrl?: string }> => {
   try {
     const { data } = await api.post(`/payments/initialize`, {
       email,
       amount,
-      bookingId
+      bookingId,
+      isSplitPayment,
     });
 
     const { paystackRef } = data.data;

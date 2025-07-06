@@ -110,7 +110,7 @@ const AdminPayments = () => {
     {
       key: "amount",
       title: "Amount",
-      render: (payment: any) => `₦${payment.amount.toLocaleString()}`,
+      render: (payment: any) => `₦${(payment.amount /  100).toLocaleString()}`,
     },
     {
       key: "provider",

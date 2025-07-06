@@ -349,6 +349,7 @@ const AdminTrips = () => {
           isSubmitting={isSubmitting}
           routes={routes}
           buses={buses}
+          onCancel={() => setIsCreateModalOpen(false)}
         />
       </FormModal>
 
@@ -371,7 +372,9 @@ const AdminTrips = () => {
               // availableSeats: currentTrip.availableSeats,
               status: currentTrip.status,
             }}
+
             onSubmit={handleEditTrip}
+            onCancel={() => setIsEditModalOpen(false)}
             isSubmitting={isSubmitting}
             routes={routes}
             buses={buses}

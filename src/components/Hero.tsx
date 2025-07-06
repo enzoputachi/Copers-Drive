@@ -91,14 +91,22 @@ const Hero = () => {
     }
   ];
 
+  const paymentTypes = routesArrays.map(item => item.paymentType)
+
+  
+
   // Rotate through slides every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
+
+    console.log( "Payment:", paymentTypes);
     
     return () => clearInterval(interval);
   }, []);
+
+
 
   const onSubmit = (data: BookingFormData) => {
     setDeparture(data.departure);
@@ -106,7 +114,6 @@ const Hero = () => {
     setBookingDate(data.date);
     setPassengers(data.passengers);
     setSeatClass(data.seatClass);
-    setPaymentType(routesArrays.filter(item => item.paymentType))
     
     toast.success("Redirecting to booking wizard...");
     navigate("/booking");

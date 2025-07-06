@@ -17,11 +17,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 const PAYMENT_TYPES = ["Full", "Split"] as const;
+type PaymetType = typeof PAYMENT_TYPES[number]
 
 const routeSchema = z.object({
   origin: z.string().min(1, "Origin is required"),
   destination: z.string().min(1, "Destination is required"),
-  distanceKm: z.coerce.number().min(1, "Distance must be at least 1 km"),
+  // distanceKm: z.coerce.number().min(1, "Distance must be at least 1 km"),
   duration: z.string().min(1, "Duration is required"),
   paymentType: z.enum(PAYMENT_TYPES),
   isActive: z.boolean().default(true),
@@ -33,9 +34,10 @@ interface RouteFormProps {
   defaultValues?: RouteFormValues;
   onSubmit: (data: RouteFormValues) => void;
   isSubmitting?: boolean;
+  onCancel: () => void;
 }
 
-const RouteForm = ({ defaultValues, onSubmit, isSubmitting = false }: RouteFormProps) => {
+const RouteForm = ({ defaultValues, onSubmit, onCancel, isSubmitting = false }: RouteFormProps) => {
   const form = useForm<RouteFormValues>({
     resolver: zodResolver(routeSchema),
     defaultValues: defaultValues || {
@@ -116,14 +118,7 @@ const RouteForm = ({ defaultValues, onSubmit, isSubmitting = false }: RouteFormP
               <FormControl>
                 <select
                   value={field.value}
-                  onChange={(e) => {
-                    const selectedType = e.target.value as keyof typeof PAYMENT_TYPES;
-                    const config = PAYMENT_TYPES[selectedType];
-
-                    field.onChange(selectedType);
-                    form.setValue("paymentType", config[0]);
-                    form.setValue("paymentType", config[1]);
-                  }}
+                  onChange={(e) => field.onChange(e.target.value as PaymetType) }
                   className="w-full rounded-md border px-3 py-2 text-sm shadow-sm"
                 >
                   {PAYMENT_TYPES.map((type) => (
@@ -159,9 +154,19 @@ const RouteForm = ({ defaultValues, onSubmit, isSubmitting = false }: RouteFormP
           )}
         />
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Save Route"}
-        </Button>
+        <div className="flex justify-between">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            className="border-2"
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save Route"}
+          </Button>
+        </div>
       </form>
     </Form>
   );

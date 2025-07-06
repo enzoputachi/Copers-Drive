@@ -16,7 +16,7 @@ const Index = () => {
       <BookingProvider>
         <main>
           <Hero />
-          <FeaturedRoutes />
+          {/* <FeaturedRoutes /> */}
           <Features />
           <Testimonials />
           <AppPromo />

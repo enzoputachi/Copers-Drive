@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useBookingStore } from "@/stores/bookingStore";
 import TripSelection from "./steps/TripSelection";
@@ -7,7 +6,7 @@ import SeatSelection from "./steps/SeatSelection";
 import PassengerInfo from "./steps/PassengerInfo";
 import Payment from "./steps/Payment";
 import Confirmation from "./steps/Confirmation";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight, ChevronLeft, CalendarIcon, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import {
@@ -19,11 +18,11 @@ import {
   AlertDialogCancel,
 } from "@radix-ui/react-alert-dialog";
 import { AlertDialogFooter, AlertDialogHeader } from "../ui/alert-dialog";
-// import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { useNavigationGuard } from '@/hooks/useNavigationGuard';
+import { format } from 'date-fns';
 
-// Define all steps in the booking process
-const STEPS = [
+// Define all possible steps
+const ALL_STEPS = [
   { id: "tripSelection", label: "Trip Details" },
   { id: "busSelection", label: "Select Bus" },
   { id: "seatSelection", label: "Choose Seats" },
@@ -32,78 +31,87 @@ const STEPS = [
   { id: "confirmation", label: "Confirmation" }
 ];
 
-
-  const slides = [
-    {
-      image: "/cm1.jpeg",
-      alt: "Corpers Drive luxury bus"
-    },
-    {
-      image: "/cm2.jpeg",
-      alt: "NYSC corps members traveling"
-    },
-    {
-      image: "/cm2.jpeg",
-      alt: "Modern transportation hub"
-    }
-  ];
-
 const BookingWizard = () => {
   const navigate = useNavigate();
-  // const [currentStep, setCurrentStep] = useState(0);
-  const currentStep = useBookingStore((state) => state.currentStep);
-  const setCurrentStep = useBookingStore((state) => state.setCurrentStep);
-  // Remove: const [currentStep, setCurrentStep] = useState(0);
   const [isCompleted, setIsCompleted] = useState<Record<string, boolean>>({});
   const [showRestrictedDialog, setShowRestrictedDialogue] = useState(false);
   const [showNavigationWarning, setShowNavigationWarning] = useState(false);
+  const [showPaymentBackWarning, setShowPaymentBackWarning] = useState(false);
+  const [activeSteps, setActiveSteps] = useState(ALL_STEPS);
 
   const { 
     departure, 
     destination, 
     date, 
+    passengers,
     hasSubmittedPassengerData, 
-    resetForm 
+    resetForm,
+    createdAt,
+    setCreatedAt,
+    currentStep,
+    setCurrentStep,
   } = useBookingStore();
 
-  console.log("departure:", departure, "destination:", destination, "date:", date, "hasSubmittedPassengerData:", hasSubmittedPassengerData);
-  
-
+  // Determine which steps to show based on whether user came from Hero
+  useEffect(() => {
+    const hasHeroData = departure && destination && date;
+    
+    if (hasHeroData) {
+      // Skip TripSelection - start from BusSelection
+      const stepsWithoutTripSelection = ALL_STEPS.filter(step => step.id !== "tripSelection");
+      setActiveSteps(stepsWithoutTripSelection);
+      
+      // Mark trip selection as completed since we have the data
+      setIsCompleted(prev => ({ ...prev, tripSelection: true }));
+      
+      // Set createdAt if not already set
+      if (!createdAt) {
+        setCreatedAt(new Date().toISOString());
+      }
+      
+      // Reset current step to 0 (which will be busSelection now)
+      if (currentStep === 0) {
+        setCurrentStep(0);
+      }
+    } else {
+      // Show all steps including TripSelection
+      setActiveSteps(ALL_STEPS);
+    }
+  }, [departure, destination, date, createdAt, setCreatedAt, currentStep, setCurrentStep]);
 
   // Prevent navigation when passenger data has been submitted
   useNavigationGuard({
-    shouldPrevent: hasSubmittedPassengerData && currentStep < STEPS.length - 1,
+    shouldPrevent: hasSubmittedPassengerData && currentStep < activeSteps.length - 1,
     message: "Your booking is in progress. Leaving now will lose your progress.",
     onNavigationAttempt: () => setShowNavigationWarning(true)
   });
 
-
-  // Check if initial booking data exists when component mounts
-  useEffect(() => {
-    // If the user navigated from the homepage with pre-filled data
-    if (departure && destination && date) {
-      // Mark the first step as complete since we have this data
-      setIsCompleted(prev => ({ ...prev, tripSelection: true }));
-    }
-  }, [departure, destination, date]);
-
   const goToNextStep = () => {
-    if (currentStep < STEPS.length - 1) {
+    if (currentStep < activeSteps.length - 1) {
       // Mark the current step as completed
-      setIsCompleted(prev => ({ ...prev, [STEPS[currentStep].id]: true }));
+      setIsCompleted(prev => ({ ...prev, [activeSteps[currentStep].id]: true }));
       setCurrentStep(currentStep + 1);
       window.scrollTo(0, 0);
     }
   };
 
   const goToPrevStep = () => {
-    // 1️⃣ Block if passenger data has been submitted and we’re on or before step 3
-    if (hasSubmittedPassengerData && currentStep <= 3) {
+    const paymentStepIndex = activeSteps.findIndex(step => step.id === "payment");
+    const restrictedStepIndex = activeSteps.findIndex(step => step.id === "payment");
+    const targetStep = currentStep - 1;
+
+    // Special handling for payment page - show warning instead of blocking
+    if (hasSubmittedPassengerData && currentStep === paymentStepIndex) {
+      setShowPaymentBackWarning(true);
+      return;
+    }
+
+    // Block if passenger data has been submitted and we're trying to go before payment step
+    if (hasSubmittedPassengerData && targetStep < restrictedStepIndex) {
       setShowRestrictedDialogue(true);
       return;
     }
 
-    // 2️⃣ Otherwise, navigate as normal
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
       window.scrollTo(0, 0);
@@ -114,13 +122,23 @@ const BookingWizard = () => {
   };
 
   const handleStepClick = (stepIndex: number) => {
-    if (hasSubmittedPassengerData && stepIndex < 4 ) {
+    const paymentStepIndex = activeSteps.findIndex(step => step.id === "payment");
+    const restrictedStepIndex = activeSteps.findIndex(step => step.id === "payment");
+    
+    // Special handling for payment page - show warning instead of blocking
+    if (hasSubmittedPassengerData && currentStep === paymentStepIndex && stepIndex < paymentStepIndex) {
+      setShowPaymentBackWarning(true);
+      return;
+    }
+
+    // Block if passenger data has been submitted and trying to go before payment step
+    if (hasSubmittedPassengerData && stepIndex < restrictedStepIndex) {
       setShowRestrictedDialogue(true);
       return;
     }
 
-  // Allow navigation to completed steps only
-  if (stepIndex <= currentStep) {
+    // Allow navigation to completed steps only
+    if (stepIndex <= currentStep) {
       setCurrentStep(stepIndex);
       window.scrollTo(0, 0);
     }
@@ -132,6 +150,15 @@ const BookingWizard = () => {
     navigate("/");
   };
 
+  const handlePaymentBackWithReset = () => {
+    resetForm();
+    setShowPaymentBackWarning(false);
+    // Reset to the beginning or previous step
+    navigate("/");
+    setCurrentStep(Math.max(0, currentStep - 1));
+    window.scrollTo(0, 0);
+  };
+
   // Update step complete status
   const setStepComplete = (stepId: string, isComplete: boolean) => {
     setIsCompleted(prev => ({ ...prev, [stepId]: isComplete }));
@@ -139,18 +166,20 @@ const BookingWizard = () => {
 
   // Render the current step component
   const renderStep = () => {
-    switch (currentStep) {
-      case 0:
+    const currentStepId = activeSteps[currentStep]?.id;
+    
+    switch (currentStepId) {
+      case "tripSelection":
         return <TripSelection onComplete={() => goToNextStep()} setStepComplete={setStepComplete} />;
-      case 1:
+      case "busSelection":
         return <BusSelection onComplete={() => goToNextStep()} setStepComplete={setStepComplete} />;
-      case 2:
+      case "seatSelection":
         return <SeatSelection onComplete={() => goToNextStep()} setStepComplete={setStepComplete} />;
-      case 3:
+      case "passengerInfo":
         return <PassengerInfo onComplete={() => goToNextStep()} setStepComplete={setStepComplete} />;
-      case 4:
+      case "payment":
         return <Payment onComplete={() => goToNextStep()} setStepComplete={setStepComplete} />;
-      case 5:
+      case "confirmation":
         return <Confirmation />;
       default:
         return null;
@@ -158,10 +187,10 @@ const BookingWizard = () => {
   };
 
   // Determine if the next button should be disabled
-  const isNextDisabled = !isCompleted[STEPS[currentStep]?.id];
+  const isNextDisabled = !isCompleted[activeSteps[currentStep]?.id];
   
   // Hide navigation buttons on confirmation step
-  const showNavButtons = currentStep !== STEPS.length - 1;
+  const showNavButtons = currentStep !== activeSteps.length - 1;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -169,11 +198,11 @@ const BookingWizard = () => {
       {/* Progress Steps */}
       <div className="mb-8 overflow-x-auto">
         <div className="flex min-w-max">
-          {STEPS.map((step, index) => (
+          {activeSteps.map((step, index) => (
             <div key={step.id} className="flex items-center">
               <div 
                 className={`flex flex-col items-center ${index <= currentStep ? "text-primary" : "text-gray-400"}
-                ${hasSubmittedPassengerData && index < 4 ? "cursor-not-allowed opacity-60" : ""}
+                ${hasSubmittedPassengerData && index < activeSteps.findIndex(s => s.id === "payment") ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
                 `}
                 onClick={() => handleStepClick(index)}
               >
@@ -189,7 +218,7 @@ const BookingWizard = () => {
                 </div>
                 <span className="text-xs font-medium">{step.label}</span>
               </div>
-              {index < STEPS.length - 1 && (
+              {index < activeSteps.length - 1 && (
                 <div 
                   className={`w-12 h-0.5 mx-1 ${
                     index < currentStep ? "bg-primary" : "bg-gray-300"
@@ -201,8 +230,55 @@ const BookingWizard = () => {
         </div>
       </div>
 
+      {/* Show trip details summary if we skipped TripSelection */}
+      {!activeSteps.find(step => step.id === "tripSelection") && (
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="font-medium text-lg">Trip Details</h3>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate("/")}
+            >
+              Modify
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Route */}
+            <div>
+              <div className="flex items-center space-x-2 mb-2">
+                <MapPin className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-600">Route</span>
+              </div>
+              <p className="font-medium">{departure} → {destination}</p>
+            </div>
+            
+            {/* Date */}
+            <div>
+              <div className="flex items-center space-x-2 mb-2">
+                <CalendarIcon className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-600">Date</span>
+              </div>
+              <p className="font-medium">
+                {date ? format(date, "EEEE, MMMM d, yyyy") : "No date selected"}
+              </p>
+            </div>
+            
+            {/* Passengers */}
+            <div>
+              <div className="flex items-center space-x-2 mb-2">
+                <Users className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-600">Passengers</span>
+              </div>
+              <p className="font-medium">{passengers} passenger{passengers > 1 ? 's' : ''}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Progress Protection Warning */}
-      {hasSubmittedPassengerData && currentStep !== STEPS.length - 1 && (
+      {hasSubmittedPassengerData && currentStep !== activeSteps.length - 1 && (
         <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-sm text-yellow-800">
             <strong>Booking in Progress:</strong> Your passenger information has been saved. 
@@ -233,13 +309,13 @@ const BookingWizard = () => {
             disabled={isNextDisabled}
             className="flex items-center"
           >
-            {STEPS[currentStep + 1]?.label || "Next"}
+            {activeSteps[currentStep + 1]?.label || "Next"}
             <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </div>
       )}
 
-       {/* Restricted Access Dialog */}
+      {/* Restricted Access Dialog */}
       <AlertDialog open={showRestrictedDialog} onOpenChange={setShowRestrictedDialogue}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -253,6 +329,29 @@ const BookingWizard = () => {
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => setShowRestrictedDialogue(false)}>
               I Understand
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Payment Back Warning Dialog */}
+      <AlertDialog open={showPaymentBackWarning} onOpenChange={setShowPaymentBackWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Going Back Will Reset Your Data</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are currently on the payment page with passenger information already saved. 
+              Going back will erase all your booking data including passenger details, seat selection, 
+              and bus selection. You will need to start the booking process from the beginning.
+              Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowPaymentBackWarning(false)}>
+              Stay on Payment Page
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handlePaymentBackWithReset} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Go Back and Reset Data
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -283,7 +382,5 @@ const BookingWizard = () => {
     </div>
   );
 };
-
-
 
 export default BookingWizard;

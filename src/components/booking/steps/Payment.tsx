@@ -98,6 +98,7 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
         email: values.email,
         amount: amountToPayInKobo,
         bookingId: bookingDraftId,
+        isSplitPayment: paymentMethod === "split",
       })
 
       if (!paymentSuccessful) {

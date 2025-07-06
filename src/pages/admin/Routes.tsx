@@ -175,7 +175,7 @@ const AdminRoutes = () => {
       title: "Payment Type",
       render: (route: any) => (
         <span className={route.paymentType === "Full" ? "text-green-600" : "text-yellow-500"}>
-          {route.paymentType ? `Full` : "Split"}
+          {route.paymentType === "Full" ? "Full" : "Split"}
         </span>
       ),
     },
@@ -244,7 +244,7 @@ const AdminRoutes = () => {
         onOpenChange={setIsCreateModalOpen}
         onSubmit={() => {}}
       >
-        <RouteForm onSubmit={handleCreateRoute} isSubmitting={isSubmitting} />
+        <RouteForm onSubmit={handleCreateRoute} isSubmitting={isSubmitting} onCancel={() => setIsCreateModalOpen(false)} />
       </FormModal>
 
       <FormModal
@@ -259,6 +259,7 @@ const AdminRoutes = () => {
             defaultValues={currentRoute}
             onSubmit={handleEditRoute}
             isSubmitting={isSubmitting}
+            onCancel={() => setIsEditModalOpen(false)}
           />
         )}
       </FormModal>

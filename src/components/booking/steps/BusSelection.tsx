@@ -45,6 +45,8 @@ const BusSelection = ({ onComplete, setStepComplete }: BusSelectionProps) => {
   const [localSelectedBus, setLocalSelectedBus] = useState<string | null>(selectedBus?.id || null);
   const lastCompleteRef = useRef<boolean>();
 
+    console.log("BusSelection mount - selectedBus from store:", selectedBus);
+      console.log("BusSelection mount - localSelectedBus:", localSelectedBus);
   // Format date for API query
   const formattedDate = date ? format(date, "yyyy-MM-dd") : "";
 
@@ -139,12 +141,12 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
 
   // Update step completion status
   useEffect(() => {
-    const isComplete = localSelectedBus !== null;
+    const isComplete = localSelectedBus !== null && selectedBus !== null;
     if (lastCompleteRef.current !== isComplete) {
       setStepComplete("busSelection", isComplete);
       lastCompleteRef.current = isComplete;
     }
-  }, [localSelectedBus, setStepComplete]);
+  }, [localSelectedBus, selectedBus, setStepComplete]);
 
   // Handle selection
   const handleSelectBus = (trip: TripOption) => {

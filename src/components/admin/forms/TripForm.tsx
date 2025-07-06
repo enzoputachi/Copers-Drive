@@ -70,13 +70,14 @@ interface TripFormProps {
     status: "SCHEDULED"|"COMPLETED"|"CANCELED";
   }) => void;
   isSubmitting?: boolean;
+  onCancel: () => void;
 
   /**From API */
   routes: RouteOption[];
   buses: BusOption[];
 }
 
-const TripForm = ({ defaultValues, onSubmit, isSubmitting = false , routes, buses}: TripFormProps) => {
+const TripForm = ({ defaultValues, onSubmit, onCancel, isSubmitting = false , routes, buses}: TripFormProps) => {
   const form = useForm<TripFormValues>({
     resolver: zodResolver(tripSchema),
     defaultValues: {
@@ -134,17 +135,17 @@ const TripForm = ({ defaultValues, onSubmit, isSubmitting = false , routes, buse
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(handleFormSubmit)}
+        className="space-y-4"
+      >
         <FormField
           control={form.control}
           name="routeId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Route</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a route" />
@@ -163,17 +164,14 @@ const TripForm = ({ defaultValues, onSubmit, isSubmitting = false , routes, buse
           )}
         />
 
-          {/*  ——— Bus Select ——— */}
+        {/*  ——— Bus Select ——— */}
         <FormField
           control={form.control}
           name="busId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Bus</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a bus" />
@@ -254,10 +252,7 @@ const TripForm = ({ defaultValues, onSubmit, isSubmitting = false , routes, buse
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
@@ -276,9 +271,19 @@ const TripForm = ({ defaultValues, onSubmit, isSubmitting = false , routes, buse
           )}
         />
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Save Trip"}
-        </Button>
+        <div className="flex justify-between">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            className="border-2"
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save Trip"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
