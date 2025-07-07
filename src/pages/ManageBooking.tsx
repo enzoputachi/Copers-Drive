@@ -94,7 +94,9 @@ const ManageBooking = () => {
           </div>
         </div>
       </main>
-      <Footer />
+      <div className="hidden md:block">
+        <Footer />
+      </div>
     </>
   );
 };
