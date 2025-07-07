@@ -138,7 +138,7 @@ const Hero = () => {
   return (
     <section className="relative">
       {/* Hero Banner */}
-      <div className="relative h-[500px] md:h-[600px] overflow-hidden">
+      <div className="relative h-[700px] md:h-[600px] overflow-hidden">
          {slides.map((slide, index) => (
           <div
             key={index}
@@ -169,10 +169,10 @@ const Hero = () => {
 
       {/* Booking Widget */}
       <div className="container mx-auto px-4 mb-[1.5rem]">
-        <div className="relative -mt-[25rem] md:-mt-[28rem] bg-white/60 backdrop-blur-lg rounded-lg shadow-xl p-6 md:p-8 max-w-4xl mx-auto shadow-2xl drop-shadow-2xl">
+        <div className="relative -mt-[40rem] md:-mt-[28rem] bg-white/60 backdrop-blur-lg rounded-lg p-6 md:p-8 max-w-4xl mx-auto shadow-2xl drop-shadow-2xl">
           <h2 className="text-2xl font-bold mb-6 text-center">Book Your Trip</h2>
           
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="md:space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Departure */}
               <div className="space-y-4">

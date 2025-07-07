@@ -14,9 +14,9 @@ const Index = () => {
       <Navbar />
       <BookingProvider>
         <main>
-          <Hero />
-          {/* <FeaturedRoutes /> */}
+          <Hero />          
           <div className="hidden md:block">
+            <FeaturedRoutes />
             <Features />
             <Testimonials />
             <AppPromo />
