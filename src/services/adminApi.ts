@@ -1,17 +1,12 @@
 import axios from 'axios';
 import { toast } from '@/components/ui/sonner';
-import dotenv from 'dotenv';
-import path from 'path';
-import pathFinder from './pathFinder.js';
-dotenv.config();
-pathFinder();
 // Create an admin axios instance with admin-specific config
 
-console.log("Dotenv:", process.env.APP_URL)
+console.log("Dotenv:", import.meta.env.VITE_APP_URL)
 
 
 const adminApi = axios.create({
-  baseURL: process.env.APP_URL, // 'https://booking-api-tuso.onrender.com',
+  baseURL: import.meta.env.VITE_APP_URL, // 'https://booking-api-tuso.onrender.com',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

@@ -1,10 +1,6 @@
 // src/lib/api.ts
 import axios from 'axios';
 import { toast } from '@/components/ui/sonner';
-import dotenv from 'dotenv';
-import pathFinder from './pathFinder.js';
-dotenv.config();
-pathFinder()
 
 // ----- Interfaces -----
 export interface Route {
@@ -93,7 +89,7 @@ export interface Notification {
 
 // ----- Config & Error Handling -----
 const api = axios.create({
-  baseURL: process.env.APP_URL, // 'https://booking-api-tuso.onrender.com',
+  baseURL: import.meta.env.VITE_APP_URL, // 'https://booking-api-tuso.onrender.com',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 });
