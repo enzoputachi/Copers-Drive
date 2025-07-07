@@ -171,10 +171,10 @@ const AdminRoles = () => {
             </p>
             <ul className="list-disc pl-5 space-y-1 text-sm">
               <li><span className="font-medium">Admin:</span> Full system access</li>
-              <li><span className="font-medium">Manager:</span> Manages operations, trips and bookings</li>
+              {/* <li><span className="font-medium">Manager:</span> Manages operations, trips and bookings</li>
               <li><span className="font-medium">Support:</span> Handles customer inquiries and bookings</li>
               <li><span className="font-medium">Finance:</span> Manages payments and financial aspects</li>
-              <li><span className="font-medium">Driver:</span> Limited access for bus drivers</li>
+              <li><span className="font-medium">Driver:</span> Limited access for bus drivers</li> */}
             </ul>
           </CardContent>
         </Card>
