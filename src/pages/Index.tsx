@@ -1,4 +1,3 @@
-
 import React from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
@@ -17,12 +16,14 @@ const Index = () => {
         <main>
           <Hero />
           {/* <FeaturedRoutes /> */}
-          <Features />
-          <Testimonials />
-          <AppPromo />
+          <div className="hidden md:block">
+            <Features />
+            <Testimonials />
+            <AppPromo />
+            <Footer />
+          </div>
         </main>
       </BookingProvider>
-      <Footer />
     </div>
   );
 };

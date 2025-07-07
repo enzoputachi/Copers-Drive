@@ -21,7 +21,9 @@ const Booking = () => {
           </div>
         </main>
       </BookingProvider>
-      <Footer />
+      <div className="hidden md:block">
+        <Footer />
+      </div>
     </div>
   );
 };

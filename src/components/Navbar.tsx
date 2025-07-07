@@ -39,7 +39,7 @@ const Navbar: React.FC = () => {
               className="text-2xl font-bold text-green-700"
               onClick={handleProtectNav('/')}
             >
-              <img src="/logo.png" className="h-[4rem]" alt="Logo" />
+              <img src="/logo.png" className="h-[2rem] md:h-[4rem]" alt="Logo" />
             </Link>
           </div>
 
@@ -98,19 +98,19 @@ const Navbar: React.FC = () => {
               onClick={handleProtectNav('/')}>
               Home
             </Link>
-             <Link 
+             {/* <Link 
               to="/about" 
               className="block text-gray-900 hover:text-primary font-medium py-2"
               onClick={handleProtectNav('/about')}
             >
               
-            </Link>
-            <Link 
+            </Link> */}
+            {/* <Link 
               to="/booking" 
               className="block text-green-700 hover:text-white hover:bg-green-800 p-3 font-medium py-2"  
               onClick={handleProtectNav('/booking')}>
               Online Booking
-            </Link>
+            </Link> */}
             <Link 
               to="/manage-booking" 
               className="block text-green-700 hover:text-white hover:bg-green-800 p-3 font-medium py-2"  
@@ -123,12 +123,12 @@ const Navbar: React.FC = () => {
               onClick={handleProtectNav('/contact')}>
               Contact Us
             </Link>
-            <Link 
+            {/* <Link 
               to="/admin" 
               className="block text-primary hover:text-primary-dark font-medium py-2"  
               onClick={ handleProtectNav('/admin')}>
               Admin
-            </Link>
+            </Link> */}
           </div>
         )}
       </div>
