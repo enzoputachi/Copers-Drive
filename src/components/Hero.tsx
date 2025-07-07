@@ -9,7 +9,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBookingStore } from "@/stores/bookingStore";
 import { toast } from "@/components/ui/sonner";
@@ -169,8 +168,8 @@ const Hero = () => {
       </div>
 
       {/* Booking Widget */}
-      <div className="container mx-auto px-4">
-        <div className="relative -mt-[25rem] md:-mt-[28rem] bg-white/60 backdrop-blur-lg  rounded-lg shadow-xl p-6 md:p-8 max-w-4xl mx-auto">
+      <div className="container mx-auto px-4 mb-[1.5rem]">
+        <div className="relative -mt-[25rem] md:-mt-[28rem] bg-white/60 backdrop-blur-lg rounded-lg shadow-xl p-6 md:p-8 max-w-4xl mx-auto shadow-2xl drop-shadow-2xl">
           <h2 className="text-2xl font-bold mb-6 text-center">Book Your Trip</h2>
           
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -300,7 +299,7 @@ const Hero = () => {
             
             {/* Submit Button */}
             <div className="pt-[2rem]">
-              <Button type="submit" className="w-full py-6 text-lg ">
+              <Button type="submit" className="w-full py-6 text-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
                 Continue to Booking
               </Button>
             </div>

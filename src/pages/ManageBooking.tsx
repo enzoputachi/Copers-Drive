@@ -16,7 +16,6 @@ const ManageBooking = () => {
       title: "Booking retrieval initiated",
       description: "We're searching for your booking. Please wait...",
     });
-    // In a real implementation, this would call an API to retrieve the booking
     setTimeout(() => {
       toast({
         title: "No booking found",
@@ -33,19 +32,19 @@ const ManageBooking = () => {
         <meta name="description" content="Retrieve, modify or cancel your existing Corpers Drive bookings." />
       </Helmet>
       <Navbar />
-      <main className="bg-gray-100 container mx-auto px-4 py-8 min-h-screen">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Manage Your Booking</h1>
+      <main className="bg-gray-100 container mx-auto px-2 py-4 sm:px-4 sm:py-8 min-h-screen">
+        <div className="max-w-full sm:max-w-3xl mx-auto">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Manage Your Booking</h1>
           
-          <Card className="mb-8">
+          <Card className="mb-4 sm:mb-8">
             <CardHeader>
-              <CardTitle>Retrieve Your Booking</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg sm:text-xl">Retrieve Your Booking</CardTitle>
+              <CardDescription className="text-sm sm:text-base">
                 Enter your booking reference number and the email address used during booking
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 <div>
                   <label htmlFor="bookingReference" className="block text-sm font-medium mb-1">
                     Booking Reference
@@ -54,7 +53,7 @@ const ManageBooking = () => {
                     id="bookingReference"
                     placeholder="e.g. TX12345"
                     required
-                    className="w-full"
+                    className="w-full h-10 sm:h-12"
                   />
                 </div>
                 
@@ -67,28 +66,28 @@ const ManageBooking = () => {
                     type="email"
                     placeholder="Enter your email address"
                     required
-                    className="w-full"
+                    className="w-full h-10 sm:h-12"
                   />
                 </div>
                 
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full h-10 sm:h-12">
                   Retrieve Booking
                 </Button>
               </form>
             </CardContent>
           </Card>
           
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Need Help?</h2>
-            <p className="mb-4">
+          <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Need Help?</h2>
+            <p className="mb-3 sm:mb-4 text-sm sm:text-base">
               If you're having trouble finding your booking, please contact our customer support team:
             </p>
-            <div className="space-y-2">
-              <p>
+            <div className="space-y-1 sm:space-y-2">
+              <p className="text-sm sm:text-base">
                 <span className="font-medium">Phone:</span> coming soon
               </p>
-              <p>
-                <span className="font-medium">Email:</span> scoming soon
+              <p className="text-sm sm:text-base">
+                <span className="font-medium">Email:</span> coming soon
               </p>
             </div>
           </div>

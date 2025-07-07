@@ -29,23 +29,23 @@ const Contact = () => {
         <meta name="description" content="Get in touch with Corpers Drive customer service for any queries or support related to NYSC transport services." />
       </Helmet>
       <Navbar />
-      <main className="container mx-auto px-4 py-8 min-h-screen bg-gray-100">
-        <h1 className="text-3xl font-bold mb-6 text-center">Contact Us</h1>
-        <p className="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+      <main className="container mx-auto px-2 py-4 sm:px-4 sm:py-8 min-h-screen bg-gray-100">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center">Contact Us</h1>
+        <p className="text-center text-gray-600 max-w-2xl mx-auto mb-6 sm:mb-12 text-sm sm:text-base px-2">
           Have questions or need assistance? We're here to help. Reach out to us through any of the channels below or send us a message directly.
         </p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8 max-w-6xl mx-auto">
           {/* Contact Information */}
           <div className="lg:col-span-1">
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-8">
               <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-start space-x-4">
-                    <MapPin className="h-6 w-6 text-primary mt-1" />
+                <CardContent className="pt-4 sm:pt-6">
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-primary mt-1 flex-shrink-0" />
                     <div>
-                      <h3 className="font-semibold mb-2">Head Office</h3>
-                      <address className="not-italic text-gray-600">
+                      <h3 className="font-semibold mb-2 text-sm sm:text-base">Head Office</h3>
+                      <address className="not-italic text-gray-600 text-sm sm:text-base">
                         23 Olowu Street<br />
                         Ikeja, Lagos<br />
                         Nigeria
@@ -56,40 +56,38 @@ const Contact = () => {
               </Card>
               
               <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-start space-x-4">
-                    <Phone className="h-6 w-6 text-primary mt-1" />
+                <CardContent className="pt-4 sm:pt-6">
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-primary mt-1 flex-shrink-0" />
                     <div>
-                      <h3 className="font-semibold mb-2">Phone</h3>
-                      <p className="text-gray-600"></p>
-                      <p className="text-gray-600"></p>
+                      <h3 className="font-semibold mb-2 text-sm sm:text-base">Phone</h3>
+                      <p className="text-gray-600 text-sm sm:text-base">Coming soon</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
               
               <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-start space-x-4">
-                    <Mail className="h-6 w-6 text-primary mt-1" />
+                <CardContent className="pt-4 sm:pt-6">
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <Mail className="h-5 w-5 sm:h-6 sm:w-6 text-primary mt-1 flex-shrink-0" />
                     <div>
-                      <h3 className="font-semibold mb-2">Email</h3>
-                      <p className="text-gray-600"></p>
-                      <p className="text-gray-600"></p>
+                      <h3 className="font-semibold mb-2 text-sm sm:text-base">Email</h3>
+                      <p className="text-gray-600 text-sm sm:text-base">Coming soon</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
               
               <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-start space-x-4">
-                    <Clock className="h-6 w-6 text-primary mt-1" />
+                <CardContent className="pt-4 sm:pt-6">
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-primary mt-1 flex-shrink-0" />
                     <div>
-                      <h3 className="font-semibold mb-2">Business Hours</h3>
-                      <p className="text-gray-600">Monday - Friday: 8am - 8pm</p>
-                      <p className="text-gray-600">Saturday: 9am - 6pm</p>
-                      <p className="text-gray-600">Sunday: 10am - 4pm</p>
+                      <h3 className="font-semibold mb-2 text-sm sm:text-base">Business Hours</h3>
+                      <p className="text-gray-600 text-sm sm:text-base">Monday - Friday: 8am - 8pm</p>
+                      <p className="text-gray-600 text-sm sm:text-base">Saturday: 9am - 6pm</p>
+                      <p className="text-gray-600 text-sm sm:text-base">Sunday: 10am - 4pm</p>
                     </div>
                   </div>
                 </CardContent>
@@ -100,10 +98,10 @@ const Contact = () => {
           {/* Contact Form */}
           <div className="lg:col-span-2">
             <Card>
-              <CardContent className="pt-6">
-                <h2 className="text-xl font-semibold mb-4">Send us a Message</h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent className="pt-4 sm:pt-6">
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Send us a Message</h2>
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium mb-1">
                         Full Name
@@ -112,6 +110,7 @@ const Contact = () => {
                         id="name"
                         placeholder="Enter your full name"
                         required
+                        className="h-10 sm:h-12"
                       />
                     </div>
                     <div>
@@ -123,6 +122,7 @@ const Contact = () => {
                         type="email"
                         placeholder="Enter your email address"
                         required
+                        className="h-10 sm:h-12"
                       />
                     </div>
                   </div>
@@ -134,6 +134,7 @@ const Contact = () => {
                     <Input
                       id="phone"
                       placeholder="Enter your phone number"
+                      className="h-10 sm:h-12"
                     />
                   </div>
                   
@@ -145,6 +146,7 @@ const Contact = () => {
                       id="subject"
                       placeholder="What is your message about?"
                       required
+                      className="h-10 sm:h-12"
                     />
                   </div>
                   
@@ -155,12 +157,13 @@ const Contact = () => {
                     <Textarea
                       id="message"
                       placeholder="Type your message here..."
-                      rows={5}
+                      rows={4}
+                      className="sm:min-h-[120px]"
                       required
                     />
                   </div>
                   
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full h-10 sm:h-12">
                     Send Message
                   </Button>
                 </form>
