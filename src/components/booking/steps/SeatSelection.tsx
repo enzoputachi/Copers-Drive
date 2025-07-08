@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/sonner";
 import { useValidateTripDetails } from "@/hooks/useApi";
-import SeatContainerProps from "@/components/seatContainer";
 import SeatIcon from "@/components/ui/seat";
 import BusSeatLayout from "@/components/seatLayout";
 
@@ -38,12 +37,42 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
     error,
   } = useValidateTripDetails(Number(selectedBus?.id));
 
-  console.log("SEATS:", apiSeats)
 
-  // Local selected seats
-  const [localSelected, setLocalSelected] = useState<SelectedSeat[]>(selectedSeats || []);
+  // Local selected seats - Initialize as empty array to avoid stale state
+  const [localSelected, setLocalSelected] = useState<SelectedSeat[]>([]);
   const lastStepCompleteRef = useRef<boolean>();
-  
+  const previousBusIdRef = useRef<string | null>(null);
+ console.log("PpreviousBusIdRef:", previousBusIdRef);
+ 
+  // Reset seat selection when bus changes
+  useEffect(() => {
+    const currentBusId = selectedBus?.id;
+    
+    // If bus has changed, clear all seat selections
+    if (currentBusId && previousBusIdRef.current !== null && previousBusIdRef.current !== currentBusId) {
+      console.log("Bus changed, clearing seat selections");
+      setLocalSelected([]);
+      setSelectedSeats([]);
+    }
+    
+    previousBusIdRef.current = currentBusId || null;
+  }, [selectedBus?.id, setSelectedSeats]);
+
+  useEffect(() => {
+    if (!selectedBus) {
+      console.log("No bus selected, clearing seat selections");
+      setLocalSelected([]);
+      setSelectedSeats([]);
+    }
+  }, [selectedBus, setSelectedSeats]);
+
+  // Initialize local selected seats from store only on first load
+  // useEffect(() => {
+  //   // Only set from store if we have the same bus and no local selections yet
+  //   if (selectedSeats.length > 0 && localSelected.length === 0 && selectedBus?.id === previousBusIdRef.current) {
+  //     setLocalSelected(selectedSeats);
+  //   }
+  // }, [selectedSeats, localSelected.length, selectedBus?.id]);
 
   // Sync selection and step
   useEffect(() => {
@@ -57,7 +86,6 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
     if (selectedChanged) {
       setSelectedSeats(localSelected);
       console.log("Selected seat:", localSelected);
-      
     }
 
     if (lastStepCompleteRef.current !== isComplete) {
@@ -65,6 +93,8 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
       setStepComplete('seatSelection', isComplete);
     }
   }, [localSelected, passengers, selectedSeats, setSelectedSeats, setStepComplete]);
+
+
 
   // Generate mock grid
   const generateMock = () => {
@@ -110,15 +140,14 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
 
   const seats = USE_MOCK_DATA ? generateMock() : generateFromApi();
 
-  // NEW: Map seats for BusSeatLayout (14-seat bus format)
+  // Map seats for BusSeatLayout (14-seat bus format)
+  // Fixed mapSeatsForBusLayout function
   const mapSeatsForBusLayout = () => {
-    // Create 14 seats for the sprinter bus layout
     const busType = getBusType();
     const maxSeats = busType === "sprinter" ? 14 : busType === "coaster44" ? 44 : 51;
     
     if (USE_MOCK_DATA) {
-      // Use mock data - convert first 14 seats
-      const flatSeats = seats.flat().slice(0, 14);
+      const flatSeats = seats.flat().slice(0, maxSeats);
       return flatSeats.map((seat, index) => ({
         id: index + 1,
         seatNo: (index + 1).toString(),
@@ -127,33 +156,51 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
         status: seat.isAvailable ? 'AVAILABLE' : 'OCCUPIED'
       }));
     } else {
-      // Use API data - convert first 14 seats
       const sortedSeats = [...apiSeats]
         .sort((a, b) => Number(a.seatNo) - Number(b.seatNo))
         .slice(0, maxSeats);
       
       return sortedSeats.map((seat, index) => ({
-        id: seat.id,
-        seatNo: (index + 1).toString(), // Convert to sequential 1-14
+        id: index + 1,                    // Use index + 1 instead of seat.id
+        seatNo: (index + 1).toString(),
         label: (index + 1).toString(),
         isAvailable: seat.status === 'AVAILABLE',
-        status: seat.status
+        status: seat.status,
+        originalId: seat.id               // Keep original ID for reference if needed
       }));
     }
   };
 
-  // Handle seat click
+  // Handle seat click with improved logic
   const handleSeatClick = (label: string, id: number, available: boolean) => {
-    if (!available) return;
+    if (!available) {
+      toast.error("This seat is not available");
+      return;
+    }
+    
     setLocalSelected(prev => {
       const exists = prev.find(s => s.seatId === id);
-      if (exists) return prev.filter(s => s.seatId !== id);
-      if (prev.length >= passengers) {
-        toast.error(`You can only select ${passengers} seat${passengers > 1 ? 's' : ''}`);
-        return prev;
+      
+      if (exists) {
+        // Remove the seat
+        console.log("Removing seat:", label);
+        return prev.filter(s => s.seatId !== id);
+      } else {
+        // Add the seat if under limit
+        if (prev.length >= passengers) {
+          toast.error(`You can only select ${passengers} seat${passengers > 1 ? 's' : ''}`);
+          return prev;
+        }
+        console.log("Adding seat:", label);
+        return [...prev, { seatId: id, seatNo: label }];
       }
-      return [...prev, { seatId: id, seatNo: label }];
     });
+  };
+
+  // Clear all selections
+  const clearAllSelections = () => {
+    setLocalSelected([]);
+    setSelectedSeats([]);
   };
 
   // "Continue" outside dialog opens it when exactly right number selected
@@ -171,7 +218,7 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
 
   if (!USE_MOCK_DATA && error) {
     return <p className="text-red-600">Error loading seats. Please try again.</p>;
-  };
+  }
 
   const getBusType = () => {
     const totalSeats = apiSeats.length;
@@ -182,7 +229,6 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
     } else if (totalSeats <= 51) {
       return "coaster51"
     }
-
     return "coaster44"
   }
 
@@ -192,7 +238,19 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
       {!selectedBus && <p className="text-amber-600 mb-4">Please select a bus first.</p>}
 
       <div className="mb-6">
-        <h3 className="font-medium mb-2">Selected Seats</h3>
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="font-medium">Selected Seats</h3>
+          {localSelected.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearAllSelections}
+              className="text-red-600 hover:text-red-700"
+            >
+              Clear All
+            </Button>
+          )}
+        </div>
         {localSelected.length ? (
           <div className="flex flex-wrap gap-2">
             {localSelected.map(({ seatId, seatNo }) => (
@@ -210,16 +268,13 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
         Please select <strong>{passengers}</strong> seat{passengers > 1 && 's'}. You have selected <strong>{localSelected.length}</strong>.
       </p>
 
-      {/* Show "Change Seats" once full selection is made */}
-      {(
-        <Button
-          variant="outline"
-          className="w-full mb-4"
-          onClick={() => setDialogOpen(true)}
-        >
-          {localSelected.length ? "Change Seats" : "Select Seats"}
-        </Button>
-      )}
+      <Button
+        variant="outline"
+        className="w-full mb-4"
+        onClick={() => setDialogOpen(true)}
+      >
+        {localSelected.length ? "Change Seats" : "Select Seats"}
+      </Button>
 
       <Button
         onClick={handleContinue}
@@ -230,26 +285,18 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
       </Button>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-[480px]  max-h-[85vh] w-full bg-gray-50 p-4 border rounded-xl">
+        <DialogContent className="max-w-[480px] max-h-[85vh] w-full bg-gray-50 p-4 border rounded-xl">
           <DialogHeader>
             <DialogTitle>Select Your Seats</DialogTitle>
           </DialogHeader>
           <div className="overflow-y-auto max-h-[70vh] mt-4 pb-4 scrollbar-minimal">
-
-            {/* Driver section */}
-            {/* <div className="flex justify-center mb-4">
-              <div className="bg-gray-200 h-8 w-32 rounded-t-3xl flex items-center justify-center text-sm">
-                DRIVER
-              </div>
-            </div> */}
 
             {/* Legend */}
             <div className="mb-6 flex justify-center space-x-4">
               <Legend />
             </div>
 
-            {/* Seat map with proper alignment */}
-            {/* NEW: Use BusSeatLayout instead of the old grid */}
+            {/* Seat map */}
             <div className="seat-map mx-auto">
               <BusSeatLayout
                 busType={getBusType()}

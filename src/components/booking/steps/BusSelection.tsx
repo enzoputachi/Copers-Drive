@@ -5,13 +5,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/sonner";
 import { useSearchTripsByRoute } from "@/hooks/useApi";
 import { format, parseISO, differenceInMinutes } from 'date-fns';
-// import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
 import { Bus, Star, Crown, CalendarIcon } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-
-
 
 interface BusSelectionProps {
   onComplete: () => void;
@@ -42,11 +39,18 @@ const BusSelection = ({ onComplete, setStepComplete }: BusSelectionProps) => {
     setSelectedBus,
     selectedBus,
   } = useBookingStore();
-  const [localSelectedBus, setLocalSelectedBus] = useState<string | null>(selectedBus?.id || null);
+  
+  // Initialize with empty state to avoid stale selections
+  const [localSelectedBus, setLocalSelectedBus] = useState<string | null>(null);
   const lastCompleteRef = useRef<boolean>();
+  
+  // Track route changes to clear selections
+  const previousRouteRef = useRef<string | null>(null);
+  const previousDateRef = useRef<Date | null>(null);
 
-    console.log("BusSelection mount - selectedBus from store:", selectedBus);
-      console.log("BusSelection mount - localSelectedBus:", localSelectedBus);
+  console.log("BusSelection mount - selectedBus from store:", selectedBus);
+  console.log("BusSelection mount - localSelectedBus:", localSelectedBus);
+
   // Format date for API query
   const formattedDate = date ? format(date, "yyyy-MM-dd") : "";
 
@@ -57,39 +61,68 @@ const BusSelection = ({ onComplete, setStepComplete }: BusSelectionProps) => {
     date: formattedDate,
   });
 
-  console.log("apiTripsRaw:", apiTripsRaw, "payload:", origin, destination, formattedDate );
+  console.log("apiTripsRaw:", apiTripsRaw, "payload:", departure, destination, formattedDate);
 
+  // Clear selections when route or date changes
+  useEffect(() => {
+    const currentRoute = `${departure}-${destination}`;
+    const currentDate = date;
+    
+    // Check if route changed
+    if (previousRouteRef.current && previousRouteRef.current !== currentRoute) {
+      console.log("Route changed, clearing bus selection");
+      setLocalSelectedBus(null);
+      setSelectedBus(null);
+    }
+    
+    // Check if date changed
+    if (previousDateRef.current && previousDateRef.current !== currentDate) {
+      console.log("Date changed, clearing bus selection");
+      setLocalSelectedBus(null);
+      setSelectedBus(null);
+    }
+    
+    previousRouteRef.current = currentRoute;
+    previousDateRef.current = currentDate;
+  }, [departure, destination, date, setSelectedBus]);
 
+  // Initialize local state from store only if it matches current route/date
+  useEffect(() => {
+    const currentRoute = `${departure}-${destination}`;
+    
+    // Only restore selection if we have the same route and no local selection yet
+    if (selectedBus?.id && 
+        !localSelectedBus && 
+        previousRouteRef.current === currentRoute &&
+        previousDateRef.current === date) {
+      setLocalSelectedBus(selectedBus.id);
+    }
+  }, [selectedBus?.id, localSelectedBus, departure, destination, date]);
 
-  // 2) Normalize into your UI shape
-const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
-  const dep = parseISO(trip.departTime);
-  const arr = parseISO(trip.arriveTime);
-  const minutes = differenceInMinutes(arr, dep);
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
+  // Normalize API data into UI shape
+  const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
+    const dep = parseISO(trip.departTime);
+    const arr = parseISO(trip.arriveTime);
+    const minutes = differenceInMinutes(arr, dep);
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
 
-  const availableSeats = Array.isArray(trip.seats)
-    ? trip.seats.filter(seat => !seat.isBooked).length
-    : undefined;
+    const availableSeats = Array.isArray(trip.seats)
+      ? trip.seats.filter(seat => !seat.isBooked).length
+      : undefined;
 
-  return {
-    id: String(trip.id),
-    departureTime: format(dep, 'hh:mm a'),
-    arrivalTime: format(arr, 'hh:mm a'),
-    duration: `${hours}h ${mins}m`,
-    price: trip.price,
-    busType: trip.bus?.busType,
-    availableSeats,
-    busName: trip.bus?.plateNo,
-    amenities: trip.bus?.amenities || [],
-  };
-});
-
-  // Extract trip list from API response
-  // const apiTrips: TripOption[] = Array.isArray(apiResponse)
-  //   ? apiResponse
-  //   : apiResponse?.data || [];
+    return {
+      id: String(trip.id),
+      departureTime: format(dep, 'hh:mm a'),
+      arrivalTime: format(arr, 'hh:mm a'),
+      duration: `${hours}h ${mins}m`,
+      price: trip.price,
+      busType: trip.bus?.busType,
+      availableSeats,
+      busName: trip.bus?.plateNo,
+      amenities: trip.bus?.amenities || [],
+    };
+  });
 
   // Mock data for offline/dev
   const mockTrips: TripOption[] = [
@@ -154,7 +187,7 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
     setSelectedBus(trip as any);
   };
 
-   // Handle date change
+  // Handle date change
   const handleDateSelect = (newDate: Date | undefined) => {
     if (newDate) {
       setDate(newDate);
@@ -164,6 +197,11 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
     }
   };
 
+  // Clear selection
+  const clearSelection = () => {
+    setLocalSelectedBus(null);
+    setSelectedBus(null);
+  };
 
   // Continue handler
   const handleContinue = () => {
@@ -200,21 +238,17 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
     );
   }
 
-  // Function to get bus image based on type (not implemented yet)
+  // Function to get bus image based on type
   const getBusImage = (busType?: string) => {
     switch (busType) {
       case "Sprinter":
-        // return "/images/bus-sprinter.jpg";
         return <Bus className="h-6 w-6 text-gray-500" />;
       case "Coach":
-        // return "/images/bus-executive.jpg";
         return <Bus className="h-6 w-6 text-gray-500" />;
       case "Mini Bus":
-        // return "/images/bus-vip.jpg";
         return <Star className="h-6 w-6 text-gray-500" />;
       case "Standard":
       default:
-        // return "/images/bus-default.jpg";
         return <Bus className="h-6 w-6 text-gray-500" />;
     } 
   }
@@ -226,10 +260,8 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
         <h3 className="font-medium text-lg">
           {departure} to {destination}
         </h3>
-        {/* <p className="text-gray-600">
-          {date ? format(date, "EEEE, MMMM d, yyyy") : "Date not selected"}
-        </p> */}
-         <span className="text-gray-600 pr-4">Travel Date:</span>
+        <div className="flex items-center gap-4 mt-2">
+          <span className="text-gray-600">Travel Date:</span>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -254,6 +286,17 @@ const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
               />
             </PopoverContent>
           </Popover>
+          {localSelectedBus && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearSelection}
+              className="text-red-600 hover:text-red-700"
+            >
+              Clear Selection
+            </Button>
+          )}
+        </div>
       </div>
 
       {trips.length === 0 ? (

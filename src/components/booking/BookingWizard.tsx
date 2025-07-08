@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useBookingStore } from "@/stores/bookingStore";
-import TripSelection from "./steps/TripSelection";
 import BusSelection from "./steps/BusSelection";
 import SeatSelection from "./steps/SeatSelection";
 import PassengerInfo from "./steps/PassengerInfo";
@@ -21,9 +20,8 @@ import { AlertDialogFooter, AlertDialogHeader } from "../ui/alert-dialog";
 import { useNavigationGuard } from '@/hooks/useNavigationGuard';
 import { format } from 'date-fns';
 
-// Define all possible steps
-const ALL_STEPS = [
-  { id: "tripSelection", label: "Trip Details" },
+// Define steps without TripSelection since Hero handles it
+const BOOKING_STEPS = [
   { id: "busSelection", label: "Select Bus" },
   { id: "seatSelection", label: "Choose Seats" },
   { id: "passengerInfo", label: "Passenger Details" },
@@ -37,7 +35,6 @@ const BookingWizard = () => {
   const [showRestrictedDialog, setShowRestrictedDialogue] = useState(false);
   const [showNavigationWarning, setShowNavigationWarning] = useState(false);
   const [showPaymentBackWarning, setShowPaymentBackWarning] = useState(false);
-  const [activeSteps, setActiveSteps] = useState(ALL_STEPS);
 
   const { 
     departure, 
@@ -52,52 +49,47 @@ const BookingWizard = () => {
     setCurrentStep,
   } = useBookingStore();
 
-  // Determine which steps to show based on whether user came from Hero
+  // Initialize and validate that we have required data from Hero
   useEffect(() => {
-    const hasHeroData = departure && destination && date;
+    // Check if we have required data from Hero
+    const hasRequiredData = departure && destination && date;
     
-    if (hasHeroData) {
-      // Skip TripSelection - start from BusSelection
-      const stepsWithoutTripSelection = ALL_STEPS.filter(step => step.id !== "tripSelection");
-      setActiveSteps(stepsWithoutTripSelection);
-      
-      // Mark trip selection as completed since we have the data
-      setIsCompleted(prev => ({ ...prev, tripSelection: true }));
-      
-      // Set createdAt if not already set
-      if (!createdAt) {
-        setCreatedAt(new Date().toISOString());
-      }
-      
-      // Reset current step to 0 (which will be busSelection now)
-      if (currentStep === 0) {
-        setCurrentStep(0);
-      }
-    } else {
-      // Show all steps including TripSelection
-      setActiveSteps(ALL_STEPS);
+    if (!hasRequiredData) {
+      // If we don't have the required data, redirect back to home
+      navigate("/");
+      return;
     }
-  }, [departure, destination, date, createdAt, setCreatedAt, currentStep, setCurrentStep]);
+    
+    // Set createdAt if not already set
+    if (!createdAt) {
+      setCreatedAt(new Date().toISOString());
+    }
+    
+    // Ensure currentStep is valid for our step array
+    if (currentStep >= BOOKING_STEPS.length) {
+      setCurrentStep(0);
+    }
+  }, [departure, destination, date, createdAt, setCreatedAt, currentStep, setCurrentStep, navigate]);
 
   // Prevent navigation when passenger data has been submitted
   useNavigationGuard({
-    shouldPrevent: hasSubmittedPassengerData && currentStep < activeSteps.length - 1,
+    shouldPrevent: hasSubmittedPassengerData && currentStep < BOOKING_STEPS.length - 1,
     message: "Your booking is in progress. Leaving now will lose your progress.",
     onNavigationAttempt: () => setShowNavigationWarning(true)
   });
 
   const goToNextStep = () => {
-    if (currentStep < activeSteps.length - 1) {
+    if (currentStep < BOOKING_STEPS.length - 1) {
       // Mark the current step as completed
-      setIsCompleted(prev => ({ ...prev, [activeSteps[currentStep].id]: true }));
+      setIsCompleted(prev => ({ ...prev, [BOOKING_STEPS[currentStep].id]: true }));
       setCurrentStep(currentStep + 1);
       window.scrollTo(0, 0);
     }
   };
 
   const goToPrevStep = () => {
-    const paymentStepIndex = activeSteps.findIndex(step => step.id === "payment");
-    const restrictedStepIndex = activeSteps.findIndex(step => step.id === "payment");
+    const paymentStepIndex = BOOKING_STEPS.findIndex(step => step.id === "payment");
+    const restrictedStepIndex = BOOKING_STEPS.findIndex(step => step.id === "payment");
     const targetStep = currentStep - 1;
 
     // Special handling for payment page - show warning instead of blocking
@@ -122,8 +114,8 @@ const BookingWizard = () => {
   };
 
   const handleStepClick = (stepIndex: number) => {
-    const paymentStepIndex = activeSteps.findIndex(step => step.id === "payment");
-    const restrictedStepIndex = activeSteps.findIndex(step => step.id === "payment");
+    const paymentStepIndex = BOOKING_STEPS.findIndex(step => step.id === "payment");
+    const restrictedStepIndex = BOOKING_STEPS.findIndex(step => step.id === "payment");
     
     // Special handling for payment page - show warning instead of blocking
     if (hasSubmittedPassengerData && currentStep === paymentStepIndex && stepIndex < paymentStepIndex) {
@@ -166,11 +158,9 @@ const BookingWizard = () => {
 
   // Render the current step component
   const renderStep = () => {
-    const currentStepId = activeSteps[currentStep]?.id;
+    const currentStepId = BOOKING_STEPS[currentStep]?.id;
     
     switch (currentStepId) {
-      case "tripSelection":
-        return <TripSelection onComplete={() => goToNextStep()} setStepComplete={setStepComplete} />;
       case "busSelection":
         return <BusSelection onComplete={() => goToNextStep()} setStepComplete={setStepComplete} />;
       case "seatSelection":
@@ -187,10 +177,15 @@ const BookingWizard = () => {
   };
 
   // Determine if the next button should be disabled
-  const isNextDisabled = !isCompleted[activeSteps[currentStep]?.id];
+  const isNextDisabled = !isCompleted[BOOKING_STEPS[currentStep]?.id];
   
   // Hide navigation buttons on confirmation step
-  const showNavButtons = currentStep !== activeSteps.length - 1;
+  const showNavButtons = currentStep !== BOOKING_STEPS.length - 1;
+
+  // Don't render if we don't have required data
+  if (!departure || !destination || !date) {
+    return null;
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -198,11 +193,11 @@ const BookingWizard = () => {
       {/* Progress Steps */}
       <div className="mb-8 overflow-x-auto">
         <div className="flex min-w-max">
-          {activeSteps.map((step, index) => (
+          {BOOKING_STEPS.map((step, index) => (
             <div key={step.id} className="flex items-center">
               <div 
                 className={`flex flex-col items-center ${index <= currentStep ? "text-primary" : "text-gray-400"}
-                ${hasSubmittedPassengerData && index < activeSteps.findIndex(s => s.id === "payment") ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
+                ${hasSubmittedPassengerData && index < BOOKING_STEPS.findIndex(s => s.id === "payment") ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
                 `}
                 onClick={() => handleStepClick(index)}
               >
@@ -218,7 +213,7 @@ const BookingWizard = () => {
                 </div>
                 <span className="text-xs font-medium">{step.label}</span>
               </div>
-              {index < activeSteps.length - 1 && (
+              {index < BOOKING_STEPS.length - 1 && (
                 <div 
                   className={`w-12 h-0.5 mx-1 ${
                     index < currentStep ? "bg-primary" : "bg-gray-300"
@@ -230,55 +225,53 @@ const BookingWizard = () => {
         </div>
       </div>
 
-      {/* Show trip details summary if we skipped TripSelection */}
-      {!activeSteps.find(step => step.id === "tripSelection") && (
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="font-medium text-lg">Trip Details</h3>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate("/")}
-            >
-              Modify
-            </Button>
+      {/* Trip Details Summary - Always show since we removed TripSelection */}
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="font-medium text-lg">Trip Details</h3>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate("/")}
+          >
+            Modify
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Route */}
+          <div>
+            <div className="flex items-center space-x-2 mb-2">
+              <MapPin className="h-4 w-4 text-gray-500" />
+              <span className="text-sm text-gray-600">Route</span>
+            </div>
+            <p className="font-medium">{departure} → {destination}</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Route */}
-            <div>
-              <div className="flex items-center space-x-2 mb-2">
-                <MapPin className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-600">Route</span>
-              </div>
-              <p className="font-medium">{departure} → {destination}</p>
+          {/* Date */}
+          <div>
+            <div className="flex items-center space-x-2 mb-2">
+              <CalendarIcon className="h-4 w-4 text-gray-500" />
+              <span className="text-sm text-gray-600">Date</span>
             </div>
-            
-            {/* Date */}
-            <div>
-              <div className="flex items-center space-x-2 mb-2">
-                <CalendarIcon className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-600">Date</span>
-              </div>
-              <p className="font-medium">
-                {date ? format(date, "EEEE, MMMM d, yyyy") : "No date selected"}
-              </p>
+            <p className="font-medium">
+              {date ? format(date, "EEEE, MMMM d, yyyy") : "No date selected"}
+            </p>
+          </div>
+          
+          {/* Passengers */}
+          <div>
+            <div className="flex items-center space-x-2 mb-2">
+              <Users className="h-4 w-4 text-gray-500" />
+              <span className="text-sm text-gray-600">Passengers</span>
             </div>
-            
-            {/* Passengers */}
-            <div>
-              <div className="flex items-center space-x-2 mb-2">
-                <Users className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-600">Passengers</span>
-              </div>
-              <p className="font-medium">{passengers} passenger{passengers > 1 ? 's' : ''}</p>
-            </div>
+            <p className="font-medium">{passengers} passenger{passengers > 1 ? 's' : ''}</p>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Progress Protection Warning */}
-      {hasSubmittedPassengerData && currentStep !== activeSteps.length - 1 && (
+      {hasSubmittedPassengerData && currentStep !== BOOKING_STEPS.length - 1 && (
         <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-sm text-yellow-800">
             <strong>Booking in Progress:</strong> Your passenger information has been saved. 
@@ -309,7 +302,7 @@ const BookingWizard = () => {
             disabled={isNextDisabled}
             className="flex items-center"
           >
-            {activeSteps[currentStep + 1]?.label || "Next"}
+            {BOOKING_STEPS[currentStep + 1]?.label || "Next"}
             <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </div>
@@ -321,7 +314,7 @@ const BookingWizard = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Changes Not Allowed</AlertDialogTitle>
             <AlertDialogDescription>
-              You cannot go back and modify your trip details, bus selection, or seat selection 
+              You cannot go back and modify your bus selection or seat selection 
               after submitting passenger information. This ensures your booking remains secure 
               and prevents conflicts with seat reservations.
             </AlertDialogDescription>
