@@ -44,13 +44,13 @@ const About = () => {
     {
       title: "Mission",
       icon: Target,
-      color: "black",
+      color: "green",
       content: "Providing world-class and reliable transportation for NYSC corps members. We bridge logistic gaps and strengthen trustworthy networks, ensuring safe journeys while contributing to Nigeria's youth empowerment."
     },
     {
       title: "Vision",
       icon: Eye,
-      color: "black",
+      color: "blue",
       content: "To become Nigeria's leading indigenous brand in transportation and logistics. We envision setting new industry standards while expanding across the nation with innovation, reliability, and excellence."
     },
     {
@@ -130,19 +130,19 @@ const About = () => {
                       {/* Front Face - Only Heading */}
                       <div className="absolute inset-0 w-full h-full backface-hidden">
                         <Card 
-                          className="relative bg-no-repeat md:bg-cover text-center h-full flex flex-col justify-center border-0 shadow-lg group-hover:shadow-xl transition-all duration-300"
-                          style={{ 
-                            backgroundImage: `url('/bg.jpg')`,
-                            backgroundPosition: 'center',
-                            backgroundSize: 'contain',
-                          }}
+                          className="bg-no-repeat md:bg-cover text-center h-full flex flex-col justify-center border-0 shadow-lg group-hover:shadow-xl transition-all duration-300"
+                          // style={{ 
+                          //   backgroundImage: `url('/bg.jpg')`,
+                          //   backgroundPosition: 'center',
+                          //   backgroundSize: 'contain',
+                          // }}
                         >
-                           <div className="absolute inset-0 bg-black/40 z-0"></div>
-                          <CardHeader className="flex-1 flex flex-col justify-end z-10">
-                            {/* <div className={`bg-${item.color}-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-${item.color}-200 transition-colors`}>
+                          {/* <div className="absolute inset-0 bg-black/10 z-0"></div> */}
+                          <CardHeader className="flex-1 flex flex-col justify-center">
+                            <div className={`bg-${item.color}-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-${item.color}-200 transition-colors`}>
                               <IconComponent className={`h-8 w-8 text-${item.color}-600 mx-auto`} />
-                            </div> */}
-                            <CardTitle className={`text-3xl text-${item.color}-800 z-10`}>{item.title}</CardTitle>
+                            </div>
+                            <CardTitle className={`text-3xl text-${item.color}-800`}>{item.title}</CardTitle>
                             <p className="text-sm text-gray-500 mt-4 italic">Hover to learn more</p>
                           </CardHeader>
                         </Card>
