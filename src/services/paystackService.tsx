@@ -32,7 +32,7 @@ export const payWithPaystack = async ({
 
     return new Promise((resolve) => {
       paystack.newTransaction({
-        key: "pk_test_73e068069c3d3111592867a42c07d8009aafe82f",
+        key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
         email,
         amount,
         reference: paystackRef,

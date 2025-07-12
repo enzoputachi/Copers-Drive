@@ -53,7 +53,7 @@ const Navbar: React.FC = () => {
               Home
             </Link>
             <Link to="/about" className="text-gray-900 hover:text-primary font-medium">
-              
+              About
             </Link>
             {/* <Link to="/booking" className="text-green-700 hover:text-white hover:bg-green-800 p-3 font-medium" >
               Online Booking
@@ -98,13 +98,13 @@ const Navbar: React.FC = () => {
               onClick={handleProtectNav('/')}>
               Home
             </Link>
-             {/* <Link 
+             <Link 
               to="/about" 
               className="block text-gray-900 hover:text-primary font-medium py-2"
               onClick={handleProtectNav('/about')}
             >
-              
-            </Link> */}
+              About
+            </Link>
             {/* <Link 
               to="/booking" 
               className="block text-green-700 hover:text-white hover:bg-green-800 p-3 font-medium py-2"  

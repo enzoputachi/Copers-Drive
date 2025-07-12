@@ -161,9 +161,9 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
         .slice(0, maxSeats);
       
       return sortedSeats.map((seat, index) => ({
-        id: index + 1,                    // Use index + 1 instead of seat.id
-        seatNo: (index + 1).toString(),
-        label: (index + 1).toString(),
+        id: seat.id,                    // Use index + 1 instead of seat.id
+        seatNo: seat.seatNo,
+        label: seat.seatNo,
         isAvailable: seat.status === 'AVAILABLE',
         status: seat.status,
         originalId: seat.id               // Keep original ID for reference if needed

@@ -28,6 +28,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute";
 import { AdminAuthProvider } from "./contexts/AdminAuthContext";
 import About from './pages/About';
+import EnvTest from './EnvTest.tsx';
 
 // Define window.gtag to avoid TypeScript errors
 declare global {
@@ -89,6 +90,7 @@ const App = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/manage-booking" element={<ManageBooking />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="test-env" element={<EnvTest />} />
                 {/* Admin Login Route (Public) */}
                 <Route path="/admin/login" element={<AdminLogin />} />
                 {/* Protected Admin Routes */}
@@ -109,6 +111,7 @@ const App = () => {
                   <Route path="logs" element={<AdminLogs />} />
                   <Route path="settings" element={<AdminSettings />} />
                   <Route path="roles" element={<AdminRoles />} />
+                  
                 </Route>
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

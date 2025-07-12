@@ -66,8 +66,8 @@ type BookingState = {
   bookingToken?: string;
 
   // Route
-  paymetType: string,
-  setPaymentType: (paymetType: string )=> void,
+  paymentType: string,
+  setPaymentType: (paymentType: string )=> void,
 
   // Trip basics
   departure: string;
@@ -134,12 +134,12 @@ const useBookingStore = create<BookingState>()(
       selectedSeats: [],
       passengerInfo: null,
       paymentInfo: null,
-      // paymetType: null,
+      // paymentType: null,
       hasSubmittedPassengerData: false,
 
       // Routes
-      paymetType: null,
-      setPaymentType: (paymetType: string ) => set({ paymetType: paymetType}),
+      paymentType: "",
+      setPaymentType: (paymentType: string ) => set({ paymentType: paymentType}),
 
       // Current step in the booking process
       currentStep: 0,
@@ -177,7 +177,7 @@ const useBookingStore = create<BookingState>()(
         bookingToken: "",
         bookingDraftId: undefined,
         createdAt: undefined,
-        paymetType: null,
+        paymentType: null,
       }),
     }),
     {

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminApiService, User, Route, Bus, Trip, Booking, Payment, DashboardStats, SystemSettingsResponse, Notification } from '@/services/adminApi';
+import { adminApiService, User, Route, Bus, Trip, Booking, Payment, DashboardStats, SystemSettingsResponse, Notification } from '../services/adminApi';
 import { toast } from '@/components/ui/sonner';
 
 // Query keys
@@ -353,3 +353,30 @@ export const useUpdateSettings = () => {
     },
   });
 };
+
+export const useCreateSettings = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (settings: Omit<SystemSettingsResponse, 'id'>) =>
+      adminApiService.createSettings(settings),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.settings });
+      toast.success('Settings created successfully');
+    },
+  });
+};
+
+
+export const useDeleteSettings = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => adminApiService.deleteSettings(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.settings });
+      toast.success('Settings deleted successfully');
+    },
+  });
+};
+

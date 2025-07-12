@@ -94,34 +94,35 @@ const BusSeatLayout = ({
     );
   }
 
-  // Helper function to get seat availability from props
-  const getSeatAvailability = (seatNo: string | number) => {
-    const seatNoStr = seatNo.toString();
-    const seat = availableSeats.find(s => 
-      s.seatNo === seatNoStr || 
-      s.label === seatNoStr || 
-      s.id.toString() === seatNoStr
-    );
-    return seat ? seat.isAvailable : false;
-  };
+ 
 
   // Helper function to get seat ID from props
   const getSeatId = (seatNo: string | number) => {
     const seatNoStr = seatNo.toString();
     const seat = availableSeats.find(s => 
       s.seatNo === seatNoStr || 
-      s.label === seatNoStr || 
-      s.id.toString() === seatNoStr
+      s.label === seatNoStr
     );
-    return seat ? seat.id : typeof seatNo === 'number' ? seatNo : parseInt(seatNoStr);
+    // return seat ? seat.id : typeof seatNo === 'number' ? seatNo : parseInt(seatNoStr);
+    return seat?.id ?? NaN;
+  };
+
+   // Helper function to get seat availability from props
+  const getSeatAvailability = (seatNo: string | number) => {
+    const seatNoStr = seatNo.toString();
+    const seat = availableSeats.find(s =>  
+      s.id === getSeatId(seatNo)
+    );
+    return seat ? seat.isAvailable : false;
   };
 
   // Helper function to check if seat is selected
   const isSeatSelected = (seatNo: string | number) => {
     const seatNoStr = seatNo.toString();
+    const targetId = getSeatId(seatNo); 
     return selectedSeats.some(seat => 
-      seat.seatNo === seatNoStr || 
-      seat.seatId.toString() === seatNoStr
+      // seat.seatNo === seatNoStr |
+      seat.seatId === targetId
     );
   };
 

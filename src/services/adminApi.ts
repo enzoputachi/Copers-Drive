@@ -319,8 +319,15 @@ export const adminApiService = {
     adminApi.post<Notification>('/notifications', notificationData),
 
   // Settings
+  // Settings
   getSettings: () => adminApi.get<SystemSettings>('/companySettings'),
-  updateSettings: (id, settings: Partial<SystemSettingsResponse>) => adminApi.patch<SystemSettingsResponse>(`/companySettings/${id}`, settings),
+  createSettings: (settings: Omit<SystemSettingsResponse, 'id' | 'createdAt' | 'updatedAt'>) =>
+    adminApi.post<SystemSettings>('/companySettings', settings),
+  updateSettings: (id: number, settings: Partial<SystemSettingsResponse>) =>
+    adminApi.patch<SystemSettingsResponse>(`/companySettings/${id}`, settings),
+  deleteSettings: (id: number) =>
+    adminApi.delete(`/companySettings/${id}`),
+
 };
 
 

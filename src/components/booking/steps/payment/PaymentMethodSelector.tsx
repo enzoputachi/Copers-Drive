@@ -15,7 +15,9 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   onPaymentMethodChange,
 }) => {
 
-  const { paymetType } = useBookingStore();
+  const { paymentType } = useBookingStore();
+  console.log("payment selecter:", paymentType);
+  
 
   return (
     <div className="mb-6">
@@ -45,7 +47,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           </div>
         </div>
 
-        { paymetType === "Split" && (
+        { paymentType.toLowerCase() === "split" && (
           <div
           className={`flex items-start space-x-3 p-4 border rounded-lg transition-all ${
             paymentMethod === "split" ? "border-primary bg-primary/5" : "hover:bg-gray-50"

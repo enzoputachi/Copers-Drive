@@ -12,16 +12,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { useSettings, useUpdateSettings } from "@/hooks/useAdminQueries";
+import { 
+  useSettings, 
+  useUpdateSettings, 
+  useCreateSettings, 
+  useDeleteSettings 
+} from "@/hooks/useAdminQueries";
 import { SystemSettings, SystemSettingsResponse } from "@/services/adminApi";
 import { toast } from "sonner";
+import { Trash2, AlertTriangle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // —————————————————————————————————————————————
 // 1) Mock defaults for SystemSettings
 // —————————————————————————————————————————————
-const initialMockSettings: SystemSettings = {
+const initialMockSettings: Omit<SystemSettings, 'id' | 'createdAt' | 'updatedAt'> = {
   // Prisma schema fields
-  id: 1,
   companyName: "Corpers Drive Nigeria",
   supportEmail: "contact@corpersdrive.ng",
   supportPhone: "+234 801 234 5678",
@@ -32,8 +48,6 @@ const initialMockSettings: SystemSettings = {
   instagramUrl: null,
   linkedinUrl: null,
   address: "No 1, Jibowu, Yaba, Lagos State",
-  createdAt: new Date("2025-06-28T00:00:00Z"),
-  updatedAt: new Date("2025-06-28T00:00:00Z"),
 
   // Your original system settings fields
   contactEmail: "contact@corpersdrive.ng",
@@ -51,7 +65,6 @@ const initialMockSettings: SystemSettings = {
   reminderHours: 24,
 };
 
-
 // Toggle to force‐use mock data instead of hitting the API
 const USE_MOCK_SETTINGS = false;
 
@@ -59,25 +72,43 @@ const AdminSettings = () => {
   // —————————————————————————————————————————————
   // 2) Hooks and mutations
   // —————————————————————————————————————————————
-  const { data: apiSettings, isLoading, error } = useSettings();
-  const updateSettingsMutation = useUpdateSettings();;
-  const [settingsData, setSettingsData] = useState<Partial<SystemSettings> | null>({});
-  const [originalSettings, setOriginalSettings] = useState<Partial<SystemSettings> | null>(null)
-  // const apiSettings = apiSettingsRaw.data;
-  console.log('Api settings', apiSettings)
+  const { data: apiSettings, isLoading, error, refetch } = useSettings();
+  const updateSettingsMutation = useUpdateSettings();
+  const createSettingsMutation = useCreateSettings();
+  const deleteSettingsMutation = useDeleteSettings();
+  
+  const [settingsData, setSettingsData] = useState<Partial<SystemSettings> | null>(null);
+  const [originalSettings, setOriginalSettings] = useState<Partial<SystemSettings> | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+
+  // Determine if we're in create mode (no existing settings)
+  const isCreateMode = !apiSettings?.id && !USE_MOCK_SETTINGS;
+
+  console.log('Api settings', apiSettings);
+  console.log('Is create mode', isCreateMode);
 
   // —————————————————————————————————————————————
-  // 3) Sync API → form state (or load mock)
+  // 3) Sync API → form state (or load mock) - FIXED
   // —————————————————————————————————————————————
   useEffect(() => {
     if (USE_MOCK_SETTINGS) {
       // Always load mock defaults
-      setSettingsData(initialMockSettings);
-      setOriginalSettings(apiSettings);
-    } else if (!isLoading && apiSettings) {
-      // Copy API fields into form state
-      setSettingsData(apiSettings);
-      setOriginalSettings(apiSettings);
+      const mockData = { ...initialMockSettings, id: 1 };
+      setSettingsData(mockData);
+      setOriginalSettings(mockData);
+      setIsCreating(false);
+    } else if (!isLoading) {
+      if (apiSettings?.id) {
+        // Existing settings - load them
+        setSettingsData(apiSettings);
+        setOriginalSettings(apiSettings);
+        setIsCreating(false);
+      } else {
+        // No settings exist - prepare for creation
+        setSettingsData(initialMockSettings);
+        setOriginalSettings(null);
+        setIsCreating(true);
+      }
     }
   }, [apiSettings, isLoading]);
 
@@ -94,8 +125,20 @@ const AdminSettings = () => {
 
   if (!USE_MOCK_SETTINGS && error) {
     return (
+      <div className="flex items-center justify-center h-96 flex-col space-y-4">
+        <p className="text-red-600">Failed to load settings.</p>
+        <Button onClick={() => refetch()}>
+          Try Again
+        </Button>
+      </div>
+    );
+  }
+
+  // Don't render until we have settings data
+  if (!settingsData) {
+    return (
       <div className="flex items-center justify-center h-96">
-        <p className="text-red-600">Failed to load settings. Please try again.</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -107,29 +150,65 @@ const AdminSettings = () => {
     field: keyof SystemSettings,
     value: SystemSettings[keyof SystemSettings]
   ) => {
-    setSettingsData((prev) => ({ ...prev, [field]: value }));
+    setSettingsData((prev) => prev ? { ...prev, [field]: value } : null);
   };
 
   // —————————————————————————————————————————————
-  // 6) Handle Save per section
-  //    • If mock: simulate a delay + toast
-  //    • Otherwise: call the mutation with full settingsData
+  // 6) Handle Create Settings
   // —————————————————————————————————————————————
-  const handleSave = (overrides: Partial<SystemSettings>) => {
+  const handleCreate = (overrides: Partial<SystemSettings>) => {
+    const payload = {
+      ...initialMockSettings,
+      ...settingsData,
+      ...overrides,
+    };
+
+    if (!window.confirm("Are you sure you want to create these settings?")) {
+      return;
+    }
+
+    if (USE_MOCK_SETTINGS) {
+      toast.success("Settings created (mock).");
+      const newData = { ...payload, id: 1 };
+      setSettingsData(newData);
+      setOriginalSettings(newData);
+      setIsCreating(false);
+      return;
+    }
+
+    createSettingsMutation.mutate(payload, {
+      onSuccess: (data) => {
+        toast.success("Settings created successfully.");
+        setSettingsData(data);
+        setOriginalSettings(data);
+        setIsCreating(false);
+        // Refetch to ensure we have the latest data
+        refetch();
+      },
+      onError: (error) => {
+        console.error("Create error:", error);
+        toast.error("Failed to create settings.");
+      },
+    });
+  };
+
+  // —————————————————————————————————————————————
+  // 7) Handle Update Settings
+  // —————————————————————————————————————————————
+  const handleUpdate = (overrides: Partial<SystemSettings>) => {
+    if (!settingsData) return;
+    
     const payload: SystemSettings = {
       ...(settingsData as SystemSettings),
       ...overrides,
     };
 
-    // console.log("PAylod settings:", payload);
-    
-
     const hasChanges = Object.keys(overrides).some(
       (key) => payload[key] !== originalSettings?.[key]
-    )
+    );
 
     if (!hasChanges) {
-      toast.info("No changes detected")
+      toast.info("No changes detected");
       return;
     }
 
@@ -138,24 +217,84 @@ const AdminSettings = () => {
     }
 
     if (USE_MOCK_SETTINGS) {
-      toast.success("Settings saved (mock).");
+      toast.success("Settings updated (mock).");
       setSettingsData(payload);
+      setOriginalSettings(payload);
       return;
     }
 
-    updateSettingsMutation.mutate( { id: payload.id, settings: payload as Partial<SystemSettingsResponse> }, {
+    updateSettingsMutation.mutate(
+      { id: payload.id, settings: payload as Partial<SystemSettingsResponse> },
+      {
+        onSuccess: (data) => {
+          toast.success("Settings updated successfully.");
+          setSettingsData(data);
+          setOriginalSettings(data);
+          // Refetch to ensure we have the latest data
+          refetch();
+        },
+        onError: (error) => {
+          console.error("Update error:", error);
+          toast.error("Failed to update settings.");
+        },
+      }
+    );
+  };
+
+  // —————————————————————————————————————————————
+  // 8) Handle Delete Settings
+  // —————————————————————————————————————————————
+  const handleDelete = () => {
+    if (!settingsData?.id) {
+      toast.error("Cannot delete: No settings found");
+      return;
+    }
+
+    if (USE_MOCK_SETTINGS) {
+      toast.success("Settings deleted (mock).");
+      setSettingsData(initialMockSettings);
+      setOriginalSettings(null);
+      setIsCreating(true);
+      return;
+    }
+
+    deleteSettingsMutation.mutate(settingsData.id, {
       onSuccess: () => {
-        toast.success("Settings updated successfully.");
-        setSettingsData(payload);
+        toast.success("Settings deleted successfully.");
+        setSettingsData(initialMockSettings);
+        setOriginalSettings(null);
+        setIsCreating(true);
+        // Refetch to ensure we have the latest data
+        refetch();
       },
-      onError: () => {
-        toast.error("Failed to update settings.");
+      onError: (error) => {
+        console.error("Delete error:", error);
+        toast.error("Failed to delete settings.");
       },
     });
   };
 
   // —————————————————————————————————————————————
-  // 7) Render Tabs + Forms
+  // 9) Main save handler that decides between create/update
+  // —————————————————————————————————————————————
+  const handleSave = (overrides: Partial<SystemSettings>) => {
+    if (isCreating || !settingsData?.id) {
+      handleCreate(overrides);
+    } else {
+      handleUpdate(overrides);
+    }
+  };
+
+  // —————————————————————————————————————————————
+  // 10) Check if any mutation is pending
+  // —————————————————————————————————————————————
+  const isMutationPending = 
+    updateSettingsMutation.isPending || 
+    createSettingsMutation.isPending || 
+    deleteSettingsMutation.isPending;
+
+  // —————————————————————————————————————————————
+  // 11) Render Tabs + Forms
   // —————————————————————————————————————————————
   return (
     <>
@@ -163,28 +302,70 @@ const AdminSettings = () => {
         <title>Settings | Corpers Drive Admin</title>
       </Helmet>
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+          <p className="text-sm text-muted-foreground">
+            {isCreating ? "Create new system settings" : "Manage system settings"}
+          </p>
+        </div>
+        
+        {/* Delete Button - Only show if not creating and settings exist */}
+        {!isCreating && settingsData?.id && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Settings
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                  Delete Settings
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete all system settings? This action cannot be undone.
+                  You will need to recreate the settings from scratch.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  disabled={isMutationPending}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {deleteSettingsMutation.isPending ? "Deleting..." : "Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
 
       <Tabs defaultValue="general" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="links">Links</TabsTrigger>
-          {/* <TabsTrigger value="booking">Booking</TabsTrigger> */}
-          {/* <TabsTrigger value="payment">Payment</TabsTrigger> */}
-          {/* <TabsTrigger value="notifications">Notifications</TabsTrigger> */}
+          {/* <TabsTrigger value="booking">Booking</TabsTrigger>
+          <TabsTrigger value="payment">Payment</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger> */}
         </TabsList>
 
         {/* —————————————————————————————————————————————
             General Settings Tab
            ————————————————————————————————————————————— */}
-        <TabsContent value="general" >
+        <TabsContent value="general">
           <Card>
             <CardHeader>
               <CardTitle>General Settings</CardTitle>
               <CardDescription>
-                Manage system-wide settings for the Corpers Drive platform
+                {isCreating 
+                  ? "Create system-wide settings for the Corpers Drive platform"
+                  : "Manage system-wide settings for the Corpers Drive platform"
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -192,7 +373,7 @@ const AdminSettings = () => {
                 <Label htmlFor="company-name">Company Name</Label>
                 <Input
                   id="company-name"
-                  value={settingsData.companyName || ""}
+                  value={settingsData?.companyName || ""}
                   onChange={(e) =>
                     updateField("companyName", e.target.value)
                   }
@@ -204,7 +385,7 @@ const AdminSettings = () => {
                 <Input
                   id="contact-email"
                   type="email"
-                  value={settingsData.contactEmail || ""}
+                  value={settingsData?.contactEmail || ""}
                   onChange={(e) =>
                     updateField("contactEmail", e.target.value)
                   }
@@ -215,35 +396,23 @@ const AdminSettings = () => {
                 <Label htmlFor="contact-phone">Contact Phone</Label>
                 <Input
                   id="contact-phone"
-                  value={settingsData.contactPhone || ""}
+                  value={settingsData?.contactPhone || ""}
                   onChange={(e) =>
                     updateField("contactPhone", e.target.value)
                   }
                 />
               </div>
-{/* 
-              <div className="space-y-2">
-                <Label htmlFor="website-url">Website Url</Label>
-                <Input
-                  id="website-url"
-                  value={settingsData.websiteUrl || ""}
-                  onChange={(e) =>
-                    updateField("websiteUrl", e.target.value)
-                  }
-                />
-              </div> */}
 
               <div className="space-y-2">
                 <Label htmlFor="address">Address</Label>
                 <Input
                   id="address"
-                  value={settingsData.address || ""}
+                  value={settingsData?.address || ""}
                   onChange={(e) =>
                     updateField("address", e.target.value)
                   }
                 />
               </div>
-
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
@@ -255,7 +424,7 @@ const AdminSettings = () => {
                 </div>
                 <Switch
                   id="maintenance-mode"
-                  checked={!!settingsData.maintenanceMode}
+                  checked={!!settingsData?.maintenanceMode}
                   onCheckedChange={(checked) =>
                     updateField("maintenanceMode", checked)
                   }
@@ -265,40 +434,44 @@ const AdminSettings = () => {
               <Button
                 onClick={() =>
                   handleSave({
-                    companyName: settingsData.companyName,
-                    contactEmail: settingsData.contactEmail,
-                    contactPhone: settingsData.contactPhone,
-                    maintenanceMode: settingsData.maintenanceMode,
-                    address: settingsData.address,
+                    companyName: settingsData?.companyName,
+                    contactEmail: settingsData?.contactEmail,
+                    contactPhone: settingsData?.contactPhone,
+                    maintenanceMode: settingsData?.maintenanceMode,
+                    address: settingsData?.address,
                   })
                 }
-                disabled={updateSettingsMutation.isPending}
+                disabled={isMutationPending}
+                className="w-full sm:w-auto"
               >
-                {updateSettingsMutation.isPending
-                  ? "Saving..."
-                  : "Save Changes"}
+                {isMutationPending
+                  ? (isCreating ? "Creating..." : "Saving...")
+                  : (isCreating ? "Create Settings" : "Save Changes")}
               </Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-         {/* —————————————————————————————————————————————
+        {/* —————————————————————————————————————————————
             Links Settings Tab
            ————————————————————————————————————————————— */}
-          <TabsContent value="links">
+        <TabsContent value="links">
           <Card>
             <CardHeader>
               <CardTitle>Links Settings</CardTitle>
               <CardDescription>
-                Manage Link settings for the Corpers Drive platform
+                {isCreating 
+                  ? "Set up link settings for the Corpers Drive platform"
+                  : "Manage link settings for the Corpers Drive platform"
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="website-url">Website Url</Label>
+                <Label htmlFor="website-url">Website URL</Label>
                 <Input
                   id="website-url"
-                  value={settingsData.websiteUrl || ""}
+                  value={settingsData?.websiteUrl || ""}
                   onChange={(e) =>
                     updateField("websiteUrl", e.target.value)
                   }
@@ -306,10 +479,10 @@ const AdminSettings = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="facebook-url">Facebook Url</Label>
+                <Label htmlFor="facebook-url">Facebook URL</Label>
                 <Input
                   id="facebook-url"
-                  value={settingsData.facebookUrl || ""}
+                  value={settingsData?.facebookUrl || ""}
                   onChange={(e) =>
                     updateField("facebookUrl", e.target.value)
                   }
@@ -317,10 +490,10 @@ const AdminSettings = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="twitter-url">Twitter Url</Label>
+                <Label htmlFor="twitter-url">Twitter URL</Label>
                 <Input
                   id="twitter-url"
-                  value={settingsData.twitterUrl || ""}
+                  value={settingsData?.twitterUrl || ""}
                   onChange={(e) =>
                     updateField("twitterUrl", e.target.value)
                   }
@@ -328,10 +501,10 @@ const AdminSettings = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="whatsapp-url">WhatsApp Url</Label>
+                <Label htmlFor="whatsapp-url">WhatsApp URL</Label>
                 <Input
                   id="whatsapp-url"
-                  value={settingsData.whatsAppUrl || ""}
+                  value={settingsData?.whatsAppUrl || ""}
                   onChange={(e) =>
                     updateField("whatsAppUrl", e.target.value)
                   }
@@ -339,10 +512,10 @@ const AdminSettings = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="instagram-url">Instagram Url</Label>
+                <Label htmlFor="instagram-url">Instagram URL</Label>
                 <Input
                   id="instagram-url"
-                  value={settingsData.instagramUrl || ""}
+                  value={settingsData?.instagramUrl || ""}
                   onChange={(e) =>
                     updateField("instagramUrl", e.target.value)
                   }
@@ -350,10 +523,10 @@ const AdminSettings = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="linkedin-url">Linkedin Url</Label>
+                <Label htmlFor="linkedin-url">LinkedIn URL</Label>
                 <Input
                   id="linkedin-url"
-                  value={settingsData.linkedinUrl || ""}
+                  value={settingsData?.linkedinUrl || ""}
                   onChange={(e) =>
                     updateField("linkedinUrl", e.target.value)
                   }
@@ -363,19 +536,20 @@ const AdminSettings = () => {
               <Button
                 onClick={() =>
                   handleSave({
-                    websiteUrl: settingsData.websiteUrl,
-                    facebookUrl: settingsData.facebookUrl,
-                    twitterUrl: settingsData.twitterUrl,
-                    whatsAppUrl: settingsData.whatsAppUrl,
-                    instagramUrl: settingsData.instagramUrl,
-                    linkedinUrl: settingsData.linkedinUrl,
+                    websiteUrl: settingsData?.websiteUrl,
+                    facebookUrl: settingsData?.facebookUrl,
+                    twitterUrl: settingsData?.twitterUrl,
+                    whatsAppUrl: settingsData?.whatsAppUrl,
+                    instagramUrl: settingsData?.instagramUrl,
+                    linkedinUrl: settingsData?.linkedinUrl,
                   })
                 }
-                disabled={updateSettingsMutation.isPending}
+                disabled={isMutationPending}
+                className="w-full sm:w-auto"
               >
-                {updateSettingsMutation.isPending
-                  ? "Saving..."
-                  : "Save Changes"}
+                {isMutationPending
+                  ? (isCreating ? "Creating..." : "Saving...")
+                  : (isCreating ? "Create Settings" : "Save Changes")}
               </Button>
             </CardContent>
           </Card>
@@ -400,7 +574,7 @@ const AdminSettings = () => {
                 <Input
                   id="seat-hold-minutes"
                   type="number"
-                  value={settingsData.seatHoldMinutes ?? 0}
+                  value={settingsData?.seatHoldMinutes ?? 0}
                   onChange={(e) =>
                     updateField("seatHoldMinutes", parseInt(e.target.value))
                   }
@@ -417,7 +591,7 @@ const AdminSettings = () => {
                 <Input
                   id="max-seats"
                   type="number"
-                  value={settingsData.maxSeatsPerBooking ?? 0}
+                  value={settingsData?.maxSeatsPerBooking ?? 0}
                   onChange={(e) =>
                     updateField(
                       "maxSeatsPerBooking",
@@ -436,7 +610,7 @@ const AdminSettings = () => {
                 <Input
                   id="booking-deadline"
                   type="number"
-                  value={settingsData.bookingDeadlineHours ?? 0}
+                  value={settingsData?.bookingDeadlineHours ?? 0}
                   onChange={(e) =>
                     updateField(
                       "bookingDeadlineHours",
@@ -451,16 +625,17 @@ const AdminSettings = () => {
               <Button
                 onClick={() =>
                   handleSave({
-                    seatHoldMinutes: settingsData.seatHoldMinutes,
-                    maxSeatsPerBooking: settingsData.maxSeatsPerBooking,
-                    bookingDeadlineHours: settingsData.bookingDeadlineHours,
+                    seatHoldMinutes: settingsData?.seatHoldMinutes,
+                    maxSeatsPerBooking: settingsData?.maxSeatsPerBooking,
+                    bookingDeadlineHours: settingsData?.bookingDeadlineHours,
                   })
                 }
-                disabled={updateSettingsMutation.isPending}
+                disabled={isMutationPending}
+                className="w-full sm:w-auto"
               >
-                {updateSettingsMutation.isPending
-                  ? "Saving..."
-                  : "Save Changes"}
+                {isMutationPending
+                  ? (isCreating ? "Creating..." : "Saving...")
+                  : (isCreating ? "Create Settings" : "Save Changes")}
               </Button>
             </CardContent>
           </Card>
@@ -487,7 +662,7 @@ const AdminSettings = () => {
                 </div>
                 <Switch
                   id="paystack-enabled"
-                  checked={!!settingsData.paystackEnabled}
+                  checked={!!settingsData?.paystackEnabled}
                   onCheckedChange={(checked) =>
                     updateField("paystackEnabled", checked)
                   }
@@ -498,7 +673,7 @@ const AdminSettings = () => {
                 <Label htmlFor="paystack-key">Paystack Public Key</Label>
                 <Input
                   id="paystack-key"
-                  value={settingsData.paystackPublicKey || ""}
+                  value={settingsData?.paystackPublicKey || ""}
                   onChange={(e) =>
                     updateField("paystackPublicKey", e.target.value)
                   }
@@ -516,7 +691,7 @@ const AdminSettings = () => {
                 </div>
                 <Switch
                   id="bank-transfer-enabled"
-                  checked={!!settingsData.bankTransferEnabled}
+                  checked={!!settingsData?.bankTransferEnabled}
                   onCheckedChange={(checked) =>
                     updateField("bankTransferEnabled", checked)
                   }
@@ -526,16 +701,17 @@ const AdminSettings = () => {
               <Button
                 onClick={() =>
                   handleSave({
-                    paystackEnabled: settingsData.paystackEnabled,
-                    paystackPublicKey: settingsData.paystackPublicKey,
-                    bankTransferEnabled: settingsData.bankTransferEnabled,
+                    paystackEnabled: settingsData?.paystackEnabled,
+                    paystackPublicKey: settingsData?.paystackPublicKey,
+                    bankTransferEnabled: settingsData?.bankTransferEnabled,
                   })
                 }
-                disabled={updateSettingsMutation.isPending}
+                disabled={isMutationPending}
+                className="w-full sm:w-auto"
               >
-                {updateSettingsMutation.isPending
-                  ? "Saving..."
-                  : "Save Changes"}
+                {isMutationPending
+                  ? (isCreating ? "Creating..." : "Saving...")
+                  : (isCreating ? "Create Settings" : "Save Changes")}
               </Button>
             </CardContent>
           </Card>
@@ -564,7 +740,7 @@ const AdminSettings = () => {
                 </div>
                 <Switch
                   id="booking-emails"
-                  checked={!!settingsData.bookingEmailsEnabled}
+                  checked={!!settingsData?.bookingEmailsEnabled}
                   onCheckedChange={(checked) =>
                     updateField("bookingEmailsEnabled", checked)
                   }
@@ -582,7 +758,7 @@ const AdminSettings = () => {
                 </div>
                 <Switch
                   id="payment-emails"
-                  checked={!!settingsData.paymentEmailsEnabled}
+                  checked={!!settingsData?.paymentEmailsEnabled}
                   onCheckedChange={(checked) =>
                     updateField("paymentEmailsEnabled", checked)
                   }
@@ -598,7 +774,7 @@ const AdminSettings = () => {
                 </div>
                 <Switch
                   id="reminder-sms"
-                  checked={!!settingsData.reminderSmsEnabled}
+                  checked={!!settingsData?.reminderSmsEnabled}
                   onCheckedChange={(checked) =>
                     updateField("reminderSmsEnabled", checked)
                   }
@@ -612,7 +788,7 @@ const AdminSettings = () => {
                 <Input
                   id="reminder-hours"
                   type="number"
-                  value={settingsData.reminderHours ?? 0}
+                  value={settingsData?.reminderHours ?? 0}
                   onChange={(e) =>
                     updateField("reminderHours", parseInt(e.target.value))
                   }
@@ -624,17 +800,18 @@ const AdminSettings = () => {
               <Button
                 onClick={() =>
                   handleSave({
-                    bookingEmailsEnabled: settingsData.bookingEmailsEnabled,
-                    paymentEmailsEnabled: settingsData.paymentEmailsEnabled,
-                    reminderSmsEnabled: settingsData.reminderSmsEnabled,
-                    reminderHours: settingsData.reminderHours,
+                    bookingEmailsEnabled: settingsData?.bookingEmailsEnabled,
+                    paymentEmailsEnabled: settingsData?.paymentEmailsEnabled,
+                    reminderSmsEnabled: settingsData?.reminderSmsEnabled,
+                    reminderHours: settingsData?.reminderHours,
                   })
                 }
-                disabled={updateSettingsMutation.isPending}
+                disabled={isMutationPending}
+                className="w-full sm:w-auto"
               >
-                {updateSettingsMutation.isPending
-                  ? "Saving..."
-                  : "Save Changes"}
+                {isMutationPending
+                  ? (isCreating ? "Creating..." : "Saving...")
+                  : (isCreating ? "Create Settings" : "Save Changes")}
               </Button>
             </CardContent>
           </Card>

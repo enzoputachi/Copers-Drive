@@ -116,27 +116,27 @@ const AdminDashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <SummaryCard
           title="Total Users"
-          value={stats?.totalBookings?.toLocaleString() || "0"}
+          value={stats?.data?.totalBookings?.toLocaleString() || "0"}
           icon={<Users className="h-6 w-6" />}
-          change={{ value: stats?.bookingGrowth || 0, positive: (stats?.bookingGrowth || 0) > 0 }}
+          change={{ value: stats?.data?.bookingGrowth || 0, positive: (stats?.data?.bookingGrowth || 0) > 0 }}
         />
         <SummaryCard
           title="Active Trips"
-          value={stats?.activeTrips?.toString() || "0"}
+          value={stats?.data?.activeTrips?.toString() || "0"}
           icon={<Calendar className="h-6 w-6" />}
-          change={{ value: stats?.tripGrowth || 0, positive: (stats?.tripGrowth || 0) > 0 }}
+          change={{ value: stats?.data?.tripGrowth || 0, positive: (stats?.data?.tripGrowth || 0) > 0 }}
         />
         <SummaryCard
           title="Pending Bookings"
-          value={stats?.pendingBookings?.toString() || "0"}
+          value={stats?.data?.pendingBookings?.toString() || "0"}
           icon={<Bus className="h-6 w-6" />}
-          change={{ value: stats?.bookingGrowth || 0, positive: (stats?.bookingGrowth || 0) > 0 }}
+          change={{ value: stats?.data?.bookingGrowth || 0, positive: (stats?.data?.bookingGrowth || 0) > 0 }}
         />
         <SummaryCard
           title="Revenue (This Month)"
-          value={`₦${stats?.monthlyRevenue?.toLocaleString() || "0"}`}
+          value={`₦${stats?.data?.monthlyRevenue?.toLocaleString() || "0"}`}
           icon={<CreditCard className="h-6 w-6" />}
-          change={{ value: stats?.revenueGrowth || 0, positive: (stats?.revenueGrowth || 0) > 0 }}
+          change={{ value: stats?.data?.revenueGrowth || 0, positive: (stats?.data?.revenueGrowth || 0) > 0 }}
         />
       </div>
 

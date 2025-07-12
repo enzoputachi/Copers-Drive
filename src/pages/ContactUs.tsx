@@ -8,9 +8,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { useSettings } from "@/hooks/useApi";
 
 const Contact = () => {
   const { toast } = useToast();
+   const { data, isLoading, error } = useSettings()
+  const settings = data?.data?.data;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,9 +49,7 @@ const Contact = () => {
                     <div>
                       <h3 className="font-semibold mb-2 text-sm sm:text-base">Head Office</h3>
                       <address className="not-italic text-gray-600 text-sm sm:text-base">
-                        23 Olowu Street<br />
-                        Ikeja, Lagos<br />
-                        Nigeria
+                         {`${settings?.address}`}
                       </address>
                     </div>
                   </div>
@@ -61,7 +62,7 @@ const Contact = () => {
                     <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-primary mt-1 flex-shrink-0" />
                     <div>
                       <h3 className="font-semibold mb-2 text-sm sm:text-base">Phone</h3>
-                      <p className="text-gray-600 text-sm sm:text-base">Coming soon</p>
+                      <p className="text-gray-600 text-sm sm:text-base"> {`${settings?.contactPhone}`}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -73,7 +74,7 @@ const Contact = () => {
                     <Mail className="h-5 w-5 sm:h-6 sm:w-6 text-primary mt-1 flex-shrink-0" />
                     <div>
                       <h3 className="font-semibold mb-2 text-sm sm:text-base">Email</h3>
-                      <p className="text-gray-600 text-sm sm:text-base">Coming soon</p>
+                      <p className="text-gray-600 text-sm sm:text-base"> {`${settings?.contactEmail}`}</p>
                     </div>
                   </div>
                 </CardContent>

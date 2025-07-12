@@ -7,6 +7,7 @@ import Testimonials from "@/components/Testimonials";
 import AppPromo from "@/components/AppPromo";
 import Footer from "@/components/Footer";
 import { BookingProvider } from "@/stores/bookingStore";
+import NeuraDetails from "@/components/AboutCard1";
 
 const Index = () => {
   return (
@@ -18,8 +19,10 @@ const Index = () => {
           <div className="hidden md:block">
             <FeaturedRoutes />
             <Features />
+            {/* < NeuraDetails /> */}
             <Testimonials />
-            <AppPromo />
+            {/* <AppPromo /> */}
+           
             <Footer />
           </div>
         </main>

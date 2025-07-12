@@ -36,8 +36,9 @@ const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const navigate = useNavigate();
   const { data: routes, isLoading, error } = useListRoutes();
+  const [filteredDestinations, setFilteredDestinations] = useState<string[]>([])
   const routesArrays = routes?.data?.data || [];
-  console.log('Routes:', routesArrays, 'Loading:', isLoading, 'Error:', error);
+  // console.log('Routes:', routesArrays, 'Loading:', isLoading, 'Error:', error);
 
     
   const { 
@@ -74,6 +75,10 @@ const Hero = () => {
   // }, [storeDate, setValue]);
 
   const selectedDate = watch("date");
+  const origin = watch("departure")
+
+  // extract unique origin
+  const uniqueOrigins = [...new Set(routesArrays.map(route => route.origin))] as string[];
 
   const slides = [
     {
@@ -91,6 +96,8 @@ const Hero = () => {
   ];
 
   const paymentTypes = routesArrays.map(item => item.paymentType)
+  // setPaymentType(paymentTypes)
+
 
   
 
@@ -99,8 +106,6 @@ const Hero = () => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
-
-    console.log( "Payment:", paymentTypes);
     
     return () => clearInterval(interval);
   }, []);
@@ -113,6 +118,21 @@ const Hero = () => {
     setBookingDate(data.date);
     setPassengers(data.passengers);
     setSeatClass(data.seatClass);
+    
+      const matchedRoute = routesArrays.find(
+        (route) =>
+          route.origin === data.departure &&
+          route.destination === data.destination
+      );
+
+      if (matchedRoute?.paymentType) {
+        // Normalize and store as lowercase string
+        const paymentType = matchedRoute.paymentType;
+        setPaymentType(paymentType);
+        console.log("Real:", paymentType)
+      } else {
+        setPaymentType("Full"); // fallback default
+      }
     
     toast.success("Redirecting to booking wizard...");
     navigate("/booking");
@@ -168,8 +188,8 @@ const Hero = () => {
       </div>
 
       {/* Booking Widget */}
-      <div className="container mx-auto px-4 mb-[1.5rem]">
-        <div className="relative -mt-[40rem] md:-mt-[28rem] bg-white/60 backdrop-blur-lg rounded-lg p-6 md:p-8 max-w-4xl mx-auto shadow-2xl drop-shadow-2xl">
+      <div className="container mx-auto px-6 mb-[1.5rem]">
+        <div className="relative -mt-[40rem] md:-mt-[30rem] bg-white/60 backdrop-blur-lg rounded-lg p-6 md:p-8 max-w-4xl mx-auto shadow-2xl drop-shadow-2xl">
           <h2 className="text-2xl font-bold mb-6 text-center">Book Your Trip</h2>
           
           <form onSubmit={handleSubmit(onSubmit)} className="md:space-y-6">
@@ -181,12 +201,23 @@ const Hero = () => {
                   id="departure"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-space-y-4 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   {...register("departure", {
-                    onChange: (e) => setDeparture(e.target.value)
+                    onChange: (e) => {
+                      const selectedOrigin = e.target.value;
+                      setDeparture(selectedOrigin);
+
+                      // filter destinations for that origin
+                      const destinations = routesArrays
+                        .filter(route => route.origin == selectedOrigin)
+                        .map(route => route.destination);
+
+                      setFilteredDestinations([...new Set(destinations)] as string[])
+                      setValue("destination", "");
+                    }
                   })}
                 >
                   <option value="">Select departure</option>
-                  {routesArrays.map((route) => (
-                    <option key={route.id} value={route.origin}>{route.origin}</option>
+                  {uniqueOrigins.map((origin) => (
+                    <option key={origin} value={origin}>{origin}</option>
                   ))}
                 </select>
                 {errors.departure && (
@@ -203,10 +234,11 @@ const Hero = () => {
                   {...register("destination", {
                     onChange: (e) => setDestination(e.target.value)
                   })}
+                  disabled={!filteredDestinations.length}
                 >
                   <option value="">Select destination</option>
-                  {routesArrays.map((route) => (
-                    <option key={route.id} value={route.destination}>{route.destination}</option>
+                  {filteredDestinations.map((dest) => (
+                    <option key={dest} value={dest}>{dest}</option>
                   ))}
                 </select>
                 {errors.destination && (

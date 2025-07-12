@@ -8,7 +8,7 @@ import { useSettings } from "@/hooks/useApi";
 const Footer = () => {
   const { data, isLoading, error } = useSettings()
   const settings = data?.data?.data;
-  console.log("Seetings DATA:", settings);
+
   
   const year = new Date().getFullYear();
   
@@ -48,7 +48,7 @@ const Footer = () => {
               <div>
                 <div className="font-medium">Booking Hotline:</div>
                 <a href="tel:+2348012345678" className="hover:text-white transition-colors">
-                  
+                  {`${settings?.contactPhone}`}
                 </a>
               </div>
               <div>
@@ -118,13 +118,13 @@ const Footer = () => {
             &copy; {year} Corpers Drive Transportation Ltd. All rights reserved.
           </div>
           <div className="mt-4 md:mt-0 flex space-x-6">
-            <Link to="/terms" className="hover:text-white transition-colors">
+            <Link to="#" className="hover:text-white transition-colors">
               Terms of Service
             </Link>
-            <Link to="/privacy" className="hover:text-white transition-colors">
+            <Link to="#" className="hover:text-white transition-colors">
               Privacy Policy
             </Link>
-            <Link to="/faq" className="hover:text-white transition-colors">
+            <Link to="/about" className="hover:text-white transition-colors">
               FAQ
             </Link>
           </div>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
@@ -8,78 +7,135 @@ import { ChevronLeft } from "lucide-react";
 import { useTrips } from "@/hooks/useAdminQueries";
 import { SeatStatus, Seat } from "@/services/adminApi";
 
-// Mock seat map data
-// const generateSeats = () => {
-//   const seatStatus = ["available", "booked", "selected", "reserved", "unavailable"];
-//   const seats = [];
-//   const rows = 8;
-//   const seatsPerRow = 5;
-  
-//   for (let row = 1; row <= rows; row++) {
-//     for (let seat = 1; seat <= seatsPerRow; seat++) {
-//       // Skip middle seat in each row to simulate aisle
-//       if (seat === 3) continue;
-      
-//       const randomStatus = seatStatus[Math.floor(Math.random() * 3)]; // Only use first 3 statuses
-//       seats.push({
-//         id: `${row}${String.fromCharCode(64 + seat)}`, // 1A, 1B, etc.
-//         status: randomStatus
-//       });
-//     }
-//   }
-  
-//   return seats;
-// };
-
-
-
 const AdminTripSeats = () => {
   const { id } = useParams<{ id: string }>();
   const { data: allTrips = [], isLoading, isError, error } = useTrips();
   const trip = allTrips.find((t) => String(t.id) === id);
+  
+  // State for selected seats
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   if (isLoading) {
-        return (
+    return (
       <div className="flex items-center justify-center h-96">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
-  };
+  }
+
   if (isError || !trip) {
     return (
       <div className="flex items-center justify-center h-96">
         <p className="text-red-600">Failed to load seats. Please try again.</p>
       </div>
     );
-  };
+  }
 
   const seats = trip.seats;
-
-
   const totalSeats = seats.length;
-
   const available = seats.filter((s) => s.status === "AVAILABLE").length;
   const booked = seats.filter((s) => s.status === "BOOKED").length;
   const reserved = seats.filter((s) => s.status === "RESERVED").length;
-  // const unavailable = seats.filter((s) => s.status === "UNAVAILABLE").length;
+  const unavailable = seats.filter((s) => s.status === "UNAVAILABLE").length;
 
+  // Handle seat selection
+  const handleSeatClick = (seatId: string, seatStatus: string) => {
+    // Only allow selection of available seats or deselection of selected seats
+    if (seatStatus === "AVAILABLE" || selectedSeats.includes(seatId)) {
+      setSelectedSeats(prev => 
+        prev.includes(seatId) 
+          ? prev.filter(id => id !== seatId)
+          : [...prev, seatId]
+      );
+    }
+  };
 
-  // const [seats] = useState(generateSeats());
+  // Reserve selected seats
+  const handleReserveSeats = async () => {
+    if (selectedSeats.length === 0) {
+      alert("Please select seats to reserve");
+      return;
+    }
 
-  const getSeatColor = (status: string) => {
-    switch (status) {
+    setIsUpdating(true);
+    try {
+      // TODO: Implement API call to reserve seats
+      // await reserveSeats(selectedSeats);
+      
+      // For now, just show a success message
+      alert(`Reserved ${selectedSeats.length} seat(s) successfully!`);
+      setSelectedSeats([]);
+      
+      // You would typically refetch the trip data here
+      // refetch();
+    } catch (error) {
+      console.error("Failed to reserve seats:", error);
+      alert("Failed to reserve seats. Please try again.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Mark seats as unavailable
+  const handleMarkUnavailable = async () => {
+    if (selectedSeats.length === 0) {
+      alert("Please select seats to mark as unavailable");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      // TODO: Implement API call to mark seats as unavailable
+      // await markSeatsUnavailable(selectedSeats);
+      
+      alert(`Marked ${selectedSeats.length} seat(s) as unavailable!`);
+      setSelectedSeats([]);
+    } catch (error) {
+      console.error("Failed to mark seats as unavailable:", error);
+      alert("Failed to update seats. Please try again.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Reset all seats to available
+  const handleResetAllSeats = async () => {
+    if (!confirm("Are you sure you want to reset all seats to available?")) {
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      // TODO: Implement API call to reset all seats
+      // await resetAllSeats(trip.id);
+      
+      alert("All seats have been reset to available!");
+      setSelectedSeats([]);
+    } catch (error) {
+      console.error("Failed to reset seats:", error);
+      alert("Failed to reset seats. Please try again.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const getSeatColor = (seat: Seat) => {
+    if (selectedSeats.includes(seat.id)) {
+      return "bg-blue-100 border-blue-500 border-2";
+    }
+    
+    switch (seat.status) {
       case "AVAILABLE":
-        return "bg-green-100 border-green-500 hover:bg-green-200";
+        return "bg-green-100 border-green-500 hover:bg-green-200 cursor-pointer";
       case "BOOKED":
-        return "bg-red-100 border-red-500";
-      case "selected":
-        return "bg-blue-100 border-blue-500";
+        return "bg-red-100 border-red-500 cursor-not-allowed";
       case "RESERVED":
-        return "bg-yellow-100 border-yellow-500";
-      case "unavailable":
-        return "bg-gray-100 border-gray-500";
+        return "bg-yellow-100 border-yellow-500 cursor-not-allowed";
+      case "UNAVAILABLE":
+        return "bg-gray-100 border-gray-500 cursor-not-allowed";
       default:
-        return "bg-gray-100";
+        return "bg-gray-100 cursor-not-allowed";
     }
   };
 
@@ -97,12 +153,20 @@ const AdminTripSeats = () => {
         
         <h1 className="text-2xl font-bold tracking-tight">Trip Seat Map</h1>
         <p className="text-muted-foreground">Trip ID: {id}</p>
+        {selectedSeats.length > 0 && (
+          <p className="text-blue-600 mt-2">
+            {selectedSeats.length} seat(s) selected
+          </p>
+        )}
       </div>
       
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card className="p-6">
             <h2 className="text-lg font-medium mb-4">Bus Seat Layout</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Click on available seats to select them for reservation
+            </p>
             
             <div className="flex justify-center mb-6">
               <div className="w-20 h-20 bg-gray-200 rounded-t-3xl flex items-center justify-center border-b-4 border-gray-400">
@@ -118,10 +182,9 @@ const AdminTripSeats = () => {
                     <div className="w-8 h-8"></div>
                   ) : (
                     <button
-                      className={`w-10 h-10 rounded border-2 flex items-center justify-center text-xs font-medium ${getSeatColor(
-                        seat.status
-                      )}`}
-                      disabled={seat.status !== "AVAILABLE"}
+                      className={`w-10 h-10 rounded border-2 flex items-center justify-center text-xs font-medium transition-colors ${getSeatColor(seat)}`}
+                      onClick={() => handleSeatClick(seat.id, seat.status)}
+                      disabled={seat.status !== "AVAILABLE" && !selectedSeats.includes(seat.id)}
                     >
                       {seat.seatNo}
                     </button>
@@ -133,7 +196,7 @@ const AdminTripSeats = () => {
             <div className="mt-8 space-y-2">
               <div className="flex items-center text-sm">
                 <div className="w-4 h-4 bg-green-100 border border-green-500 mr-2"></div>
-                <span>Available</span>
+                <span>Available (Click to select)</span>
               </div>
               <div className="flex items-center text-sm">
                 <div className="w-4 h-4 bg-red-100 border border-red-500 mr-2"></div>
@@ -159,9 +222,41 @@ const AdminTripSeats = () => {
           <Card className="p-6">
             <h2 className="text-lg font-medium mb-4">Seat Actions</h2>
             <div className="space-y-4">
-              <Button className="w-full">Reset All Seats</Button>
-              <Button className="w-full" variant="outline">Mark Selected as Reserved</Button>
-              <Button className="w-full" variant="outline">Mark Selected as Unavailable</Button>
+              <Button 
+                className="w-full" 
+                onClick={handleReserveSeats}
+                disabled={selectedSeats.length === 0 || isUpdating}
+              >
+                {isUpdating ? "Reserving..." : `Reserve Selected (${selectedSeats.length})`}
+              </Button>
+              
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={handleMarkUnavailable}
+                disabled={selectedSeats.length === 0 || isUpdating}
+              >
+                Mark Selected as Unavailable
+              </Button>
+              
+              <Button 
+                className="w-full" 
+                variant="destructive"
+                onClick={handleResetAllSeats}
+                disabled={isUpdating}
+              >
+                Reset All Seats
+              </Button>
+              
+              {selectedSeats.length > 0 && (
+                <Button 
+                  className="w-full" 
+                  variant="ghost"
+                  onClick={() => setSelectedSeats([])}
+                >
+                  Clear Selection
+                </Button>
+              )}
             </div>
             
             <div className="mt-6">
@@ -185,8 +280,14 @@ const AdminTripSeats = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Unavailable:</span>
-                  <span>{}</span>
+                  <span>{unavailable}</span>
                 </div>
+                {selectedSeats.length > 0 && (
+                  <div className="flex justify-between text-blue-600 font-medium">
+                    <span>Selected:</span>
+                    <span>{selectedSeats.length}</span>
+                  </div>
+                )}
               </div>
             </div>
           </Card>

@@ -33,6 +33,7 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
     setPaymentInfo,
     bookingDraftId,
     bookingToken,
+    paymentType,
   } = useBookingStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -115,7 +116,7 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
       setIsSubmitting(false);
     }
   };
-
+  
   const handlePaymentMethodchange = (value: "full" | "split") => {
     setPaymentMethod(value);
   };
