@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -6,9 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Helmet } from "react-helmet-async";
+import { useSettings, useRetrieveBooking } from "@/hooks/useApi";
 
 const ManageBooking = () => {
   const { toast } = useToast();
+  const { data, error } = useSettings();
+  const [bookingToken, setBookingToken] = useState("");
+  const [email, setEmail] = useState("");
+  const settings = data?.data?.data;
+
+  const { mutate: retrieveBooking, isPending } = useRetrieveBooking();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -16,13 +23,26 @@ const ManageBooking = () => {
       title: "Booking retrieval initiated",
       description: "We're searching for your booking. Please wait...",
     });
-    setTimeout(() => {
-      toast({
-        title: "No booking found",
-        description: "We couldn't find a booking with the provided details. Please check and try again.",
-        variant: "destructive",
-      });
-    }, 2000);
+    retrieveBooking(
+      { bookingToken, email },
+      {
+        onSuccess: (booking) => {
+          toast({
+            title: "Booking found!",
+            description: `Booking for ${booking.passengerName} retrieved successfully.`,
+          });
+          // Redirect or show booking details;
+        },
+        onError: (error) => {
+          toast({
+            title: "No booking found",
+            description:
+            "We couldn't find a booking with the provided details. Please check and try again.",
+            variant: "destructive",
+          })
+        }
+      }
+    )
   };
 
   return (
@@ -51,6 +71,8 @@ const ManageBooking = () => {
                   </label>
                   <Input
                     id="bookingReference"
+                    value={bookingToken}
+                    onChange={(e) => setBookingToken(e.target.value)}
                     placeholder="e.g. TX12345"
                     required
                     className="w-full h-10 sm:h-12"
@@ -64,14 +86,16 @@ const ManageBooking = () => {
                   <Input
                     id="email"
                     type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email address"
                     required
                     className="w-full h-10 sm:h-12"
                   />
                 </div>
                 
-                <Button type="submit" className="w-full h-10 sm:h-12">
-                  Retrieve Booking
+                <Button type="submit" className="w-full h-10 sm:h-12" disabled={isPending}>
+                  {isPending ? "Searching..." : "Retrieve Booking"}
                 </Button>
               </form>
             </CardContent>
@@ -84,10 +108,10 @@ const ManageBooking = () => {
             </p>
             <div className="space-y-1 sm:space-y-2">
               <p className="text-sm sm:text-base">
-                <span className="font-medium">Phone:</span> coming soon
+                <span className="font-medium">Phone:</span> {settings?.contactPhone || "coming soon"}
               </p>
               <p className="text-sm sm:text-base">
-                <span className="font-medium">Email:</span> coming soon
+                <span className="font-medium">Email:</span> {settings?.contactEmail || "coming soon"}
               </p>
             </div>
           </div>

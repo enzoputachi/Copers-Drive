@@ -1,37 +1,35 @@
 import React from "react";
-import { Helmet } from "react-helmet-async";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Target, Eye, Quote, Bus, MapPin, Clock, Shield } from "lucide-react";
 
 const About = () => {
   const teamMembers = [
-    {
-      name: "Alimi Nurudeen Adeleye",
-      position: "Chief Financial Officer",
-      description: "The Chief Financial Officer of Corpers Drive oversees all financial operations, ensuring transparency, sustainability, and efficiency in managing the company's resources. He is responsible for budgeting, financial planning, record-keeping, and reporting.",
-      bgColor: "bg-green-50"
-    },
-    {
-      name: "ISAKUNLE EMMANUEL AYOBAMI",
-      position: "Brand Strategist", 
-      description: "The Brand Strategist of Corpers Drive is responsible for shaping and strengthening the company's brand identity across all platforms. He helps develop creative strategies that enhance brand visibility, engagement, and loyalty among Corps Members.",
-      bgColor: "bg-blue-50"
-    },
-    {
-      name: "OGUNLANA IBRAHIM OLADAYO",
-      position: "Public Relations Officer",
-      description: "The Public Relations Officer of Corpers Drive is responsible for managing the company's image and communications with the public, partners, and stakeholders. He crafts and delivers clear, positive messages that reflect the brand's values.",
-      bgColor: "bg-amber-50"
-    },
-    {
-      name: "[Name TBD]",
-      position: "Chief Customer Service Officer",
-      description: "The Chief Customer Service Officer of Corpers Drive leads all customer experience initiatives, ensuring every interaction reflects the company's commitment to excellence and reliability.",
-      bgColor: "bg-purple-50"
-    }
-  ];
+  {
+    name: "ALIMI NURUDEEN ADELEYE",
+    position: "Chief Financial Officer",
+    description: "The Chief Financial Officer of Corpers Drive oversees all financial operations, ensuring transparency, sustainability, and efficiency in managing the company's resources. He is responsible for budgeting, financial planning, record-keeping, and reporting.",
+    image: ""
+  },
+  {
+    name: "EMMANUEL AYOBAMI",
+    position: "Brand Strategist",
+    description: "The Brand Strategist of Corpers Drive is responsible for shaping and strengthening the company's brand identity across all platforms. He helps develop creative strategies that enhance brand visibility, engagement, and loyalty among Corps Members.",
+    image: ""
+  },
+  {
+    name: "OGUNLANA IBRAHIM OLADAYO",
+    position: "Public Relations Officer",
+    description: "The Public Relations Officer of Corpers Drive is responsible for managing the company's image and communications with the public, partners, and stakeholders. He crafts and delivers clear, positive messages that reflect the brand's values.",
+    image: ""
+  },
+  {
+    name: "OGUNDERU SAMUEL OLUWASEUN",
+    position: "Chief Customer Service Officer",
+    description: "The Chief Customer Service Officer of Corpers Drive leads all customer experience initiatives, ensuring every interaction reflects the company's commitment to excellence and reliability.",
+    image: ""
+  }
+];
+
+
 
   const serviceIcons = [
     { icon: Bus, label: "Safe Transport" },
@@ -63,12 +61,6 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-green-50">
-      <Helmet>
-        <title>About Us - Corpers Drive</title>
-        <meta name="description" content="Learn about Corpers Drive - Nigeria's leading transportation service for NYSC corps members. Our mission, vision, and dedicated team." />
-      </Helmet>
-      
-      
       <main>
         {/* Intro Banner */}
         <section className="relative bg-gradient-to-r from-green-600 via-green-700 to-green-800 text-white py-20 overflow-hidden">
@@ -119,7 +111,7 @@ const About = () => {
         </section>
 
         {/* Mission, Vision, Motto - Flipable Cards */}
-        <section className="py-20 ">
+        <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               {missionVisionData.map((item, index) => {
@@ -129,34 +121,28 @@ const About = () => {
                     <div className="relative preserve-3d w-full h-full duration-500 group-hover:rotate-y-180">
                       {/* Front Face - Only Heading */}
                       <div className="absolute inset-0 w-full h-full backface-hidden">
-                        <Card 
-                          className="bg-no-repeat md:bg-cover text-center h-full flex flex-col justify-center border-0 shadow-lg group-hover:shadow-xl transition-all duration-300"
-                          // style={{ 
-                          //   backgroundImage: `url('/bg.jpg')`,
-                          //   backgroundPosition: 'center',
-                          //   backgroundSize: 'contain',
-                          // }}
+                        <div 
+                          className="bg-white rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300 text-center h-full flex flex-col justify-center border-0"
                         >
-                          {/* <div className="absolute inset-0 bg-black/10 z-0"></div> */}
-                          <CardHeader className="flex-1 flex flex-col justify-center">
+                          <div className="flex-1 flex flex-col justify-center p-6">
                             <div className={`bg-${item.color}-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-${item.color}-200 transition-colors`}>
                               <IconComponent className={`h-8 w-8 text-${item.color}-600 mx-auto`} />
                             </div>
-                            <CardTitle className={`text-3xl text-${item.color}-800`}>{item.title}</CardTitle>
-                            <p className="text-sm text-gray-500 mt-4 italic">Hover to learn more</p>
-                          </CardHeader>
-                        </Card>
+                            <h3 className={`text-3xl font-bold text-${item.color}-800 mb-4`}>{item.title}</h3>
+                            <p className="text-sm text-gray-500 italic">Hover to learn more</p>
+                          </div>
+                        </div>
                       </div>
 
                       {/* Back Face - Only Content */}
                       <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180">
-                        <Card className={`h-full flex flex-col justify-center border-0 shadow-lg bg-${item.color}-50 p-6`}>
-                          <CardContent className="flex-1 flex items-center justify-center p-0">
+                        <div className={`h-full flex flex-col justify-center border-0 shadow-lg bg-${item.color}-50 p-6 rounded-lg`}>
+                          <div className="flex-1 flex items-center justify-center p-0">
                             <p className={`text-${item.color}-800 leading-relaxed text-center`}>
                               {item.content}
                             </p>
-                          </CardContent>
-                        </Card>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -166,45 +152,54 @@ const About = () => {
           </div>
         </section>
 
-        {/* Team Section */}
-        <section className="py-20 bg-white">
+        {/* Team Section - Updated Style */}
+        <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold mb-4 text-gray-900">Meet the People Behind the Wheels</h2>
+               <h2 className="text-4xl font-bold mb-4 text-gray-900">Meet the People Behind the Wheels</h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 The dedicated professionals driving Corpers Drive forward with passion and expertise
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
               {teamMembers.map((member, index) => (
-                <Card key={index} className={`${member.bgColor} border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group`}>
-                  <CardHeader>
-                    <div className="flex items-start space-x-4">
-                      <div className="bg-white p-4 rounded-full shadow-md group-hover:shadow-lg transition-shadow">
-                        <User className="h-8 w-8 text-gray-600" />
-                      </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-xl text-gray-900 mb-1">{member.name}</CardTitle>
-                        <p className="text-green-600 font-semibold text-sm uppercase tracking-wide">{member.position}</p>
-                      </div>
+                <div key={index} className="text-center group">
+                  {/* Profile Image Container */}
+                  <div className="relative mb-6">
+                    <div className="w-48 h-48 mx-auto rounded-full bg-gradient-to-br from-gray-200 to-gray-300 shadow-lg overflow-hidden group-hover:shadow-xl transition-shadow duration-300">
+                      {member.image ? (
+                        <img 
+                          src={member.image} 
+                          alt={member.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-100 to-green-200">
+                          <User className="w-20 h-20 text-green-600" />
+                        </div>
+                      )}
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-700 leading-relaxed">
+                  </div>
+
+                  {/* Member Info */}
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-green-600 transition-colors duration-300">
+                      {member.name}
+                    </h3>
+                    <p className="text-green-600 font-semibold text-sm uppercase tracking-wide">
+                      {member.position}
+                    </p>
+                    <p className="text-gray-600 text-sm leading-relaxed mt-4 px-2">
                       {member.description}
                     </p>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
         </section>
-
-        {/* Address & Contact Strip */}
-        
       </main>
-    
     </div>
   );
 };
