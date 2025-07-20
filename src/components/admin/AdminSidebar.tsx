@@ -15,19 +15,20 @@ interface AdminSidebarProps {
 const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
   const location = useLocation();
   
-  const navItems = [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
-    { icon: Users, label: "Users", href: "/admin/users" },
-    { icon: Map, label: "Routes", href: "/admin/routes" },   
-    { icon: Bus, label: "Buses", href: "/admin/buses" },
-     { icon: Calendar, label: "Trips", href: "/admin/trips" },
-    { icon: BookText, label: "Bookings", href: "/admin/bookings" },
-    { icon: CreditCard, label: "Payments", href: "/admin/payments" },
-    // { icon: Bell, label: "Notifications", href: "/admin/notifications" },
-    // { icon: FileText, label: "Logs", href: "/admin/logs" },
-    { icon: Settings, label: "Settings", href: "/admin/settings" },
-    { icon: Shield, label: "Roles", href: "/admin/roles" },
-  ];
+ const navItems = [
+  { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+  { icon: Users, label: "Users", href: "/users" },
+  { icon: Map, label: "Routes", href: "/routes" },
+  { icon: Bus, label: "Buses", href: "/buses" },
+  { icon: Calendar, label: "Trips", href: "/trips" },
+  { icon: BookText, label: "Bookings", href: "/bookings" },
+  { icon: CreditCard, label: "Payments", href: "/payments" },
+  // { icon: Bell, label: "Notifications", href: "/notifications" },
+  // { icon: FileText, label: "Logs", href: "/logs" },
+  { icon: Settings, label: "Settings", href: "/settings" },
+  { icon: Shield, label: "Roles", href: "/roles" },
+];
+
 
   return (
     <aside
