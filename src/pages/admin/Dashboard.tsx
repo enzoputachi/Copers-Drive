@@ -115,7 +115,7 @@ const AdminDashboard = () => {
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <SummaryCard
-          title="Total Users"
+          title="Total Bookings"
           value={stats?.data?.totalBookings?.toLocaleString() || "0"}
           icon={<Users className="h-6 w-6" />}
           change={{ value: stats?.data?.bookingGrowth || 0, positive: (stats?.data?.bookingGrowth || 0) > 0 }}
