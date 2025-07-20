@@ -2,9 +2,6 @@ import axios from 'axios';
 import { toast } from '@/components/ui/sonner';
 // Create an admin axios instance with admin-specific config
 
-console.log("Dotenv:", import.meta.env.VITE_APP_URL)
-
-
 const adminApi = axios.create({
   baseURL: import.meta.env.VITE_APP_URL, // 'https://booking-api-tuso.onrender.com',
   timeout: 10000,
@@ -50,7 +47,7 @@ adminApi.interceptors.response.use(
 
 // =================== ENUMS ===================
 export type BookingStatus = 'DRAFT' | 'PENDING' | 'CONFIRMED' | 'CANCELLED';
-export type SeatStatus    = 'AVAILABLE' | 'BOOKED' | 'RESERVED';
+export type SeatStatus    = 'AVAILABLE' | 'BOOKED' | 'RESERVED' | "UNAVAILABLE";
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED';
 export type Role          = 'ADMIN' | string;
 export type TripStatus    = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
@@ -241,6 +238,7 @@ export interface SystemSettings {
   facebookUrl?: string;
   twitterUrl?: string;
   whatsAppUrl?: string;
+  whatsAppGroupUrl?: string;
   instagramUrl?: string;
   linkedinUrl?: string;
   address?: string;
@@ -297,6 +295,10 @@ export const adminApiService = {
   createTrip: (tripData: Omit<Trip, 'id' | 'availableSeats'>) => adminApi.post<Trip>('/trips', tripData),
   updateTrip: (id: string, tripData: Partial<Trip>) => adminApi.patch<Trip>(`/trips/${id}`, tripData),
   deleteTrip: (id: string) => adminApi.delete(`/trips/${id}`),
+
+  // Seats
+  updateSeatStatus: (payload: { seatIds: number[]; data: Partial<Pick<Seat, 'status' | 'reservedAt'>>;}) => 
+    adminApi.patch<{count: number}>(`/seats/update`, payload),
 
   // Bookings
   getBookings: () => adminApi.get<{ data: Booking[], status: string }>('/bookings'),

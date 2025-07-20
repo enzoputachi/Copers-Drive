@@ -172,4 +172,11 @@ export const settingsApi = {
   getSettings: () => api.get('/companySettings'),
 }
 
+export const retrieveBookingApi = {
+  getBooking: (bookingToken: string, email: string) => 
+    api.get<Booking>('/retrieve', {
+      params: { email, bookingToken }
+    }),
+}
+
 export default api;

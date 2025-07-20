@@ -4,17 +4,19 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
-import { useTrips } from "@/hooks/useAdminQueries";
+import { useTrips, useUpdateSeats } from "@/hooks/useAdminQueries";
 import { SeatStatus, Seat } from "@/services/adminApi";
+import { toast } from "sonner";
 
 const AdminTripSeats = () => {
   const { id } = useParams<{ id: string }>();
   const { data: allTrips = [], isLoading, isError, error } = useTrips();
   const trip = allTrips.find((t) => String(t.id) === id);
-  
+  const [tempDisableReserve, setTempDisableReserve] = useState(true)
   // State for selected seats
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
+  const { mutate: bulkUpdateSeats, isPending } = useUpdateSeats();
 
   if (isLoading) {
     return (
@@ -80,14 +82,18 @@ const AdminTripSeats = () => {
   // Mark seats as unavailable
   const handleMarkUnavailable = async () => {
     if (selectedSeats.length === 0) {
-      alert("Please select seats to mark as unavailable");
+      toast.warning("Please select seats to mark as unavailable");
       return;
     }
 
     setIsUpdating(true);
     try {
-      // TODO: Implement API call to mark seats as unavailable
-      // await markSeatsUnavailable(selectedSeats);
+      bulkUpdateSeats({
+        seatIds: selectedSeats.map((id) => Number(id)),
+        data: { status: 'UNAVAILABLE' as SeatStatus },
+      }, {
+        onSuccess: () => setSelectedSeats([]),
+      });
       
       alert(`Marked ${selectedSeats.length} seat(s) as unavailable!`);
       setSelectedSeats([]);
@@ -121,7 +127,7 @@ const AdminTripSeats = () => {
   };
 
   const getSeatColor = (seat: Seat) => {
-    if (selectedSeats.includes(seat.id)) {
+    if (selectedSeats.includes(seat.id.toString())) {
       return "bg-blue-100 border-blue-500 border-2";
     }
     
@@ -183,8 +189,8 @@ const AdminTripSeats = () => {
                   ) : (
                     <button
                       className={`w-10 h-10 rounded border-2 flex items-center justify-center text-xs font-medium transition-colors ${getSeatColor(seat)}`}
-                      onClick={() => handleSeatClick(seat.id, seat.status)}
-                      disabled={seat.status !== "AVAILABLE" && !selectedSeats.includes(seat.id)}
+                      onClick={() => handleSeatClick(`${seat.id}`, seat.status)}
+                      disabled={seat.status !== "AVAILABLE" && !selectedSeats.includes(`${seat.id}`)}
                     >
                       {seat.seatNo}
                     </button>
@@ -223,16 +229,17 @@ const AdminTripSeats = () => {
             <h2 className="text-lg font-medium mb-4">Seat Actions</h2>
             <div className="space-y-4">
               <Button 
-                className="w-full" 
+                className="w-full"
+                 variant="outline"
                 onClick={handleReserveSeats}
-                disabled={selectedSeats.length === 0 || isUpdating}
+                disabled={selectedSeats.length === 0 || tempDisableReserve}
               >
                 {isUpdating ? "Reserving..." : `Reserve Selected (${selectedSeats.length})`}
               </Button>
               
               <Button 
                 className="w-full" 
-                variant="outline"
+                // variant="outline"
                 onClick={handleMarkUnavailable}
                 disabled={selectedSeats.length === 0 || isUpdating}
               >
@@ -243,7 +250,7 @@ const AdminTripSeats = () => {
                 className="w-full" 
                 variant="destructive"
                 onClick={handleResetAllSeats}
-                disabled={isUpdating}
+                disabled={tempDisableReserve} // isUpdating
               >
                 Reset All Seats
               </Button>

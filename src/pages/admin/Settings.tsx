@@ -45,6 +45,7 @@ const initialMockSettings: Omit<SystemSettings, 'id' | 'createdAt' | 'updatedAt'
   facebookUrl: null,
   twitterUrl: null,
   whatsAppUrl: null,
+  whatsAppGroupUrl: null,
   instagramUrl: null,
   linkedinUrl: null,
   address: "No 1, Jibowu, Yaba, Lagos State",
@@ -84,7 +85,6 @@ const AdminSettings = () => {
   // Determine if we're in create mode (no existing settings)
   const isCreateMode = !apiSettings?.id && !USE_MOCK_SETTINGS;
 
-  console.log('Api settings', apiSettings);
   console.log('Is create mode', isCreateMode);
 
   // —————————————————————————————————————————————
@@ -158,9 +158,11 @@ const AdminSettings = () => {
   // —————————————————————————————————————————————
   const handleCreate = (overrides: Partial<SystemSettings>) => {
     const payload = {
+     data: {
       ...initialMockSettings,
       ...settingsData,
       ...overrides,
+     }
     };
 
     if (!window.confirm("Are you sure you want to create these settings?")) {
@@ -176,11 +178,12 @@ const AdminSettings = () => {
       return;
     }
 
-    createSettingsMutation.mutate(payload, {
+    createSettingsMutation.mutate(payload as Omit<SystemSettingsResponse, "id">, {
       onSuccess: (data) => {
         toast.success("Settings created successfully.");
-        setSettingsData(data);
-        setOriginalSettings(data);
+        const response = data.data;
+        setSettingsData(response);
+        setOriginalSettings(response);
         setIsCreating(false);
         // Refetch to ensure we have the latest data
         refetch();
@@ -228,8 +231,9 @@ const AdminSettings = () => {
       {
         onSuccess: (data) => {
           toast.success("Settings updated successfully.");
-          setSettingsData(data);
-          setOriginalSettings(data);
+          const settings: SystemSettings = data.data.data;
+          setSettingsData(settings);
+          setOriginalSettings(settings);
           // Refetch to ensure we have the latest data
           refetch();
         },
@@ -512,6 +516,17 @@ const AdminSettings = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="whatsapp-group-url">WhatsApp Group URL</Label>
+                <Input
+                  id="whatsapp-group-url"
+                  value={settingsData?.whatsAppGroupUrl || ""}
+                  onChange={(e) =>
+                    updateField("whatsAppGroupUrl", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="instagram-url">Instagram URL</Label>
                 <Input
                   id="instagram-url"
@@ -540,6 +555,7 @@ const AdminSettings = () => {
                     facebookUrl: settingsData?.facebookUrl,
                     twitterUrl: settingsData?.twitterUrl,
                     whatsAppUrl: settingsData?.whatsAppUrl,
+                    whatsAppGroupUrl: settingsData?.whatsAppGroupUrl,
                     instagramUrl: settingsData?.instagramUrl,
                     linkedinUrl: settingsData?.linkedinUrl,
                   })
