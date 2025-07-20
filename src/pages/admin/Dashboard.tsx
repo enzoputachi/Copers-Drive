@@ -146,7 +146,7 @@ const AdminDashboard = () => {
         <ActivityFeed activities={recentActivities} className="lg:col-span-2" />
 
         {/* Quick Actions */}
-        <Card>
+        <Card className="">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
