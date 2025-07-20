@@ -30,6 +30,7 @@ import AdminRoles from "./pages/admin/Roles";
 import AdminLayout from "./components/admin/AdminLayout";
 import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute";
 import { AdminAuthProvider } from "./contexts/AdminAuthContext";
+import Terms from "./pages/terms.tsx";
 
 const queryClient = new QueryClient();
 
@@ -122,6 +123,7 @@ const App = () => {
                 <Route path="/manage-booking" element={<ManageBooking />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/test-env" element={<EnvTest />} />
+                <Route path="terms" element={<Terms />} />
                 {/* Catch-all */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

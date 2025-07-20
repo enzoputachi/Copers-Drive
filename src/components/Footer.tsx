@@ -3,6 +3,7 @@ import { Facebook, Twitter, Instagram, Mail, ArrowUp, MessageCircle } from "luci
 import { useSettings } from "@/hooks/useApi";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   // Mock settings data for demonstration
@@ -37,7 +38,7 @@ const Footer = () => {
               Your trusted transportation partner for safe and reliable journeys
               to and from NYSC camps across Nigeria.
             </p>
-            <div className="flex space-x-4">
+            {/* <div className="flex space-x-4">
               <a
                 href={settings?.facebookUrl || "#"}
                 aria-label="Facebook"
@@ -59,7 +60,7 @@ const Footer = () => {
               >
                 <Instagram size={20} />
               </a>
-            </div>
+            </div> */}
           </div>
 
           {/* Contact Info */}
@@ -147,21 +148,23 @@ const Footer = () => {
               <a
                 href={settings?.facebookUrl || "#"}
                 aria-label="Facebook"
-                className="text-gray-50 hover:text-yellow-400 transition-colors duration-300 hover:bg-gray-800 p-2 rounded-full"
+                className="text-gray-50 hover:text-yellow-400 transition-all duration-300 hover:bg-gray-800 p-2 rounded-full hover:-translate-y-2 hover:scale-105"
               >
-                <Facebook size={24} />
+                <div>
+                  <Facebook size={24} />
+                </div>
               </a>
               <a
                 href={settings?.twitterUrl || "#"}
                 aria-label="Twitter"
-                className="text-gray-50 hover:text-yellow-400 transition-colors duration-300 hover:bg-gray-800  p-2 rounded-full"
+                className="text-gray-50 hover:text-yellow-400 transition-all duration-300 hover:bg-gray-800 p-2 rounded-full hover:-translate-y-2 hover:scale-105"
               >
                 <Twitter size={24} />
               </a>
               <a
                 href={settings?.instagramUrl || "#"}
                 aria-label="Instagram"
-                className="text-gray-50 hover:text-yellow-400 transition-colors duration-300 hover:bg-gray-800 p-2 rounded-full"
+                className="text-gray-50 hover:text-yellow-400 transition-all duration-300 hover:bg-gray-800 p-2 rounded-full hover:-translate-y-2 hover:scale-105"
               >
                 <Instagram size={24} />
               </a>
@@ -192,9 +195,9 @@ const Footer = () => {
               <a href="#" className="transition-colors duration-300">
                 Privacy Policy
               </a>
-              <a href="#" className="transition-colors duration-300">
+              <Link to="terms" className="transition-colors duration-300">
                 Terms & Conditions
-              </a>
+              </Link>
               <a href="#" className="transition-colors duration-300">
                 Disclaimer
               </a>
@@ -209,7 +212,7 @@ const Footer = () => {
       {/* Scroll to Top Button */}
       <button
         onClick={scrollToTop}
-        className="absolute bottom-8 right-8 bg-yellow-500 hover:bg-yellow-600 text-black p-3 rounded-full shadow-lg transition-colors duration-300 "
+        className="absolute bottom-8 hover:animate-bounce right-8 bg-yellow-500 hover:bg-yellow-600 text-black p-3 rounded-full shadow-lg transition-colors duration-300 "
         aria-label="Scroll to top"
       >
         <ArrowUp size={20} />
@@ -265,5 +268,3 @@ const Footer = () => {
 };
 
 export default Footer;
-
-

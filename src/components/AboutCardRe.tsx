@@ -48,28 +48,31 @@ const About = () => {
     {
       title: "Vision",
       icon: Eye,
-      color: "blue",
+      color: "green",
       content: "To become Nigeria's leading indigenous brand in transportation and logistics. We envision setting new industry standards while expanding across the nation with innovation, reliability, and excellence."
     },
     {
       title: "Motto",
       icon: Quote,
-      color: "amber",
+      color: "green",
       content: "Your safety and comfort are our top priorities. This motto guides every decision we make, from vehicle maintenance to driver training, delivering peace of mind for you and your loved ones."
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br ">
       <main>
         {/* Intro Banner */}
-        <section className="relative bg-gradient-to-r from-green-600 via-green-700 to-green-800 text-white py-20 overflow-hidden">
+        <section className="relative overflow-hidden h-44 ">
           <div className="absolute inset-0 bg-black/20"></div>
-          <div className="absolute inset-0 opacity-30" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='7' cy='7' r='7'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          <div className="absolute inset-0 opacity-30 ]" style={{
+            backgroundImage: `url("/anambra.jpg")`,
+             backgroundSize: "cover", 
+             backgroundPosition: "center", 
+             backgroundRepeat: "no-repeat"
           }}></div>
-          <div className="container mx-auto px-4 text-center relative z-10">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
+          <div className="container mx-auto px-4 md:pt-4 text-center relative z-10">
+            <h1 className="text-3xl md:text-6xl font-bold mb-6 animate-fade-in">
               Changing the Way Corps Members Move
             </h1>
             <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed opacity-90">
@@ -79,11 +82,11 @@ const About = () => {
         </section>
 
         {/* Business Overview */}
-        <section className="py-20 bg-white">
+        <section className="py-  bg-gradient-to-br from-yellow-50 to-green-50">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
               <div className="space-y-6">
-                <h2 className="text-4xl font-bold text-gray-900 mb-6">What We Do</h2>
+                <h2 className="text-4xl font-bold text-gray-900 mb-6 pt-4">What We Do</h2>
                 <p className="text-lg text-gray-700 leading-relaxed">
                   Corpers Drive is a logistics and transportation service specifically designed for NYSC corps members. 
                   We focus on providing safe, convenient, and organized travel to and from NYSC orientation camps across Nigeria.
@@ -95,7 +98,7 @@ const About = () => {
                 </p>
               </div>
               
-              <div className="grid grid-cols-2 gap-6">
+              {/* <div className="grid grid-cols-2 gap-6">
                 {serviceIcons.map((service, index) => {
                   const IconComponent = service.icon;
                   return (
@@ -105,6 +108,12 @@ const About = () => {
                     </div>
                   );
                 })}
+              </div> */}
+              <div>
+                <img 
+                  src="/herobg2.jpg" 
+                  alt="" 
+                />
               </div>
             </div>
           </div>

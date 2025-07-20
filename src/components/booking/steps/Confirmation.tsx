@@ -44,6 +44,23 @@ const Confirmation = () => {
     // This would be an API call to send the email in a real application
     toast.success("E-Ticket has been sent to your email");
   }, []);
+
+  useEffect(() => {
+    if (!bookingToken) return;
+
+    const shownToken = sessionStorage.getItem("shownWhatsAppBookingToken");
+
+    if (shownToken !== bookingToken) {
+      const timer = setTimeout(() => {
+        setShowWhatsAppDialog(true);
+        sessionStorage.setItem("shownWhatsAppBookingToken", bookingToken);
+      }, 5000); // 5 seconds delay
+
+      return () => clearTimeout(timer);
+    }
+  }, [bookingToken]);
+
+
   
   const handleBookAnother = () => {
     // Reset all form data

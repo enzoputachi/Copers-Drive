@@ -1,5 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router";
+// import { Navigate } from "react-router";
 
 type Route = {
   id: number;
@@ -17,10 +19,10 @@ type Route = {
 const featuredRoutes: Route[] = [
   {
     id: 1,
-    from: "Lagos",
-    to: "Abuja",
-    price: 15000,
-    duration: "8 hours",
+    from: "Jibowu, Lagos",
+    to: "Umuawulu, Anambra",
+    price: 32000,
+    duration: "14 hours",
     image: "/anambra.jpg",
     promo: {
       type: "nysc",
@@ -29,18 +31,18 @@ const featuredRoutes: Route[] = [
   },
   {
     id: 2,
-    from: "Lagos",
-    to: "Benin City",
-    price: 8500,
-    duration: "5 hours",
+    from: "Brewery, New Ife Road, Ibadan",
+    to: "Obubra, Cross River",
+    price: 45000,
+    duration: "14 hours",
     image: "/akwaibom.png",
   },
   {
     id: 3,
-    from: "Abuja",
-    to: "Kano",
-    price: 9000,
-    duration: "6 hours",
+    from: "Jibowu, Lagos",
+    to: "Ikot Itie Udung, Akwa Ibom",
+    price: 36000,
+    duration: "14 hours",
     image: "/anambra.jpg",
     promo: {
       type: "early-bird",
@@ -49,18 +51,18 @@ const featuredRoutes: Route[] = [
   },
   {
     id: 4,
-    from: "Port Harcourt",
-    to: "Owerri",
-    price: 6000,
-    duration: "3 hours",
+    from: "Brewery, New Ife Road, Ibadan",
+    to: "Kubwa, Abuja",
+    price: 46000,
+    duration: "15 hours",
     image: "/akwaibom.png",
   },
   {
     id: 5,
-    from: "Enugu",
-    to: "Lagos",
-    price: 12500,
-    duration: "7 hours",
+    from: "Jibowu, Lagos",
+    to: "Awgu, Enugu",
+    price: 34000,
+    duration: "14 hours",
     image: "/anambra.jpg",
     promo: {
       type: "student",
@@ -102,6 +104,7 @@ const FeaturedRoutes = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const navigate = useNavigate()
   
   // Calculate how many slides are visible at once
   const getVisibleSlides = () => {
@@ -159,7 +162,8 @@ const FeaturedRoutes = () => {
 
   const onSubmit = (route: Route) => {
     console.log("Booking route:", route);
-    alert(`Booking ${route.from} to ${route.to} for ₦${route.price.toLocaleString()}`);
+    navigate('/booking')
+    // alert(`Booking ${route.from} to ${route.to} for ₦${route.price.toLocaleString()}`);
   };
   
   return (
@@ -212,6 +216,7 @@ const FeaturedRoutes = () => {
                           onClick={() => onSubmit(route)}
                         >
                           Pay ₦5,000
+                          {/* <div className="text-xl font-bold">Total: ₦{(route.price).toLocaleString()}</div> */}
                         </button>
                       </div>
                     </div>
