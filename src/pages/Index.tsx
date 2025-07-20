@@ -16,7 +16,7 @@ const Index = () => {
       <BookingProvider>
         <main>
           <Hero />          
-          <div className="hidden md:block">
+          <div className="">
             <FeaturedRoutes />
             <Features />
             {/* < NeuraDetails /> */}

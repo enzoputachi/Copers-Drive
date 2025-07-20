@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { bookingsApi, routesApi, tripsApi, busesApi, seatsApi, paymentsApi, notificationsApi, Trip, settingsApi } from '@/services/api';
+import { bookingsApi, routesApi, tripsApi, busesApi, seatsApi, paymentsApi, notificationsApi, Trip, settingsApi, retrieveBookingApi } from '@/services/api';
 import { AxiosResponse } from 'axios';
 import { PaystackParams, payWithPaystack } from '@/services/paystackService';
 import { useBookingStore } from '@/stores/bookingStore';
@@ -123,7 +123,7 @@ export const usePaystackPayment = () => {
           const link = document.createElement('a');
           // link.href = data.ticketUrl;
           // link.download = '';
-          window.open(data.ticketUrl, "_blank");
+          // window.open(data.ticketUrl, "_blank");
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -149,3 +149,18 @@ export const useSettings = () =>useQuery({
   queryKey: ['companySettings', ],
   queryFn: () => settingsApi.getSettings(),
 })
+
+export const useRetrieveBooking = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ bookingToken, email }: { bookingToken: string; email: string }) => 
+      retrieveBookingApi.getBooking(bookingToken, email).then(res => res.data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['booking', data.id], data);
+      console.log("Retrieved booking:", data);
+    },
+    onError: (error) => {
+      console.error("Error retrieving booking:", error);
+    }
+  });
+};

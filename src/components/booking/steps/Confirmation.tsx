@@ -1,14 +1,22 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useBookingStore } from "@/stores/bookingStore";
 import { Button } from "@/components/ui/button";
-import { Check, Mail, MapPin, Calendar, Ticket } from "lucide-react";
+import { Check, Mail, MapPin, Calendar, Ticket, MessageCircle } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { Dialog, DialogContent, DialogDescription, DialogHeader } from "@/components/ui/dialog";
+import { DialogTitle } from "@radix-ui/react-dialog";
+import { useSettings } from "@/hooks/useApi";
 
 const Confirmation = () => {
   const navigate = useNavigate();
+  const [showWhatsAppDialog, setShowWhatsAppDialog] = useState(false);
+   const { data, isLoading, error } = useSettings()
+  const settings = data?.data?.data;
+
+
   const { 
     departure, 
     destination, 
@@ -51,6 +59,13 @@ const Confirmation = () => {
     navigate("/");
   };
 
+  const handleJoinWhatsApp = () => {
+    // Replace with your actual WhatsApp group link
+    const whatsAppUrl = settings?.whatsAppUrl;
+    const whatsappGroupLink = whatsAppUrl;
+    window.open(whatsappGroupLink, "_blank");
+  };
+
   // Create a "fake" booking reference number
   const bookingRef = `TX${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -66,7 +81,8 @@ const Confirmation = () => {
         </div>
         <h2 className="text-2xl font-bold mb-2">Booking Confirmed!</h2>
         <p className="text-gray-600">
-          Thank you for booking with Corpers Drive. Your booking has been sent to your email.
+          Thank you for booking with Corpers Drive. Your booking has been sent
+          to your email.
         </p>
       </div>
 
@@ -157,13 +173,17 @@ const Confirmation = () => {
           </div>
           <div className="flex justify-between">
             <p className="text-gray-600">Price per Seat</p>
-            <p className="font-medium">₦{selectedBus?.price.toLocaleString()}</p>
+            <p className="font-medium">
+              ₦{selectedBus?.price.toLocaleString()}
+            </p>
           </div>
           {isSplitPayment ? (
             <>
               <div className="flex justify-between">
                 <p className="text-gray-600">Commitment Fee Paid</p>
-                <p className="font-medium">₦{paidAmountInNaira.toLocaleString()}</p>
+                <p className="font-medium">
+                  ₦{paidAmountInNaira.toLocaleString()}
+                </p>
               </div>
               <div className="flex justify-between">
                 <p className="text-gray-600">Balance Remaining</p>
@@ -192,11 +212,35 @@ const Confirmation = () => {
           Important Information
         </h3>
         <ul className="text-sm text-amber-800 space-y-1 list-disc pl-5">
-          <li>Your e-ticket has been sent to {passengerInfo?.primaryPassenger?.email}</li>
+          <li>
+            Your e-ticket has been sent to{" "}
+            {passengerInfo?.primaryPassenger?.email}
+          </li>
           <li>Please arrive at the terminal 30 minutes before departure</li>
           <li>Present your booking reference or e-ticket for boarding</li>
           <li>You can manage your booking using your booking reference</li>
         </ul>
+      </div>
+        
+        {/* WhatsApp Community */}
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+        <h3 className="flex items-center font-medium text-green-800 mb-2">
+          <MessageCircle className="h-5 w-5 mr-2" />
+          Join Our Community
+        </h3>
+        <p className="text-sm text-green-800 mb-3">
+          Get updates, connect with other travelers, and access exclusive offers
+          by joining our WhatsApp community.
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowWhatsAppDialog(true)}
+          className="border-green-300 text-green-700 hover:bg-green-100"
+        >
+          <MessageCircle className="h-4 w-4 mr-2" />
+          Join WhatsApp Community
+        </Button>
       </div>
 
       {/* Actions */}
@@ -204,10 +248,51 @@ const Confirmation = () => {
         <Button variant="outline" onClick={handleBookAnother}>
           Book Another Trip
         </Button>
-        <Button onClick={handleGoHome}>
-          Return to Home
-        </Button>
+        <Button onClick={handleGoHome}>Return to Home</Button>
       </div>
+
+       {/* WhatsApp Community Dialog */}
+      <Dialog open={showWhatsAppDialog} onOpenChange={setShowWhatsAppDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-green-600" />
+              Join Our Travel Community
+            </DialogTitle>
+            <DialogDescription>
+              Connect with other travelers and get exclusive updates!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <p className="text-sm text-green-800 mb-3">
+                🚌 Get real-time travel updates<br/>
+                💬 Connect with fellow travelers<br/>
+                🎁 Access exclusive offers & discounts<br/>
+                📍 Receive important route information
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => {
+                  handleJoinWhatsApp();
+                  setShowWhatsAppDialog(false);
+                }}
+                className="flex-1"
+              >
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Join WhatsApp Community
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowWhatsAppDialog(false)}
+              >
+                Maybe Later
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

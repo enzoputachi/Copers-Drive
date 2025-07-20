@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminApiService, User, Route, Bus, Trip, Booking, Payment, DashboardStats, SystemSettingsResponse, Notification } from '../services/adminApi';
+import { adminApiService, User, Route, Bus, Trip, Booking, Payment, DashboardStats, SystemSettingsResponse, Notification, Seat } from '../services/adminApi';
 import { toast } from '@/components/ui/sonner';
 
 // Query keys
@@ -380,3 +380,25 @@ export const useDeleteSettings = () => {
   });
 };
 
+
+// Seats
+export const useUpdateSeats = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: {
+      seatIds: number[];
+      data: Partial<Pick<Seat, 'status' | 'reservedAt'>>;
+    }) => adminApiService.updateSeatStatus(payload),
+
+    onSuccess: () => {
+      // Invalidate trips (so seats get refetched), or seats specifically if you have that key
+      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.trips });
+      toast.success('Seats updated successfully');
+    },
+
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || err.message || 'Failed to update seats');
+    },
+  });
+}
