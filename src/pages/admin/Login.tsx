@@ -41,7 +41,7 @@ const AdminLogin = () => {
     } catch (error) {
       toast.error('Login failed. Please try again.');
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 

@@ -30,8 +30,13 @@ adminApi.interceptors.response.use(
     
     // Handle admin-specific errors
     if (error.response?.status === 401) {
-      localStorage.removeItem('admin_token');
-      window.location.href = '/login';
+      // Check if this is a login request - don't redirect for login failures
+      const isLoginRequest = error.config?.url?.includes('/users/login');
+      
+      if (!isLoginRequest) {
+        localStorage.removeItem('admin_token');
+        window.location.href = '/login';
+      }
       return Promise.reject(error);
     }
     
@@ -265,6 +270,17 @@ export interface SystemSettingsResponse {
   data: SystemSettings;
 }
 
+// At the top of the file
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user?: User; // optional, in case backend returns user details too
+}
+
 
 
 // API functions
@@ -275,6 +291,7 @@ export const adminApiService = {
   // Users
   getUsers: () => adminApi.get<User[]>('/users'),
   createUser: (userData: Omit<User, 'id' | 'createdAt'>) => adminApi.post<User>('/users', userData),
+  login: (payload: LoginPayload ) => adminApi.post<LoginResponse>('/users/login', payload),
   updateUser: (id: string, userData: Partial<User>) => adminApi.patch<User>(`/users/${id}`, userData),
   deleteUser: (id: string) => adminApi.delete(`/users/${id}`),
 

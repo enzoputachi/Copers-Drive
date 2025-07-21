@@ -1,4 +1,5 @@
 
+import adminApiService from '@/services/adminApi';
 import { createContext, useContext, useState, useEffect } from 'react';
 
 interface AdminAuthContextType {
@@ -29,6 +30,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+
     // setIsAuthenticated(true);
     // Check if user is already logged in (from localStorage)
     const adminToken = localStorage.getItem('admin_token');
@@ -40,14 +42,24 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const login = async (email: string, password: string): Promise<boolean> => {
     // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log('login called with:', email, password)
+    setLoading(true);
     
-    if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-      localStorage.setItem('admin_token', 'mock_admin_token');
+    try {      
+      const response = await adminApiService.login({ email, password });
+
+      const token = response.data.data.token;
+      console.log("Token:", response)
+
+      localStorage.setItem('admin_token', token);
       setIsAuthenticated(true);
       return true;
+    } catch (error) {
+      console.error('Login error:', error?.response?.data || error.message)
+      return false;
+    } finally {
+      setLoading(false);
     }
-    return false;
   };
 
   const logout = () => {
