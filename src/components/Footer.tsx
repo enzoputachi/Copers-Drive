@@ -192,18 +192,18 @@ const Footer = () => {
               reserved.
             </div>
             <div className="mt-4 md:mt-0 flex flex-wrap gap-6">
-              <a href="#" className="transition-colors duration-300">
+              {/* <a href="#" className="transition-colors duration-300">
                 Privacy Policy
-              </a>
+              </a> */}
               <Link to="terms" className="transition-colors duration-300">
                 Terms & Conditions
               </Link>
-              <a href="#" className="transition-colors duration-300">
+              {/* <a href="#" className="transition-colors duration-300">
                 Disclaimer
-              </a>
-              <a href="/about" className=" transition-colors duration-300">
+              </a> */}
+              {/* <a href="/about" className=" transition-colors duration-300">
                 FAQ
-              </a>
+              </a> */}
             </div>
           </div>
         </div>

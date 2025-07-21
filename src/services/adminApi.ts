@@ -31,7 +31,7 @@ adminApi.interceptors.response.use(
     // Handle admin-specific errors
     if (error.response?.status === 401) {
       localStorage.removeItem('admin_token');
-      window.location.href = '/admin/login';
+      window.location.href = '/login';
       return Promise.reject(error);
     }
     

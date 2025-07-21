@@ -29,7 +29,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsAuthenticated(true);
+    // setIsAuthenticated(true);
     // Check if user is already logged in (from localStorage)
     const adminToken = localStorage.getItem('admin_token');
     if (adminToken) {
