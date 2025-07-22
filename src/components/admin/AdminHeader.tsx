@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 
+
+
 interface AdminHeaderProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
@@ -45,9 +47,13 @@ const AdminHeader = ({ sidebarOpen, setSidebarOpen }: AdminHeaderProps) => {
         <Button variant="ghost" size="icon" aria-label="Notifications">
           <Bell className="h-5 w-5" />
         </Button>
-        <Link to="/" className="text-sm text-primary hover:underline">
+        <a 
+          href={import.meta.env.VITE_WEB_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-primary hover:underline">
           View Site
-        </Link>
+        </a>
         <Button variant="ghost" size="icon" aria-label="User menu">
           <User className="h-5 w-5" />
         </Button>
