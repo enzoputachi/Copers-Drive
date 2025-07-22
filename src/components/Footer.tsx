@@ -4,12 +4,13 @@ import { useSettings } from "@/hooks/useApi";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
+import Terms from "./TermsModal"; // Import the Terms modal component
 
 const Footer = () => {
-  // Mock settings data for demonstration
   const { data, isLoading, error } = useSettings()
   const settings = data?.data?.data;
   const [showWhatsAppDialog, setShowWhatsAppDialog] = useState(false);
+  const [showTermsDialog, setShowTermsDialog] = useState(false);
 
   console.log("Settings Data:", settings);
 
@@ -22,7 +23,12 @@ const Footer = () => {
   const handleJoinWhatsApp = () => {
     const whatsAppUrl = settings?.whatsAppUrl;
     const whatsappGroupLink = whatsAppUrl;
-    window.open(whatsappGroupLink, "_blank"); // Replace with actual link
+    window.open(whatsappGroupLink, "_blank");
+  };
+
+  const handleTermsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowTermsDialog(true);
   };
   
   return (
@@ -38,29 +44,6 @@ const Footer = () => {
               Your trusted transportation partner for safe and reliable journeys
               to and from NYSC camps across Nigeria.
             </p>
-            {/* <div className="flex space-x-4">
-              <a
-                href={settings?.facebookUrl || "#"}
-                aria-label="Facebook"
-                className="text-gray-50 hover:text-yellow-400 transition-colors duration-300 p-2 rounded-full hover:bg-gray-800"
-              >
-                <Facebook size={20} />
-              </a>
-              <a
-                href={settings?.twitterUrl || "#"}
-                aria-label="Twitter"
-                className="text-gray-50 hover:text-yellow-400 transition-colors duration-300 p-2 rounded-full hover:bg-gray-800"
-              >
-                <Twitter size={20} />
-              </a>
-              <a
-                href={settings?.instagramUrl || "#"}
-                aria-label="Instagram"
-                className="text-gray-50 hover:text-yellow-400 transition-colors duration-300 p-2 rounded-full hover:bg-gray-800"
-              >
-                <Instagram size={20} />
-              </a>
-            </div> */}
           </div>
 
           {/* Contact Info */}
@@ -192,18 +175,12 @@ const Footer = () => {
               reserved.
             </div>
             <div className="mt-4 md:mt-0 flex flex-wrap gap-6">
-              {/* <a href="#" className="transition-colors duration-300">
-                Privacy Policy
-              </a> */}
-              <Link to="terms" className="transition-colors duration-300">
+              <button 
+                onClick={handleTermsClick}
+                className="hover:text-yellow-400 transition-colors duration-300 underline"
+              >
                 Terms & Conditions
-              </Link>
-              {/* <a href="#" className="transition-colors duration-300">
-                Disclaimer
-              </a> */}
-              {/* <a href="/about" className=" transition-colors duration-300">
-                FAQ
-              </a> */}
+              </button>
             </div>
           </div>
         </div>
@@ -263,6 +240,13 @@ const Footer = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Terms Modal */}
+      <Terms
+        isOpen={showTermsDialog}
+        onClose={() => setShowTermsDialog(false)}
+        onAgree={() => setShowTermsDialog(false)} // Just close modal since no agreement needed
+      />
     </footer>
   );
 };
