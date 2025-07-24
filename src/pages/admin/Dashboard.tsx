@@ -108,7 +108,7 @@ const AdminDashboard = () => {
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <div className="flex items-center space-x-2">
           <Button variant="outline">Export Reports</Button>
-          <Button onClick={() => navigate("/admin/trips")}>New Trip</Button>
+          <Button onClick={() => navigate("/trips")}>New Trip</Button>
         </div>
       </div>
 
@@ -151,16 +151,16 @@ const AdminDashboard = () => {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button className="w-full justify-start" onClick={() => navigate("/admin/routes")}>
+            <Button className="w-full justify-start" onClick={() => navigate("/routes")}>
               Create New Route
             </Button>
-            <Button className="w-full justify-start" onClick={() => navigate("/admin/trips")}>
+            <Button className="w-full justify-start" onClick={() => navigate("/trips")}>
               Schedule New Trip
             </Button>
-            <Button className="w-full justify-start" onClick={() => navigate("/admin/payments")}>
+            <Button className="w-full justify-start" onClick={() => navigate("/payments")}>
               View Pending Payments
             </Button>
-            <Button className="w-full justify-start" onClick={() => navigate("/admin/buses")}>
+            <Button className="w-full justify-start" onClick={() => navigate("/buses")}>
               Manage Bus Fleet
             </Button>
           </CardContent>
