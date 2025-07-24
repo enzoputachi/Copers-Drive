@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useBookingStore } from "@/stores/bookingStore";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/components/ui/sonner";
 // import { bookingsApi } from "@/services/api";
 import OrderSummary from "./payment/OrderSummary";
@@ -16,15 +17,18 @@ import { usePaystackPayment } from "@/hooks/useApi";
 // import { processPaystackPayment } from "@/services/paystackService";
 import SplitPayment from './payment/SplitPayment';
 import PaymentMethodSelector from './payment/PaymentMethodSelector';
+import Terms from '../../TermsModal'; // Import the new component
 
 interface PaymentProps {
   onComplete: () => void;
   setStepComplete: (stepId: string, isComplete: boolean) => void;
 }
 
-
 const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
   const [paymentMethod, setPaymentMethod] = useState<"full" | "split">("full");
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
+  
   const {
     selectedBus,
     passengers,
@@ -60,19 +64,40 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
   useEffect(() => {
     const subscription = form.watch(() => {
       const { isValid } = form.formState;
-      setStepComplete("payment", isValid);
+      // Only mark step as complete if form is valid AND terms are agreed to
+      setStepComplete("payment", isValid && hasAgreedToTerms);
     });
 
     console.log('Payment DET:', paymentInfo);
-  
 
     return () => subscription.unsubscribe();
-  }, [form, setStepComplete, paymentInfo]);
+  }, [form, setStepComplete, paymentInfo, hasAgreedToTerms]);
 
   const { mutateAsync, isPending } = usePaystackPayment()
 
+  // Handle terms agreement
+  const handleAgreeToTerms = () => {
+    setHasAgreedToTerms(true);
+    setIsTermsModalOpen(false);
+    toast.success("Terms and conditions accepted");
+  };
+
+  // Handle terms checkbox change
+  const handleTermsCheckboxChange = (checked: boolean) => {
+    if (checked) {
+      setIsTermsModalOpen(true);
+    } else {
+      setHasAgreedToTerms(false);
+    }
+  };
+
   // Call Paystack on submit
   const onSubmit = async (values: SimplePaymentFormData) => {
+    if (!hasAgreedToTerms) {
+      toast.error("Please agree to the terms and conditions to proceed");
+      return;
+    }
+
     if (!bookingDraftId) {
       toast.error("No booking draft found. Please start over.");
       return;
@@ -88,13 +113,6 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
         email: values.email,
       });
 
-      // // Paystack launches
-      // const paymentSuccessful = await processPaystackPayment(
-      //   values.email,
-      //   totalAmount
-      // );
-
-
       const paymentSuccessful = await mutateAsync({
         email: values.email,
         amount: amountToPayInKobo,
@@ -106,7 +124,6 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
         setIsSubmitting(false);
         return;
       }
-
 
       toast.success("Payment successful and booking created!");
       onComplete();
@@ -121,10 +138,6 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
     setPaymentMethod(value);
   };
 
-
-
-  
-
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Payment</h2>
@@ -135,6 +148,7 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
         passengers={passengers}
         totalAmount={totalAmount}
       />
+      
       <PaymentMethodSelector
         paymentMethod={paymentMethod}
         onPaymentMethodChange={handlePaymentMethodchange}
@@ -142,19 +156,46 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-         
           {paymentMethod === "split" ? (
             <SplitPayment
               totalAmount={totalAmount}
               commitmentAmount={commitmentFee}
             />
           ) : null}
-          <SimplePaymentForm form={form} amount={amountToPayInKobo / 100} />
           
+          <SimplePaymentForm form={form} amount={amountToPayInKobo / 100} />
+
+          {/* Terms and Conditions Checkbox */}
+          <div className="flex items-start space-x-3 p-4 bg-muted/50 rounded-lg">
+            <Checkbox
+              id="terms"
+              checked={hasAgreedToTerms}
+              onCheckedChange={handleTermsCheckboxChange}
+              className="mt-0.5"
+            />
+            <div className="flex-1">
+              <label
+                htmlFor="terms"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                I agree to the{" "}
+                <button
+                  type="button"
+                  onClick={() => setIsTermsModalOpen(true)}
+                  className="text-primary underline hover:no-underline"
+                >
+                  Terms and Conditions
+                </button>
+              </label>
+              <p className="text-xs text-muted-foreground mt-1">
+                Please read and accept our terms before proceeding with payment
+              </p>
+            </div>
+          </div>
 
           <Button
             type="submit"
-            disabled={isPending || selectedSeats.length === 0}
+            disabled={isPending || selectedSeats.length === 0 || !hasAgreedToTerms}
             className="w-full"
           >
             {isSubmitting
@@ -163,10 +204,17 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
           </Button>
 
           <p className="text-center text-sm text-gray-500">
-            By proceeding, you agree to our terms and privacy policy.
+            Payment is secured and protected
           </p>
         </form>
       </Form>
+
+      {/* Terms Modal */}
+      <Terms
+        isOpen={isTermsModalOpen}
+        onClose={() => setIsTermsModalOpen(false)}
+        onAgree={handleAgreeToTerms}
+      />
     </div>
   );
 };
