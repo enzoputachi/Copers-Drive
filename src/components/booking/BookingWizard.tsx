@@ -15,8 +15,9 @@ import {
   AlertDialogDescription,
   AlertDialogTitle,
   AlertDialogCancel,
-} from "@radix-ui/react-alert-dialog";
-import { AlertDialogFooter, AlertDialogHeader } from "../ui/alert-dialog";
+  AlertDialogFooter,
+  AlertDialogHeader,
+} from "@/components/ui/alert-dialog";
 import { useNavigationGuard } from '@/hooks/useNavigationGuard';
 import { format } from 'date-fns';
 
@@ -32,7 +33,7 @@ const BOOKING_STEPS = [
 const BookingWizard = () => {
   const navigate = useNavigate();
   const [isCompleted, setIsCompleted] = useState<Record<string, boolean>>({});
-  const [showRestrictedDialog, setShowRestrictedDialogue] = useState(false);
+  const [showRestrictedDialog, setShowRestrictedDialog] = useState(false);
   const [showNavigationWarning, setShowNavigationWarning] = useState(false);
   const [showPaymentBackWarning, setShowPaymentBackWarning] = useState(false);
 
@@ -47,6 +48,8 @@ const BookingWizard = () => {
     setCreatedAt,
     currentStep,
     setCurrentStep,
+    selectedBus,           // Add this
+    selectedSeats,
   } = useBookingStore();
 
   // Initialize and validate that we have required data from Hero
@@ -62,6 +65,7 @@ const BookingWizard = () => {
     
     // Set createdAt if not already set
     if (!createdAt) {
+      setIsCompleted({});
       setCreatedAt(new Date().toISOString());
     }
     
@@ -70,6 +74,16 @@ const BookingWizard = () => {
       setCurrentStep(0);
     }
   }, [departure, destination, date, createdAt, setCreatedAt, currentStep, setCurrentStep, navigate]);
+
+  useEffect(() => {
+    // If bus or seats are cleared but marked as completed, reset completion state
+    if (!selectedBus && isCompleted["busSelection"]) {
+      setIsCompleted((prev) => ({ ...prev, busSelection: false }));
+    }
+    if (selectedSeats.length === 0 && isCompleted["seatSelection"]) {
+      setIsCompleted((prev) => ({ ...prev, seatSelection: false }));
+    }
+  }, [selectedBus, selectedSeats, isCompleted]);
 
   // Prevent navigation when passenger data has been submitted
   useNavigationGuard({
@@ -100,7 +114,7 @@ const BookingWizard = () => {
 
     // Block if passenger data has been submitted and we're trying to go before payment step
     if (hasSubmittedPassengerData && targetStep < restrictedStepIndex) {
-      setShowRestrictedDialogue(true);
+      setShowRestrictedDialog(true);
       return;
     }
 
@@ -125,7 +139,7 @@ const BookingWizard = () => {
 
     // Block if passenger data has been submitted and trying to go before payment step
     if (hasSubmittedPassengerData && stepIndex < restrictedStepIndex) {
-      setShowRestrictedDialogue(true);
+      setShowRestrictedDialog(true);
       return;
     }
 
@@ -232,9 +246,16 @@ const BookingWizard = () => {
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => navigate("/")}
+            onClick={() => {
+              if (hasSubmittedPassengerData) {
+                setShowRestrictedDialog(true);
+              } else {
+                navigate("/");
+              }
+            }}
+            className={hasSubmittedPassengerData ? "text-red-600 border-red-300 hover:bg-red-50" : ""}
           >
-            Modify
+             {hasSubmittedPassengerData ? "Cancel Booking" : "Modify"}
           </Button>
         </div>
         
@@ -309,7 +330,7 @@ const BookingWizard = () => {
       )}
 
       {/* Restricted Access Dialog */}
-      <AlertDialog open={showRestrictedDialog} onOpenChange={setShowRestrictedDialogue}>
+      <AlertDialog open={showRestrictedDialog} onOpenChange={setShowRestrictedDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Changes Not Allowed</AlertDialogTitle>
@@ -320,7 +341,7 @@ const BookingWizard = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowRestrictedDialogue(false)}>
+            <AlertDialogAction onClick={() => setShowRestrictedDialog(false)}>
               I Understand
             </AlertDialogAction>
           </AlertDialogFooter>
