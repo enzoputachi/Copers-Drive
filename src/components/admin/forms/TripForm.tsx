@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,25 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
-// Mock data for routes and buses
-// const routes = [
-//   { id: "1", name: "Lagos to Abuja" },
-//   { id: "2", name: "Lagos to Ibadan" },
-//   { id: "3", name: "Abuja to Kaduna" },
-//   { id: "4", name: "Lagos to Benin" },
-//   { id: "5", name: "Port Harcourt to Calabar" },
-// ];
-
-// const buses = [
-//   { id: "1", plateNo: "ABC-123XY" },
-//   { id: "2", plateNo: "DEF-456XY" },
-//   { id: "3", plateNo: "GHI-789XY" },
-//   { id: "4", plateNo: "JKL-012XY" },
-//   { id: "5", plateNo: "MNO-345XY" },
-// ];
-
-
-
 const STATUS_OPTIONS = ["scheduled", "completed", "canceled"] as const;
 
 const tripSchema = z.object({
@@ -43,7 +23,6 @@ const tripSchema = z.object({
   departTime: z.string().min(1, "Departure time is required"),
   arriveTime: z.string().min(1, "Arrival time is required"),
   price: z.coerce.number().min(0, "Price must be non-negative"),
-  // availableSeats: z.coerce.number().int().min(0, "Available seats must be non-negative"),
   status: z.enum(STATUS_OPTIONS).default("scheduled"),
 });
 
@@ -71,8 +50,6 @@ interface TripFormProps {
   }) => void;
   isSubmitting?: boolean;
   onCancel: () => void;
-
-  /**From API */
   routes: RouteOption[];
   buses: BusOption[];
 }
@@ -86,7 +63,6 @@ const TripForm = ({ defaultValues, onSubmit, onCancel, isSubmitting = false , ro
       departTime: "",
       arriveTime: "",
       price: 0,
-      // availableSeats: 0,
       status: "scheduled",
       ...defaultValues,
     },
@@ -96,19 +72,14 @@ const TripForm = ({ defaultValues, onSubmit, onCancel, isSubmitting = false , ro
   const formatDateTimeForInput = (dateStr: string) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
-    return date.toISOString().slice(0, 16); // Format: "YYYY-MM-DDThh:mm"
+    return date.toISOString().slice(0, 16);
   };
 
   const handleFormSubmit = (data: TripFormValues) => {
-    // 1) parse IDs
     const routeIdNum = parseInt(data.routeId, 10);
     const busIdNum   = parseInt(data.busId,   10);
-
-    // 2) build JS Dates (includes seconds & timezone)
     const departDate = new Date(data.departTime);
     const arriveDate = new Date(data.arriveTime);
-
-    // 3) uppercase your status to match Prisma enum
     const prismaStatus = data.status.toUpperCase() as
       | "SCHEDULED"
       | "COMPLETED"
@@ -124,12 +95,20 @@ const TripForm = ({ defaultValues, onSubmit, onCancel, isSubmitting = false , ro
     });
   };
 
+  // Update form values when defaultValues change (for editing)
   useEffect(() => {
-    if (defaultValues?.departTime) {
-      form.setValue("departTime", formatDateTimeForInput(defaultValues.departTime));
-    }
-    if (defaultValues?.arriveTime) {
-      form.setValue("arriveTime", formatDateTimeForInput(defaultValues.arriveTime));
+    if (defaultValues) {
+      // Set all form values when editing
+      Object.keys(defaultValues).forEach(key => {
+        const value = defaultValues[key as keyof typeof defaultValues];
+        if (value !== undefined) {
+          if (key === 'departTime' || key === 'arriveTime') {
+            form.setValue(key, formatDateTimeForInput(value as string));
+          } else {
+            form.setValue(key as keyof TripFormValues, value);
+          }
+        }
+      });
     }
   }, [defaultValues, form]);
 
@@ -145,7 +124,7 @@ const TripForm = ({ defaultValues, onSubmit, onCancel, isSubmitting = false , ro
           render={({ field }) => (
             <FormItem>
               <FormLabel>Route</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a route" />
@@ -164,14 +143,13 @@ const TripForm = ({ defaultValues, onSubmit, onCancel, isSubmitting = false , ro
           )}
         />
 
-        {/*  ——— Bus Select ——— */}
         <FormField
           control={form.control}
           name="busId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Bus</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a bus" />
@@ -232,27 +210,13 @@ const TripForm = ({ defaultValues, onSubmit, onCancel, isSubmitting = false , ro
           )}
         />
 
-        {/* <FormField
-          control={form.control}
-          name="availableSeats"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Available Seats</FormLabel>
-              <FormControl>
-                <Input type="number" min={0} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
-
         <FormField
           control={form.control}
           name="status"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />

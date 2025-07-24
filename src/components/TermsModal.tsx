@@ -109,7 +109,7 @@ const TermsModalDemo = () => {
 
   return (
     <div className="p-8">
-      <Button onClick={() => setIsOpen(true)}>
+      <Button onClick={() => setIsOpen(true)} className='md:hidden'>
         Open Terms Modal
       </Button>
       
@@ -125,4 +125,4 @@ const TermsModalDemo = () => {
   );
 };
 
-export default TermsModalDemo;
+export default TermsModal;
