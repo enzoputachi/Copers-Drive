@@ -17,7 +17,7 @@ import { usePaystackPayment } from "@/hooks/useApi";
 // import { processPaystackPayment } from "@/services/paystackService";
 import SplitPayment from './payment/SplitPayment';
 import PaymentMethodSelector from './payment/PaymentMethodSelector';
-import Terms from '../../TermsModal'; // Import the new component
+import TermsModal from '../../TermsModal';
 
 interface PaymentProps {
   onComplete: () => void;
@@ -82,13 +82,14 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
     toast.success("Terms and conditions accepted");
   };
 
-  // Handle terms checkbox change
+  // Handle terms checkbox change - checkbox works normally
   const handleTermsCheckboxChange = (checked: boolean) => {
-    if (checked) {
-      setIsTermsModalOpen(true);
-    } else {
-      setHasAgreedToTerms(false);
-    }
+    setHasAgreedToTerms(checked);
+  };
+
+  // Handle modal close
+  const handleTermsModalClose = () => {
+    setIsTermsModalOpen(false);
   };
 
   // Call Paystack on submit
@@ -113,21 +114,18 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
         email: values.email,
       });
 
-      const paymentSuccessful = await mutateAsync({
+      await mutateAsync({
         email: values.email,
         amount: amountToPayInKobo,
         bookingId: bookingDraftId,
         isSplitPayment: paymentMethod === "split",
-      })
+      });
 
-      if (!paymentSuccessful) {
-        setIsSubmitting(false);
-        return;
-      }
-
+      // If we reach here, payment was successful (no error thrown)
       toast.success("Payment successful and booking created!");
       onComplete();
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Payment error:", error);
       toast.error(error.message || "Payment failed. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -195,7 +193,7 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
 
           <Button
             type="submit"
-            disabled={isPending || selectedSeats.length === 0 || !hasAgreedToTerms}
+            disabled={isPending || selectedSeats.length === 0 || !hasAgreedToTerms || isSubmitting}
             className="w-full"
           >
             {isSubmitting
@@ -210,9 +208,9 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
       </Form>
 
       {/* Terms Modal */}
-      <Terms
+      <TermsModal
         isOpen={isTermsModalOpen}
-        onClose={() => setIsTermsModalOpen(false)}
+        onClose={handleTermsModalClose}
         onAgree={handleAgreeToTerms}
       />
     </div>
