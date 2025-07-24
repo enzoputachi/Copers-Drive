@@ -44,9 +44,9 @@ const AdminHeader = ({ sidebarOpen, setSidebarOpen }: AdminHeaderProps) => {
       </div>
 
       <div className="flex items-center space-x-3">
-        <Button variant="ghost" size="icon" aria-label="Notifications">
+        {/* <Button variant="ghost" size="icon" aria-label="Notifications">
           <Bell className="h-5 w-5" />
-        </Button>
+        </Button> */}
         <a 
           href={import.meta.env.VITE_WEB_URL}
           target="_blank"
@@ -54,9 +54,9 @@ const AdminHeader = ({ sidebarOpen, setSidebarOpen }: AdminHeaderProps) => {
           className="text-sm text-primary hover:underline">
           View Site
         </a>
-        <Button variant="ghost" size="icon" aria-label="User menu">
+        {/* <Button variant="ghost" size="icon" aria-label="User menu">
           <User className="h-5 w-5" />
-        </Button>
+        </Button> */}
         <Button 
           variant="outline" 
           size="sm"

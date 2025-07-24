@@ -36,6 +36,7 @@ const BookingWizard = () => {
   const [showRestrictedDialog, setShowRestrictedDialog] = useState(false);
   const [showNavigationWarning, setShowNavigationWarning] = useState(false);
   const [showPaymentBackWarning, setShowPaymentBackWarning] = useState(false);
+  const [showCancelBookingDialog, setShowCancelBookingDialog] = useState(false); // Add this new state
 
   const { 
     departure, 
@@ -165,6 +166,13 @@ const BookingWizard = () => {
     window.scrollTo(0, 0);
   };
 
+  // Add this new function to handle booking cancellation
+  const handleCancelBooking = () => {
+    resetForm();
+    setShowCancelBookingDialog(false);
+    navigate("/");
+  };
+
   // Update step complete status
   const setStepComplete = (stepId: string, isComplete: boolean) => {
     setIsCompleted(prev => ({ ...prev, [stepId]: isComplete }));
@@ -248,7 +256,7 @@ const BookingWizard = () => {
             size="sm"
             onClick={() => {
               if (hasSubmittedPassengerData) {
-                setShowRestrictedDialog(true);
+                setShowCancelBookingDialog(true); // Show cancel booking dialog instead
               } else {
                 navigate("/");
               }
@@ -343,6 +351,28 @@ const BookingWizard = () => {
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => setShowRestrictedDialog(false)}>
               I Understand
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Cancel Booking Dialog - NEW */}
+      <AlertDialog open={showCancelBookingDialog} onOpenChange={setShowCancelBookingDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Booking?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel your booking? This will permanently delete 
+              all your booking information including passenger details, seat selection, 
+              and bus selection. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowCancelBookingDialog(false)}>
+              Keep Booking
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancelBooking} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Cancel Booking
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

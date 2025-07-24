@@ -107,7 +107,7 @@ const AdminDashboard = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <div className="flex items-center space-x-2">
-          <Button variant="outline">Export Reports</Button>
+          {/* <Button variant="outline">Export Reports</Button> */}
           <Button onClick={() => navigate("/trips")}>New Trip</Button>
         </div>
       </div>

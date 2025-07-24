@@ -26,7 +26,7 @@ const bookingSchema = z.object({
   date: z.date({
     required_error: "Please select a date",
   }),
-  passengers: z.number().int().min(1).max(10),
+  passengers: z.number().int().min(1).max(13),
   seatClass: z.enum(["Standard", "Executive", "VIP"]),
 });
 
@@ -134,7 +134,7 @@ const Hero = () => {
         setPaymentType("Full"); // fallback default
       }
     
-    toast.success("Redirecting to booking wizard...");
+    toast.success("Searching route...");
     navigate("/booking");
   };
 
