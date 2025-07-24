@@ -105,38 +105,59 @@ export const useGetPayment = (bookingId: number) => useQuery({
 
 // PaystackPayment
 export const usePaystackPayment = () => {
-  const QueryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-  return useMutation<{ success: boolean, ticketUrl?: string }, Error, PaystackParams >( {
-    mutationFn: payWithPaystack,
-    onSuccess: (data) => {
-      if (data.success) {
-        QueryClient.invalidateQueries({
-          queryKey: ['payments'],
-          exact: true,
-        });
-
-        if (data.ticketUrl) {
-          toast.success("Ticket is downloading...")
-
-          // Programatic download
-          const link = document.createElement('a');
-          // link.href = data.ticketUrl;
-          // link.download = '';
-          // window.open(data.ticketUrl, "_blank");
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+  return useMutation<{ success: boolean, ticketUrl?: string }, Error, PaystackParams>({
+    mutationFn: async (params: PaystackParams) => {
+      const result = await payWithPaystack(params);
+      
+      // If payment failed or was cancelled, throw an error so React Query treats it as a failure
+      if (!result.success) {
+        if (result.cancelled) {
+          throw new Error('Payment was cancelled');
+        } else {
+          throw new Error('Payment failed');
         }
+      }
+      
+      return result;
+    },
+    
+    onSuccess: (data) => {
+      // This will only run when payment is actually successful
+      queryClient.invalidateQueries({
+        queryKey: ['payments'],
+        exact: true,
+      });
+
+      if (data.ticketUrl) {
+        toast.success("Ticket is downloading...");
+
+        // Programmatic download
+        const link = document.createElement('a');
+        link.href = data.ticketUrl;
+        // Uncomment these if you want to force download instead of opening in new tab
+        // link.download = '';
+        // link.click();
+        
+        // Or open in new tab (current behavior)
+        window.open(data.ticketUrl, "_blank");
+        
+        document.body.appendChild(link);
+        document.body.removeChild(link);
       }
     },
 
-    onError: (err) => {
-      console.error(err);
+    onError: (error) => {
+      console.error('Payment error:', error);
       
+      // Don't show error toast for cancellations since we already show "cancelled" toast
+      if (error.message !== 'Payment was cancelled') {
+        toast.error(error.message || 'Payment failed. Please try again.');
+      }
     }
-  })
-}
+  });
+};
 
 // Notifications
 export const useSendNotification = () => useMutation({

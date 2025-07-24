@@ -364,13 +364,13 @@ const AdminTrips = () => {
         {currentTrip && (
           <TripForm 
             defaultValues={{
-              routeId: currentTrip.routeId,
-              busId: currentTrip.busId,
+              routeId: String(currentTrip.routeId),
+              busId: String(currentTrip.busId),
               departTime: currentTrip.departTime,
               arriveTime: currentTrip.arriveTime,
               price: currentTrip.price,
               // availableSeats: currentTrip.availableSeats,
-              status: currentTrip.status,
+              status: currentTrip.status?.toLowerCase(),
             }}
 
             onSubmit={handleEditTrip}
