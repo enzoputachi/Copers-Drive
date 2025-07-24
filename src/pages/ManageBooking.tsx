@@ -29,7 +29,7 @@ const ManageBooking = () => {
         onSuccess: (booking) => {
           toast({
             title: "Booking found!",
-            description: `Booking for ${booking.passengerName} retrieved successfully.`,
+            description: `Booking retrieved successfully. Details sents to your email`,
           });
           // Redirect or show booking details;
         },
