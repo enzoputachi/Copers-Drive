@@ -85,7 +85,7 @@ const About = () => {
         <section className="py-  bg-gradient-to-br from-yellow-50 to-green-50">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-              <div className="space-y-6">
+              <div className="space-y-6 text-justify">
                 <h2 className="text-4xl font-bold text-gray-900 mb-6 pt-4">What We Do</h2>
                 <p className="text-lg text-gray-700 leading-relaxed">
                   Corpers Drive is a logistics and transportation service specifically designed for NYSC corps members. 
@@ -175,7 +175,7 @@ const About = () => {
               {teamMembers.map((member, index) => (
                 <div key={index} className="text-center group">
                   {/* Profile Image Container */}
-                  <div className="relative mb-6">
+                  <div className="relative mb-6 ">
                     <div className="w-48 h-48 mx-auto rounded-full bg-gradient-to-br from-gray-200 to-gray-300 shadow-lg overflow-hidden group-hover:shadow-xl transition-shadow duration-300">
                       {member.image ? (
                         <img 
@@ -199,7 +199,7 @@ const About = () => {
                     <p className="text-green-600 font-semibold text-sm uppercase tracking-wide">
                       {member.position}
                     </p>
-                    <p className="text-gray-600 text-sm leading-relaxed mt-4 px-2">
+                    <p className="text-gray-600 text-sm leading-relaxed mt-4 px-2 text-justify">
                       {member.description}
                     </p>
                   </div>
