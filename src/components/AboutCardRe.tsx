@@ -147,7 +147,7 @@ const About = () => {
                       <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180">
                         <div className={`h-full flex flex-col justify-center border-0 shadow-lg bg-${item.color}-50 p-6 rounded-lg`}>
                           <div className="flex-1 flex items-center justify-center p-0">
-                            <p className={`text-${item.color}-800 leading-relaxed text-center`}>
+                            <p className={`text-${item.color}-800 leading-relaxed text-justify`}>
                               {item.content}
                             </p>
                           </div>
