@@ -118,6 +118,7 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
         email: values.email,
         amount: amountToPayInKobo,
         bookingId: bookingDraftId,
+        seatIds: selectedSeats.map((seat) => seat.seatId),
         isSplitPayment: paymentMethod === "split",
       });
 

@@ -14,6 +14,7 @@ import { useBookingStore } from "@/stores/bookingStore";
 import { toast } from "@/components/ui/sonner";
 import { useNavigate } from "react-router-dom";
 import { useListRoutes } from "@/hooks/useApi";
+import CustomSelect from "./customSelect";
 
 const locations = [
   "Jibowu, Lagos State", "Lagos", "Abuja", "Umuawulu,	Anambra State", "Kaduna", "Owerri",
@@ -37,6 +38,7 @@ const Hero = () => {
   const navigate = useNavigate();
   const { data: routes, isLoading, error } = useListRoutes();
   const [filteredDestinations, setFilteredDestinations] = useState<string[]>([])
+  const [datePickerOpen, setDatePickerOpen] = useState(false); 
   const routesArrays = routes?.data?.data || [];
   // console.log('Routes:', routesArrays, 'Loading:', isLoading, 'Error:', error);
 
@@ -142,6 +144,7 @@ const Hero = () => {
     if (date) {
       setValue("date", date, { shouldValidate: true });
       setBookingDate(date);
+      setDatePickerOpen(false);
     }
   };
 
@@ -155,16 +158,18 @@ const Hero = () => {
   }
 
 
+
+
   return (
     <section className="relative">
       {/* Hero Banner */}
       <div className="relative h-[700px] md:h-[600px] overflow-hidden">
-         {slides.map((slide, index) => (
+        {slides.map((slide, index) => (
           <div
             key={index}
             className={`
               absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out
-              ${index === currentSlide ? 'opacity-100 z-2' : 'opacity-0 z-0'}
+              ${index === currentSlide ? "opacity-100 z-2" : "opacity-0 z-0"}
             `}
             style={{
               backgroundImage: `url(${slide.image})`,
@@ -172,8 +177,11 @@ const Hero = () => {
             aria-hidden="true"
           />
         ))}
-        <div className="absolute inset-0 bg-black bg-opacity-40" aria-hidden="true" />
-      
+        <div
+          className="absolute inset-0 bg-black bg-opacity-40"
+          aria-hidden="true"
+        />
+
         <div className="relative h-full flex items-center justify-center text-center px-4">
           <div className="text-white max-w-3xl">
             <img className="hidden border rounded-2xl" src="/bg.jpg" alt="" />
@@ -190,14 +198,16 @@ const Hero = () => {
       {/* Booking Widget */}
       <div className="container mx-auto px-6 mb-[1.5rem]">
         <div className="relative -mt-[40rem] md:-mt-[30rem] bg-white/60 backdrop-blur-lg rounded-lg p-6 md:p-8 max-w-4xl mx-auto shadow-2xl drop-shadow-2xl">
-          <h2 className="text-2xl font-bold mb-6 text-center">Book Your Trip</h2>
-          
+          <h2 className="text-2xl font-bold mb-6 text-center">
+            Book Your Trip
+          </h2>
+
           <form onSubmit={handleSubmit(onSubmit)} className="md:space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Departure */}
               <div className="space-y-4">
                 <Label htmlFor="departure">Departure Location</Label>
-                <select
+                {/* <select
                   id="departure"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-space-y-4 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   {...register("departure", {
@@ -219,37 +229,76 @@ const Hero = () => {
                   {uniqueOrigins.map((origin) => (
                     <option key={origin} value={origin}>{origin}</option>
                   ))}
-                </select>
+                </select> */}
+                <CustomSelect
+                  options={uniqueOrigins}
+                  value={departure}
+                  onChange={(selectedOrigin) => {
+                    setDeparture(selectedOrigin);
+                    setValue("departure", selectedOrigin);
+
+                    // filter destinations for that origin
+                    const destinations = routesArrays
+                      .filter((route) => route.origin == selectedOrigin)
+                      .map((route) => route.destination);
+
+                    setFilteredDestinations([
+                      ...new Set(destinations),
+                    ] as string[]);
+                    setValue("destination", "");
+                  }}
+                  placeholder="Select departure"
+                  label="Please Select Source"
+                  searchPlaceholder="Search"
+                />
                 {errors.departure && (
-                  <p className="text-sm font-medium text-destructive">{errors.departure.message}</p>
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.departure.message}
+                  </p>
                 )}
               </div>
-              
+
               {/* Destination */}
               <div className="space-y-4">
                 <Label htmlFor="destination">Destination</Label>
-                <select
+                {/* <select
                   id="destination"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-space-y-4 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   {...register("destination", {
-                    onChange: (e) => setDestination(e.target.value)
+                    onChange: (e) => setDestination(e.target.value),
                   })}
                   disabled={!filteredDestinations.length}
                 >
                   <option value="">Select destination</option>
                   {filteredDestinations.map((dest) => (
-                    <option key={dest} value={dest}>{dest}</option>
+                    <option key={dest} value={dest}>
+                      {dest}
+                    </option>
                   ))}
-                </select>
+                </select> */}
+                <CustomSelect
+                  options={filteredDestinations}
+                  value={destination}
+                  onChange={(selectedDestination) => {
+                    setDestination(selectedDestination);
+                    setValue("destination", selectedDestination);
+                  }}
+                  placeholder="Select destination"
+                  label="Please Select Destination"
+                  searchPlaceholder="Search"
+                  disabled={!filteredDestinations.length}
+                />
                 {errors.destination && (
-                  <p className="text-sm font-medium text-destructive">{errors.destination.message}</p>
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.destination.message}
+                  </p>
                 )}
               </div>
-              
+
               {/* Date Picker */}
               <div className="space-y-4">
                 <Label htmlFor="date">Travel Date</Label>
-                <Popover>
+                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant={"outline"}
@@ -260,7 +309,11 @@ const Hero = () => {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                      {selectedDate ? (
+                        format(selectedDate, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -275,48 +328,72 @@ const Hero = () => {
                   </PopoverContent>
                 </Popover>
                 {errors.date && (
-                  <p className="text-sm font-medium text-destructive">{errors.date.message}</p>
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.date.message}
+                  </p>
                 )}
               </div>
-              
+
               {/* Passengers */}
               <div className="space-y-4">
                 <Label htmlFor="passengers">Number of Passengers</Label>
-                <select
+                {/* <select
                   id="passengers"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-space-y-4 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                  {...register("passengers", { 
+                  {...register("passengers", {
                     valueAsNumber: true,
-                    onChange: (e) => setPassengers(parseInt(e.target.value))
+                    onChange: (e) => setPassengers(parseInt(e.target.value)),
                   })}
                 >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                    <option key={num} value={num}>{num}</option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((num) => (
+                    <option key={num} value={num}>
+                      {num}
+                    </option>
                   ))}
-                </select>
+                </select> */}
+                <CustomSelect
+                  options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(
+                    (num) => num.toString()
+                  )}
+                  value={passengers?.toString() || ""}
+                  onChange={(selectedPassengers) => {
+                    const numPassengers = parseInt(selectedPassengers);
+                    setPassengers(numPassengers);
+                    setValue("passengers", numPassengers);
+                  }}
+                  placeholder="Select number of passengers"
+                  label="Number of Passengers"
+                  searchPlaceholder="Search"
+                />
                 {errors.passengers && (
-                  <p className="text-sm font-medium text-destructive">{errors.passengers.message}</p>
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.passengers.message}
+                  </p>
                 )}
               </div>
-              
+
               {/* Seat Class */}
               <div className="space-y-4 md:col-span-2 hidden">
                 <Label htmlFor="seatClass">Seat Class</Label>
                 <div className="grid grid-cols-3 gap-3">
                   {["Standard"].map((cls) => (
-                    <label 
+                    <label
                       key={cls}
                       className={`
                         flex items-center justify-center px-4 py-4 border rounded-md cursor-pointer
-                        ${seatClass === cls ? 'border-primary bg-primary/10' : 'border-gray-space-y-400 hover:bg-gray-50'}
+                        ${
+                          seatClass === cls
+                            ? "border-primary bg-primary/10"
+                            : "border-gray-space-y-400 hover:bg-gray-50"
+                        }
                       `}
                     >
-                      <input 
-                        type="radio" 
-                        value={cls} 
+                      <input
+                        type="radio"
+                        value={cls}
                         className="sr-only"
                         {...register("seatClass", {
-                          onChange: (e) => setSeatClass(e.target.value as any)
+                          onChange: (e) => setSeatClass(e.target.value as any),
                         })}
                       />
                       <span>{cls}</span>
@@ -324,14 +401,19 @@ const Hero = () => {
                   ))}
                 </div>
                 {errors.seatClass && (
-                  <p className="text-sm font-medium text-destructive">{errors.seatClass.message}</p>
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.seatClass.message}
+                  </p>
                 )}
               </div>
             </div>
-            
+
             {/* Submit Button */}
             <div className="pt-[2rem]">
-              <Button type="submit" className="w-full py-6 text-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <Button
+                type="submit"
+                className="w-full py-6 text-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+              >
                 Continue to Booking
               </Button>
             </div>

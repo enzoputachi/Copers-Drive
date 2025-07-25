@@ -153,22 +153,24 @@ const BookingWizard = () => {
 
   const handleForceNavigation = () => {
     resetForm();
+    setCurrentStep(0);
     setShowNavigationWarning(false);
     navigate("/");
   };
 
   const handlePaymentBackWithReset = () => {
     resetForm();
+    setCurrentStep(0);
     setShowPaymentBackWarning(false);
     // Reset to the beginning or previous step
     navigate("/");
-    setCurrentStep(Math.max(0, currentStep - 1));
     window.scrollTo(0, 0);
   };
 
   // Add this new function to handle booking cancellation
   const handleCancelBooking = () => {
     resetForm();
+    setCurrentStep(0);
     setShowCancelBookingDialog(false);
     navigate("/");
   };
@@ -258,6 +260,8 @@ const BookingWizard = () => {
               if (hasSubmittedPassengerData) {
                 setShowCancelBookingDialog(true); // Show cancel booking dialog instead
               } else {
+                resetForm();
+                setCurrentStep(0)
                 navigate("/");
               }
             }}

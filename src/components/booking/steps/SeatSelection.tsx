@@ -11,6 +11,7 @@ import { toast } from "@/components/ui/sonner";
 import { useValidateTripDetails } from "@/hooks/useApi";
 import SeatIcon from "@/components/ui/seat";
 import BusSeatLayout from "@/components/seatLayout";
+import { Check } from "lucide-react";
 
 // Toggle between mock and live at build/config time
 const USE_MOCK_DATA = false;
@@ -37,12 +38,11 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
     error,
   } = useValidateTripDetails(Number(selectedBus?.id));
 
-
   // Local selected seats - Initialize as empty array to avoid stale state
   const [localSelected, setLocalSelected] = useState<SelectedSeat[]>([]);
   const lastStepCompleteRef = useRef<boolean>();
   const previousBusIdRef = useRef<string | null>(null);
- console.log("PpreviousBusIdRef:", previousBusIdRef);
+ console.log("Api Seats:", apiSeats);
  
   // Reset seat selection when bus changes
   useEffect(() => {
@@ -66,14 +66,6 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
     }
   }, [selectedBus, setSelectedSeats]);
 
-  // Initialize local selected seats from store only on first load
-  // useEffect(() => {
-  //   // Only set from store if we have the same bus and no local selections yet
-  //   if (selectedSeats.length > 0 && localSelected.length === 0 && selectedBus?.id === previousBusIdRef.current) {
-  //     setLocalSelected(selectedSeats);
-  //   }
-  // }, [selectedSeats, localSelected.length, selectedBus?.id]);
-
   // Sync selection and step
   useEffect(() => {
     const isComplete = localSelected.length === passengers;
@@ -93,8 +85,6 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
       setStepComplete('seatSelection', isComplete);
     }
   }, [localSelected, passengers, selectedSeats, setSelectedSeats, setStepComplete]);
-
-
 
   // Generate mock grid
   const generateMock = () => {
@@ -122,7 +112,7 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
       .map(seat => ({
       id: seat.id,
       label: seat.seatNo,
-      isAvailable: seat.status === 'AVAILABLE',
+      isAvailable: seat.isAvailable,
       isSelected: localSelected.some(s => s.seatNo === seat.seatNo),
       type: 'seat' as const,
     }));
@@ -141,7 +131,6 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
   const seats = USE_MOCK_DATA ? generateMock() : generateFromApi();
 
   // Map seats for BusSeatLayout (14-seat bus format)
-  // Fixed mapSeatsForBusLayout function
   const mapSeatsForBusLayout = () => {
     const busType = getBusType();
     const maxSeats = busType === "sprinter" ? 14 : busType === "coaster44" ? 44 : 51;
@@ -161,12 +150,12 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
         .slice(0, maxSeats);
       
       return sortedSeats.map((seat, index) => ({
-        id: seat.id,                    // Use index + 1 instead of seat.id
+        id: seat.id,
         seatNo: seat.seatNo,
         label: seat.seatNo,
-        isAvailable: seat.status === 'AVAILABLE',
+        isAvailable: seat.isAvailable,
         status: seat.status,
-        originalId: seat.id               // Keep original ID for reference if needed
+        originalId: seat.id
       }));
     }
   };
@@ -212,6 +201,24 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
     }
   };
 
+  // Auto-confirm when correct number of seats selected
+  // const handleAutoConfirm = () => {
+  //   if (localSelected.length === passengers) {
+  //     onComplete();
+  //     setDialogOpen(false);
+  //     toast.success(`${passengers} seat${passengers > 1 ? 's' : ''} selected successfully!`);
+  //   }
+  // };
+
+  // Trigger auto-confirm when selection is complete
+  // useEffect(() => {
+  //   if (dialogOpen && localSelected.length === passengers) {
+  //     // Small delay to let user see their final selection
+  //     const timer = setTimeout(handleAutoConfirm, 800);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [localSelected.length, passengers, dialogOpen]);
+
   if (!USE_MOCK_DATA && isLoading) {
     return <p>Loading seats...</p>;
   }
@@ -231,6 +238,8 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
     }
     return "coaster44"
   }
+
+  const isSelectionComplete = localSelected.length === passengers;
 
   return (
     <div>
@@ -285,11 +294,32 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
       </Button>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-[480px] max-h-[85vh] w-full bg-gray-50 p-4 border rounded-xl">
-          <DialogHeader>
-            <DialogTitle>Select Your Seats</DialogTitle>
+        <DialogContent className="max-w-[480px] max-h-[90vh] w-full bg-gray-50 p-4 border rounded-xl flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center justify-between">
+              <span>Select Your Seats</span>
+              <div className="text-sm text-gray-600">
+                {localSelected.length}/{passengers} selected
+                {isSelectionComplete && (
+                  <span className="text-green-600 ml-2 font-medium">✓ Complete</span>
+                )}
+              </div>
+            </DialogTitle>
           </DialogHeader>
-          <div className="overflow-y-auto max-h-[70vh] mt-4 pb-4 scrollbar-minimal">
+          
+          {/* Scrollable content area */}
+          <div className="flex-1 overflow-y-auto mt-4 min-h-0">
+            {/* Compact progress indicator */}
+            <div className="mb-4">
+              <div className="w-full bg-gray-200 rounded-full h-1.5">
+                <div 
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    isSelectionComplete ? 'bg-green-500' : 'bg-blue-500'
+                  }`}
+                  style={{ width: `${(localSelected.length / passengers) * 100}%` }}
+                />
+              </div>
+            </div>
 
             {/* Legend */}
             <div className="mb-6 flex justify-center space-x-4">
@@ -297,7 +327,7 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
             </div>
 
             {/* Seat map */}
-            <div className="seat-map mx-auto">
+            <div className="seat-map mx-auto pb-4">
               <BusSeatLayout
                 busType={getBusType()}
                 selectedSeats={localSelected}
@@ -306,19 +336,35 @@ const SeatSelection = ({ onComplete, setStepComplete }: SeatSelectionProps) => {
                 maxSeats={passengers}
               />
             </div>
+          </div>
 
-            <div className="mt-6 flex justify-between">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+          {/* Fixed footer with buttons */}
+          <div className="flex-shrink-0 pt-4 border-t mt-4">
+            <div className="flex justify-between gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setDialogOpen(false)}
+                className="flex-1"
+              >
                 Cancel
               </Button>
               <Button
                 onClick={() => {
                   onComplete();
                   setDialogOpen(false);
+                  toast.success(`${passengers} seat${passengers > 1 ? 's' : ''} confirmed!`);
                 }}
-                disabled={localSelected.length !== passengers}
+                disabled={!isSelectionComplete}
+                className={`flex-1 ${isSelectionComplete ? 'bg-green-600 hover:bg-green-700' : ''}`}
               >
-                Confirm
+                {isSelectionComplete ? (
+                  <div className="flex items-center">
+                    <Check className="w-4 h-4 mr-2" />
+                    Confirm
+                  </div>
+                ) : (
+                  `Select ${passengers - localSelected.length} More`
+                )}
               </Button>
             </div>
           </div>

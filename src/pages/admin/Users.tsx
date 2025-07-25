@@ -97,19 +97,36 @@ const initialUsers: User[] = [
 // Toggle to force‐use mock data instead of API
 const USE_MOCK_USERS = false;
 
-// Form schema
-const userFormSchema = z.object({
+// —————————————————————————————————————————————
+// FIXED: Separate schemas for create and edit
+// —————————————————————————————————————————————
+const createUserSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   email: z.string().email("Please enter a valid email"),
   role: z.enum(["admin", "manager", "support", "finance", "driver"]),
 });
 
-type UserFormValues = z.infer<typeof userFormSchema>;
+const editUserSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  // Password is optional in edit mode
+  password: z.string().optional().refine((val) => {
+    // If password is provided, it must be at least 6 characters
+    if (val && val.length > 0) {
+      return val.length >= 6;
+    }
+    return true;
+  }, "Password must be at least 6 characters if provided"),
+  email: z.string().email("Please enter a valid email"),
+  role: z.enum(["admin", "manager", "support", "finance", "driver"]).optional(),
+});
+
+type CreateUserFormValues = z.infer<typeof createUserSchema>;
+type EditUserFormValues = z.infer<typeof editUserSchema>;
 
 const AdminUsers = () => {
   // —————————————————————————————————————————————
-  // 2) Local state always holds “the array to display”
+  // 2) Local state always holds "the array to display"
   // —————————————————————————————————————————————
   const [usersData, setUsersData] = useState<User[]>([]);
   const [openModal, setOpenModal] = useState(false);
@@ -136,8 +153,8 @@ const AdminUsers = () => {
   console.log("API Users:", apiUsers);
   
   // —————————————————————————————————————————————
-  // 4) Effect: “if mock‐flag is on, ignore API and always load initialUsers;
-  //           otherwise, once loading finishes, copy/format the API rows”
+  // 4) Effect: "if mock‐flag is on, ignore API and always load initialUsers;
+  //           otherwise, once loading finishes, copy/format the API rows"
   // —————————————————————————————————————————————
   useEffect(() => {
     if (USE_MOCK_USERS) {
@@ -154,20 +171,20 @@ const AdminUsers = () => {
   }, [apiUsers, isLoading]);
 
   // —————————————————————————————————————————————
-  // 5) React Hook Form
+  // FIXED: Dynamic form schema based on modal type
   // —————————————————————————————————————————————
-  const form = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
+  const form = useForm<CreateUserFormValues | EditUserFormValues>({
+    resolver: zodResolver(modalType === "create" ? createUserSchema : editUserSchema),
     defaultValues: {
       name: "",
       email: "",
       password: "",
-      role: "support",
+      role: "admin",
     },
   });
 
   // —————————————————————————————————————————————
-  // 6) Handle “create”
+  // 6) Handle "create"
   // —————————————————————————————————————————————
   const handleCreateUser = () => {
     setModalType("create");
@@ -175,12 +192,12 @@ const AdminUsers = () => {
       name: "",
       email: "",
       password: "",
-      role: "support",
+      role: "admin",
     });
     setOpenModal(true);
   };
 
-  const onSubmit = (values: UserFormValues) => {
+  const onSubmit = (values: CreateUserFormValues) => {
     if (USE_MOCK_USERS) {
       setLoading(true);
       setTimeout(() => {
@@ -200,6 +217,7 @@ const AdminUsers = () => {
         setLoading(false);
         setOpenModal(false);
         toast.success("User created successfully (mock)!");
+        form.reset();
       }, 1000);
     } else {
       createUserMutation.mutate(
@@ -216,6 +234,7 @@ const AdminUsers = () => {
           onSuccess: () => {
             setOpenModal(false);
             form.reset();
+            toast.success("User created successfully!");
           },
         }
       );
@@ -223,57 +242,110 @@ const AdminUsers = () => {
   };
 
   // —————————————————————————————————————————————
-  // 7) Handle “edit”
+  // 7) Handle "edit"
   // —————————————————————————————————————————————
   const handleEditUser = (user: User) => {
     setModalType("edit");
     setSelectedUser(user);
+
+     const mappedRole = user.role === 'ADMIN' ? 'admin' : user.role;
+
     form.reset({
       name: user.name,
       email: user.email,
-      password: user.password,
-      role: user.role as any,
+      password: "", // Always start with empty password in edit mode
+      role: mappedRole as any,
     });
     setOpenModal(true);
   };
 
-  const onEditSubmit = (values: UserFormValues) => {
+  // —————————————————————————————————————————————
+  // FIXED: Improved edit handler with better UX
+  // —————————————————————————————————————————————
+  const onEditSubmit = (values: EditUserFormValues) => {
     if (!selectedUser) return;
+    
+    // Build changes object with better validation
+    const changes: Partial<User> = {};
+    let hasChanges = false;
+    const changesList: string[] = [];
+    
+    // Check name change
+    if (values.name.trim() !== selectedUser.name.trim()) {
+      changes.name = values.name.trim();
+      hasChanges = true;
+      changesList.push('name');
+    }
+    
+    // Check email change
+    if (values.email.trim().toLowerCase() !== selectedUser.email.trim().toLowerCase()) {
+      changes.email = values.email.trim();
+      hasChanges = true;
+      changesList.push('email');
+    }
+    
+    // Check role change
+     const currentRole = selectedUser.role === 'ADMIN' ? 'admin' : selectedUser.role;
+    if (values.role !== currentRole) {
+      changes.role = values.role;
+      hasChanges = true;
+      changesList.push('role');
+    }
+    
+    // Only include password if it's provided and not empty
+    if (values.password && values.password.trim() !== '') {
+      changes.password = values.password;
+      hasChanges = true;
+      changesList.push('password');
+    }
+    
+    // If no changes, show friendly message
+    if (!hasChanges) {
+      toast.info("No changes detected. User information remains the same.");
+      setOpenModal(false);
+      return;
+    }
+    
+    // Show clear confirmation with security warning for password changes
+    const hasPasswordChange = changesList.includes('password');
+    const confirmMessage = hasPasswordChange 
+      ? `⚠️ SECURITY WARNING: You are about to change the password for ${selectedUser.name}.\n\nChanges: ${changesList.join(', ')}\n\nThis will log them out of all sessions. Continue?`
+      : `You are about to update: ${changesList.join(', ')} for ${selectedUser.name}.\n\nContinue?`;
+    
+    const confirmed = window.confirm(confirmMessage);
+    
+    if (!confirmed) return;
+    
     if (USE_MOCK_USERS) {
       setLoading(true);
       setTimeout(() => {
         setUsersData((prev) =>
           prev.map((u) =>
             u.id === selectedUser.id
-              ? {
-                  ...u,
-                  name: values.name,
-                  email: values.email,
-                  role: values.role,
-                  lastLogin: u.lastLogin,
-                  createdAt: u.createdAt,
-                  status: u.status,
-                  password: u.password,
-                  logs: u.logs,
-                }
+              ? { ...u, ...changes }
               : u
           )
         );
         setLoading(false);
         setOpenModal(false);
-        toast.success("User updated successfully (mock)!");
+        
+        // Different success messages
+        const successMessage = hasPasswordChange 
+          ? `User updated successfully! Password changed for ${selectedUser.name}.`
+          : `User updated successfully! Changed: ${changesList.join(', ')}`;
+        
+        toast.success(successMessage);
+        form.reset();
+        setSelectedUser(null);
       }, 1000);
     } else {
       updateUserMutation.mutate(
         {
           id: selectedUser.id,
           userData: {
-            name: values.name,
-            email: values.email,
-            role: values.role,
+            ...changes,
             status: selectedUser.status,
             lastLogin: selectedUser.lastLogin!,
-            password: selectedUser.password,
             logs: selectedUser.logs,
           },
         },
@@ -282,6 +354,12 @@ const AdminUsers = () => {
             setOpenModal(false);
             form.reset();
             setSelectedUser(null);
+            
+            const successMessage = hasPasswordChange 
+              ? `User updated successfully! Password changed for ${selectedUser.name}.`
+              : `User updated successfully! Changed: ${changesList.join(', ')}`;
+              
+            toast.success(successMessage);
           },
         }
       );
@@ -289,7 +367,7 @@ const AdminUsers = () => {
   };
 
   // —————————————————————————————————————————————
-  // 8) Handle “view”
+  // 8) Handle "view"
   // —————————————————————————————————————————————
   const handleViewUser = (user: User) => {
     setSelectedUser(user);
@@ -297,21 +375,8 @@ const AdminUsers = () => {
   };
 
   // —————————————————————————————————————————————
-  // 9) Handle “delete”
+  // 9) Handle "delete"
   // —————————————————————————————————————————————
-  // const handleDeleteUser = (userId: string) => {
-  //   if (USE_MOCK_USERS) {
-  //     setIsDeleting(true);
-  //     setTimeout(() => {
-  //       setUsersData((prev) => prev.filter((u) => u.id !== userId));
-  //       setIsDeleting(false);
-  //       toast.success("User deleted successfully (mock)!");
-  //     }, 500);
-  //   } else {
-  //     deleteUserMutation.mutate(userId);
-  //     console.log("User Id:", userId)
-  //   }
-  // };
 
   const confirmDeleteUser = (user: User) => {
     setUserToDelete(user);
@@ -419,10 +484,18 @@ const AdminUsers = () => {
       {/* Create/Edit User Modal */}
       <FormModal
         title={modalType === "create" ? "Create User" : "Edit User"}
-        description="Add or modify user details."
+        description={
+          modalType === "create" 
+            ? "Add a new user to the system." 
+            : "Modify user details. Only changed fields will be updated."
+        }
         open={openModal}
         onOpenChange={setOpenModal}
-        loading={loading || createUserMutation.isPending || updateUserMutation.isPending}
+        loading={
+          loading ||
+          createUserMutation.isPending ||
+          updateUserMutation.isPending
+        }
       >
         <Form {...form}>
           <form
@@ -433,7 +506,6 @@ const AdminUsers = () => {
             }
             className="space-y-4"
           >
-            
             <FormField
               control={form.control}
               name="name"
@@ -444,7 +516,9 @@ const AdminUsers = () => {
                     <Input placeholder="Full name" {...field} />
                   </FormControl>
                   {fieldState.error && (
-                    <p className="text-sm text-red-500">{fieldState.error.message}</p>
+                    <p className="text-sm text-red-500">
+                      {fieldState.error.message}
+                    </p>
                   )}
                 </FormItem>
               )}
@@ -457,31 +531,58 @@ const AdminUsers = () => {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="Email address" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="Email address"
+                      {...field}
+                    />
                   </FormControl>
                   {fieldState.error && (
-                    <p className="text-sm text-red-500">{fieldState.error.message}</p>
+                    <p className="text-sm text-red-500">
+                      {fieldState.error.message}
+                    </p>
                   )}
                 </FormItem>
               )}
             />
-            
+
+            {/* FIXED: Better password field with clear messaging */}
             <FormField
               control={form.control}
               name="password"
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>
+                    Password
+                    {modalType === "create" && (
+                      <span className="text-red-500 ml-1">*</span>
+                    )}
+                    {modalType === "edit" && (
+                      <span className="text-sm text-muted-foreground ml-2">
+                        (optional - leave blank to keep current password)
+                      </span>
+                    )}
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="Password"
+                      placeholder={
+                        modalType === "edit"
+                          ? "Enter new password or leave blank"
+                          : "Password (required)"
+                      }
                       {...field}
-                      // disabled={modalType === "edit"} Disable in edit mode
                     />
                   </FormControl>
                   {fieldState.error && (
-                    <p className="text-sm text-red-500">{fieldState.error.message}</p>
+                    <p className="text-sm text-red-500">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                  {modalType === "edit" && field.value && (
+                    <p className="text-sm text-amber-600">
+                      ⚠️ Password will be changed
+                    </p>
                   )}
                 </FormItem>
               )}
@@ -500,14 +601,16 @@ const AdminUsers = () => {
                       </SelectTrigger>
                     </FormControl>
                     {fieldState.error && (
-                      <p className="text-sm text-red-500">{fieldState.error.message}</p>
+                      <p className="text-sm text-red-500">
+                        {fieldState.error.message}
+                      </p>
                     )}
                     <SelectContent>
                       <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
+                      {/* <SelectItem value="manager">Manager</SelectItem>
                       <SelectItem value="support">Support</SelectItem>
                       <SelectItem value="finance">Finance</SelectItem>
-                      {/* <SelectItem value="driver">Driver</SelectItem> */}
+                      <SelectItem value="driver">Driver</SelectItem> */}
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -516,16 +619,26 @@ const AdminUsers = () => {
 
             <DialogFooter>
               <div className="flex justify-between">
-                <Button type="button" variant="outline" onClick={() => setOpenModal(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setOpenModal(false)}
+                >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  disabled={loading || createUserMutation.isPending || updateUserMutation.isPending}
+                  disabled={
+                    loading ||
+                    createUserMutation.isPending ||
+                    updateUserMutation.isPending
+                  }
                 >
-                  {loading || createUserMutation.isPending || updateUserMutation.isPending
+                  {loading ||
+                  createUserMutation.isPending ||
+                  updateUserMutation.isPending
                     ? "Processing..."
-                    : "Save"}
+                    : modalType === "create" ? "Create User" : "Update User"}
                 </Button>
               </div>
             </DialogFooter>
@@ -535,9 +648,7 @@ const AdminUsers = () => {
 
       <DeleteConfirmation
         title="Delete User"
-        description={
-          `Are you sure you want to delete ${userToDelete?.name}? This action cannot be undone.`
-        }
+        description={`Are you sure you want to delete ${userToDelete?.name}? This action cannot be undone.`}
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleDeleteUser}

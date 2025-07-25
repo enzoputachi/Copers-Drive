@@ -7,6 +7,7 @@ export interface PaystackParams {
   email: string;
   amount: number;
   bookingId: number,
+  seatIds: number[],
   isSplitPayment?: boolean;
 }
 
@@ -20,6 +21,7 @@ export const payWithPaystack = async ({
   email,
   amount,
   bookingId,
+  seatIds,
   isSplitPayment,
 }: PaystackParams): Promise<PaymentResult> => {
   try {
@@ -27,6 +29,7 @@ export const payWithPaystack = async ({
       email,
       amount,
       bookingId,
+      seatIds,
       isSplitPayment,
     });
 
@@ -55,8 +58,11 @@ export const payWithPaystack = async ({
           try {
             console.log("Payment transaction completed:", transaction);
             
-            const verifyRes = await api.get(
-              `/payments/verify/${transaction.reference}`
+            const verifyRes = await api.post(
+              `/payments/verify`, {
+                reference: transaction.reference,
+                seatIds,
+              }
             );
 
             const ticketUrl = verifyRes.data.ticketUrl;

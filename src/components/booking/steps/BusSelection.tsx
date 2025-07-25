@@ -255,7 +255,7 @@ const BusSelection = ({ onComplete, setStepComplete }: BusSelectionProps) => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Select Bus</h2>
+      <h2 className="text-xl font-semibold mb-4 overflow-x-hidden">Select Bus</h2>
       <div className="mb-6">
         <h3 className="font-medium text-lg">
           {departure} to {destination}
@@ -286,7 +286,7 @@ const BusSelection = ({ onComplete, setStepComplete }: BusSelectionProps) => {
               />
             </PopoverContent>
           </Popover>
-          {localSelectedBus && (
+          {/* {localSelectedBus && (
             <Button
               variant="outline"
               size="sm"
@@ -295,7 +295,7 @@ const BusSelection = ({ onComplete, setStepComplete }: BusSelectionProps) => {
             >
               Clear Selection
             </Button>
-          )}
+          )} */}
         </div>
       </div>
 
