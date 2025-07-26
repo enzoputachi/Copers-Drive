@@ -297,6 +297,59 @@ const AdminSettings = () => {
     createSettingsMutation.isPending || 
     deleteSettingsMutation.isPending;
 
+
+  // Maintenance mode toggle
+  const handleMaintenanceModeToggle = (checked: boolean) => {
+    // Update the form state immediately
+    updateField("maintenanceMode", checked);
+
+    // Immediately save the change to the backend
+    const updateData = {
+      maintenanceMode: checked,
+    };
+
+    if (USE_MOCK_SETTINGS) {
+      toast.success(
+        `Maintenance mode ${checked ? "enabled" : "disabled"} (mock).`
+      );
+      return;
+    }
+
+    if (isCreating || !settingsData?.id) {
+      // If creating, save all current form data including the new maintenance mode
+      handleCreate({ ...settingsData, maintenanceMode: checked });
+    } else {
+      // If updating existing settings, just update maintenance mode
+      updateSettingsMutation.mutate(
+        {
+          id: settingsData.id,
+          settings: { maintenanceMode: checked },
+        },
+        {
+          onSuccess: (data) => {
+            toast.success(
+              `Maintenance mode ${checked ? "enabled" : "disabled"}.`
+            );
+            const settings = data.data.data;
+            setSettingsData((prev) =>
+              prev ? { ...prev, maintenanceMode: checked } : null
+            );
+            setOriginalSettings((prev) =>
+              prev ? { ...prev, maintenanceMode: checked } : null
+            );
+            refetch();
+          },
+          onError: (error) => {
+            console.error("Maintenance mode update error:", error);
+            toast.error("Failed to update maintenance mode.");
+            // Revert the toggle on error
+            updateField("maintenanceMode", !checked);
+          },
+        }
+      );
+    }
+  };
+
   // —————————————————————————————————————————————
   // 11) Render Tabs + Forms
   // —————————————————————————————————————————————
@@ -429,9 +482,8 @@ const AdminSettings = () => {
                 <Switch
                   id="maintenance-mode"
                   checked={!!settingsData?.maintenanceMode}
-                  onCheckedChange={(checked) =>
-                    updateField("maintenanceMode", checked)
-                  }
+                  onCheckedChange={handleMaintenanceModeToggle}
+                  disabled={isMutationPending}
                 />
               </div>
 

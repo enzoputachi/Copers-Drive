@@ -145,7 +145,7 @@ export const bookingsApi = {
     api.post<Booking>('/bookings', data),
   getBooking: (id: number) => api.get<Booking>(`/bookings/${id}`),
   getBookingByToken: (token: string) =>
-    api.get<Booking>(`/bookings/token/${token}`),
+    api.get<Booking>(`/bookings/${token}`),
   cancelBooking: (id: number) =>
     api.post<Booking>(`/bookings/${id}/cancel`),
 };
@@ -172,10 +172,19 @@ export const settingsApi = {
   getSettings: () => api.get('/companySettings'),
 }
 
+// retrive booking
 export const retrieveBookingApi = {
   getBooking: (bookingToken: string, email: string) => 
     api.get<Booking>('/retrieve', {
       params: { email, bookingToken }
+    }),
+}
+
+// Confirm Booking
+export const confirmBookingApi = {
+  getBooking: (bookingToken: string) => 
+    api.get<Booking>('/bookings/confirm', {
+      params: { bookingToken }
     }),
 }
 

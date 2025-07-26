@@ -13,6 +13,7 @@ import {
   useUpdateBus,
   useDeleteBus,
 } from "@/hooks/useAdminQueries";
+import { truncate } from "node:fs";
 
 // —————————————————————————————————————————————
 // 1) Mock buses data (IDs as strings!)
@@ -120,6 +121,7 @@ const AdminBuses = () => {
   //     • Otherwise call API mutation
   // —————————————————————————————————————————————
   const handleCreateBus = (data: any) => {
+    setIsSubmitting(true)
     if (USE_MOCK_BUSES) {
       setIsSubmitting(true);
       setTimeout(() => {
@@ -140,8 +142,12 @@ const AdminBuses = () => {
     }
 
     createBusMutation.mutate(data, {
+      // setIsSubmiting(true);
       onSuccess: () => {
         setIsCreateModalOpen(false);
+      },
+      onSettled: () => {
+        setIsSubmitting(false);
       },
     });
   };
@@ -152,6 +158,7 @@ const AdminBuses = () => {
   //     • Otherwise: call API update
   // —————————————————————————————————————————————
   const handleEditBus = (data: any) => {
+    setIsSubmitting(true)
     if (USE_MOCK_BUSES) {
       if (!currentBus) return;
       setIsSubmitting(true);
@@ -176,6 +183,9 @@ const AdminBuses = () => {
           setIsEditModalOpen(false);
           setCurrentBus(null);
         },
+        onSettled: () => {
+          setIsSubmitting(false);
+        },
       }
     );
   };
@@ -186,6 +196,7 @@ const AdminBuses = () => {
   //     • Otherwise: call API delete
   // —————————————————————————————————————————————
   const handleDeleteBus = () => {
+    setIsDeleting(true)
     if (!currentBus) return;
 
     if (USE_MOCK_BUSES) {
@@ -205,6 +216,9 @@ const AdminBuses = () => {
       onSuccess: () => {
         setIsDeleteDialogOpen(false);
         setCurrentBus(null);
+      },
+      onSettled: () => {
+        setIsDeleting(false);
       },
     });
   };

@@ -247,8 +247,9 @@ const AdminUsers = () => {
   const handleEditUser = (user: User) => {
     setModalType("edit");
     setSelectedUser(user);
+    
 
-     const mappedRole = user.role === 'ADMIN' ? 'admin' : user.role;
+    const mappedRole = user.role === 'ADMIN' ? 'admin' : user.role;
 
     form.reset({
       name: user.name,
@@ -315,6 +316,7 @@ const AdminUsers = () => {
     const confirmed = window.confirm(confirmMessage);
     
     if (!confirmed) return;
+    setLoading(true);
     
     if (USE_MOCK_USERS) {
       setLoading(true);
@@ -361,6 +363,9 @@ const AdminUsers = () => {
               
             toast.success(successMessage);
           },
+          onSettled: () => {
+            setLoading(false);
+          }
         }
       );
     }

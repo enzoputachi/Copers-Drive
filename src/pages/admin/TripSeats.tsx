@@ -152,7 +152,7 @@ const AdminTripSeats = () => {
       </Helmet>
       
       <div className="mb-6">
-        <Link to="/admin/trips" className="inline-flex items-center text-primary hover:underline mb-4">
+        <Link to="/trips" className="inline-flex items-center text-primary hover:underline mb-4">
           <ChevronLeft className="h-4 w-4 mr-1" />
           Back to Trips
         </Link>

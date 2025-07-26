@@ -78,6 +78,7 @@ const AdminRoutes = () => {
   }, [routes, isLoading]);
 
   const handleCreateRoute = (data: any) => {
+    setIsSubmitting(true);
     if (USE_MOCK_ROUTES) {
       setIsSubmitting(true);
       setTimeout(() => {
@@ -95,10 +96,14 @@ const AdminRoutes = () => {
 
     createRouteMutation.mutate(data, {
       onSuccess: () => setIsCreateModalOpen(false),
+              onSettled: () => {
+          setIsSubmitting(false);
+        },
     });
   };
 
   const handleEditRoute = (data: any) => {
+     setIsSubmitting(true);
     if (USE_MOCK_ROUTES) {
       if (!currentRoute) return;
       setIsSubmitting(true);
@@ -123,12 +128,16 @@ const AdminRoutes = () => {
           setIsEditModalOpen(false);
           setCurrentRoute(null);
         },
+                onSettled: () => {
+          setIsSubmitting(false);
+        },
       }
     );
   };
 
   const handleDeleteRoute = () => {
     if (!currentRoute) return;
+    setIsDeleting(true);
 
     if (USE_MOCK_ROUTES) {
       setIsDeleting(true);
@@ -148,6 +157,9 @@ const AdminRoutes = () => {
         setIsDeleteDialogOpen(false);
         setCurrentRoute(null);
       },
+      onSettled: () => {
+        setIsDeleting(false);
+      }
     });
   };
 

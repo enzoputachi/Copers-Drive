@@ -122,6 +122,7 @@ const AdminTrips = () => {
   //     • Otherwise call API mutation
   // —————————————————————————————————————————————
   const handleCreateTrip = (data: any) => {
+    setIsSubmitting(true);
     if (USE_MOCK_TRIPS) {
       setIsSubmitting(true);
       // Simulate API call
@@ -148,11 +149,15 @@ const AdminTrips = () => {
     createTripMutation.mutate(data, {
       onSuccess: () => {
         setIsCreateModalOpen(false)
+      },
+      onSettled: () => {
+        setIsSubmitting(false);
       }
     })
   };
 
   const handleEditTrip = (data: any) => {
+    setIsSubmitting(true);
     if (USE_MOCK_TRIPS) {
       setIsSubmitting(true);
       // Simulate API call
@@ -191,6 +196,9 @@ const AdminTrips = () => {
         onSuccess: () => {
           setIsEditModalOpen(false);
           setCurrentTrip(null);
+        },
+        onSettled: () => {
+          setIsSubmitting(false);
         }
       }
     )
@@ -198,6 +206,7 @@ const AdminTrips = () => {
 
   const handleDeleteTrip = () => {
     if (!currentTrip) return;
+    setIsDeleting(true);
 
     if(USE_MOCK_TRIPS) {
       if (!currentTrip) return;
@@ -220,6 +229,9 @@ const AdminTrips = () => {
         setIsDeleteDialogOpen(false);
         setCurrentTrip(null);
       },
+      onSettled: () => {
+        setIsDeleting(false);
+      }
     });
   };
 
@@ -308,7 +320,7 @@ const AdminTrips = () => {
         <Trash className="h-4 w-4" />
       </Button>
 
-      <Link to={`/admin/trips/${trip.id}/seats`}>
+      <Link to={`/trips/${trip.id}/seats`}>
         <Button variant="outline" size="sm">
           View Seats
         </Button>

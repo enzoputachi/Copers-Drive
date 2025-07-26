@@ -28,6 +28,7 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
   const [paymentMethod, setPaymentMethod] = useState<"full" | "split">("full");
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
+  const [paymentSuccessful, setPaymentSuccessful] = useState(false); 
   
   const {
     selectedBus,
@@ -65,13 +66,14 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
     const subscription = form.watch(() => {
       const { isValid } = form.formState;
       // Only mark step as complete if form is valid AND terms are agreed to
-      setStepComplete("payment", isValid && hasAgreedToTerms);
+      const shouldBeComplete = isValid && hasAgreedToTerms && paymentSuccessful;
+      setStepComplete("payment", shouldBeComplete);
     });
 
     console.log('Payment DET:', paymentInfo);
 
     return () => subscription.unsubscribe();
-  }, [form, setStepComplete, paymentInfo, hasAgreedToTerms]);
+  }, [form, setStepComplete, paymentInfo, hasAgreedToTerms, paymentSuccessful]);
 
   const { mutateAsync, isPending } = usePaystackPayment()
 
@@ -106,6 +108,7 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
 
     try {
       setIsSubmitting(true);
+      setStepComplete("payment", false);
 
       // Persist payment in zustand
       setPaymentInfo({
@@ -124,9 +127,19 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
 
       // If we reach here, payment was successful (no error thrown)
       toast.success("Payment successful and booking created!");
+      setStepComplete("payment", true);
       onComplete();
     } catch (error: any) {
       console.error("Payment error:", error);
+      setStepComplete("payment", false);
+      const errorMessage = error?.response?.data?.message || error.message || '';
+      
+      if (errorMessage.includes('Hold expired') || errorMessage.includes('seat')) {
+          toast.error("Your seat reservation has expired. Redirecting to seat selection...", {
+            duration: 5000
+          })
+      }
+    
       toast.error(error.message || "Payment failed. Please try again.");
     } finally {
       setIsSubmitting(false);
