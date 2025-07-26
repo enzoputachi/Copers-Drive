@@ -31,6 +31,8 @@ import AdminLayout from "./components/admin/AdminLayout";
 import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute";
 import { AdminAuthProvider } from "./contexts/AdminAuthContext";
 import Terms from "./pages/terms.tsx";
+import { useSettings } from "./hooks/useApi.ts";
+import MaintenancePage from "./pages/maintenancePage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -40,7 +42,59 @@ declare global {
   }
 }
 
+
+const PublicApp = () => {
+  const { data, isLoading, error } = useSettings();
+  const settings = data?.data?.data;
+
+  // Show loading while fetching settings
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+      </div>
+    );
+  }
+
+  // If there's an error fetching settings, continue with normal app
+  // (you might want to handle this differently based on your needs)
+  if (error) {
+    console.warn("Failed to fetch settings, continuing without maintenance check:", error);
+  }
+
+  // Show maintenance page if maintenance mode is enabled
+  if (settings?.maintenanceMode && !error) {
+    return (
+      <MaintenancePage 
+        companyName={settings.companyName}
+        contactEmail={settings.contactEmail || settings.supportEmail}
+        contactPhone={settings.contactPhone || settings.supportPhone}
+      />
+    );
+  }
+
+  // Normal public app routes
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/booking" element={<Booking />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/manage-booking" element={<ManageBooking />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/test-env" element={<EnvTest />} />
+        <Route path="terms" element={<Terms />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+
 const App = () => {
+  
+
+
   // Track analytics
   useEffect(() => {
     const trackPageView = () => {
@@ -56,6 +110,8 @@ const App = () => {
     return () => window.removeEventListener('popstate', trackPageView);
   }, []);
 
+
+  
   // Detect subdomain
   const host = window.location.hostname;
   const isAdminHost = host.startsWith("admin.");
@@ -114,20 +170,7 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<Index />} />
-                <Route path="/booking" element={<Booking />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/manage-booking" element={<ManageBooking />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/test-env" element={<EnvTest />} />
-                <Route path="terms" element={<Terms />} />
-                {/* Catch-all */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <PublicApp />
           </TooltipProvider>
         </AdminAuthProvider>
       </QueryClientProvider>

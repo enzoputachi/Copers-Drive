@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import SummaryCard from "@/components/admin/SummaryCard";
 import ActivityFeed, { ActivityItem } from "@/components/admin/ActivityFeed";
 import { useDashboardStats } from "@/hooks/useAdminQueries";
+import SimpleExportButton  from "@/components/ExportBooking";
 
 // Mock Data for fallback
 const mockStats = {
@@ -82,6 +83,10 @@ const AdminDashboard = () => {
   }
   }, [data, isLoading]);
 
+  const handleExportReports = () => {
+
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -108,6 +113,7 @@ const AdminDashboard = () => {
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <div className="flex items-center space-x-2">
           {/* <Button variant="outline">Export Reports</Button> */}
+          <SimpleExportButton />
           <Button onClick={() => navigate("/trips")}>New Trip</Button>
         </div>
       </div>
