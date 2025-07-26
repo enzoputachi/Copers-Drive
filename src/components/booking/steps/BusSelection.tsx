@@ -99,30 +99,32 @@ const BusSelection = ({ onComplete, setStepComplete }: BusSelectionProps) => {
     }
   }, [selectedBus?.id, localSelectedBus, departure, destination, date]);
 
-  // Normalize API data into UI shape
-  const apiTrips: TripOption[] = apiTripsRaw.map(trip => {
-    const dep = parseISO(trip.departTime);
-    const arr = parseISO(trip.arriveTime);
-    const minutes = differenceInMinutes(arr, dep);
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
+  // Filter and normalize API data into UI shape - only SCHEDULED trips
+  const apiTrips: TripOption[] = apiTripsRaw
+    .filter(trip => trip.status === 'SCHEDULED')
+    .map(trip => {
+      const dep = parseISO(trip.departTime);
+      const arr = parseISO(trip.arriveTime);
+      const minutes = differenceInMinutes(arr, dep);
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
 
-    const availableSeats = Array.isArray(trip.seats)
-      ? trip.seats.filter(seat => !seat.isBooked).length
-      : undefined;
+      const availableSeats = Array.isArray(trip.seats)
+        ? trip.seats.filter(seat => seat.bookingId === null).length
+        : 0;
 
-    return {
-      id: String(trip.id),
-      departureTime: format(dep, 'hh:mm a'),
-      arrivalTime: format(arr, 'hh:mm a'),
-      duration: `${hours}h ${mins}m`,
-      price: trip.price,
-      busType: trip.bus?.busType,
-      availableSeats,
-      busName: trip.bus?.plateNo,
-      amenities: trip.bus?.amenities || [],
-    };
-  });
+      return {
+        id: String(trip.id),
+        departureTime: format(dep, 'hh:mm a'),
+        arrivalTime: format(arr, 'hh:mm a'),
+        duration: `${hours}h ${mins}m`,
+        price: trip.price,
+        busType: trip.bus?.busType,
+        availableSeats,
+        busName: trip.bus?.plateNo,
+        amenities: trip.bus?.amenities || [],
+      };
+    });
 
   // Mock data for offline/dev
   const mockTrips: TripOption[] = [

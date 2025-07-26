@@ -4,17 +4,20 @@ import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useBookingStore } from "@/stores/bookingStore";
 import { Button } from "@/components/ui/button";
-import { Check, Mail, MapPin, Calendar, Ticket, MessageCircle } from "lucide-react";
+import { Check, Mail, MapPin, Calendar, Ticket, MessageCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader } from "@/components/ui/dialog";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { useSettings } from "@/hooks/useApi";
+import { useGetBookingByToken, useSettings } from "@/hooks/useApi";
 
 const Confirmation = () => {
   const navigate = useNavigate();
   const [showWhatsAppDialog, setShowWhatsAppDialog] = useState(false);
-   const { data, isLoading, error } = useSettings()
+  const { data, isLoading, error } = useSettings()
+  const bookingMutation = useGetBookingByToken();
   const settings = data?.data?.data;
+
+  console.log('Booking mutration:', bookingMutation.data)
 
 
   const { 
@@ -38,6 +41,12 @@ const Confirmation = () => {
   const totalAmountInNaira = totalAmount;
 
   const isSplitPayment = paidAmountInKobo < totalAmount * 100;
+
+   useEffect(() => {
+    if (bookingToken) {
+      bookingMutation.mutate({ bookingToken });
+    }
+  }, [bookingToken]);
 
   // Simulate sending a confirmation email
   useEffect(() => {
@@ -89,6 +98,43 @@ const Confirmation = () => {
   // const totalAmount = selectedBus ? selectedBus.price * passengers : 0;
 
    const seatNo = selectedSeats[0]?.seatNo;
+
+   // form api
+  const bookingData = bookingMutation.data;
+  const isLoadingBooking = bookingMutation.isPending;
+  const bookingError = bookingMutation.error;
+
+    if (isLoadingBooking) {
+      return (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading booking details...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (bookingError || !bookingData) {
+      return (
+        <div className="text-center py-8">
+          <div className="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+            <AlertCircle className="h-8 w-8 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2 text-red-600">
+            Booking Not Found
+          </h2>
+          <p className="text-gray-600 mb-6">
+            {bookingError?.message ||
+              "Unable to retrieve your booking details."}
+          </p>
+          <Button onClick={() => {
+            resetForm();
+            navigate("/");
+          }}>Return to Home</Button>
+        </div>
+      );
+    }
 
   return (
     <div>
@@ -269,7 +315,7 @@ const Confirmation = () => {
       </div>
 
        {/* WhatsApp Community Dialog */}
-      <Dialog open={showWhatsAppDialog} onOpenChange={setShowWhatsAppDialog}>
+      <Dialog open={showWhatsAppDialog} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -300,12 +346,12 @@ const Confirmation = () => {
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Join WhatsApp Community
               </Button>
-              <Button 
+              {/* <Button 
                 variant="outline" 
                 onClick={() => setShowWhatsAppDialog(false)}
               >
                 Maybe Later
-              </Button>
+              </Button> */}
             </div>
           </div>
         </DialogContent>

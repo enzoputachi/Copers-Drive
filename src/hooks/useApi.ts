@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { bookingsApi, routesApi, tripsApi, busesApi, seatsApi, paymentsApi, notificationsApi, Trip, settingsApi, retrieveBookingApi } from '@/services/api';
+import { bookingsApi, routesApi, tripsApi, busesApi, seatsApi, paymentsApi, notificationsApi, Trip, settingsApi, retrieveBookingApi, confirmBookingApi } from '@/services/api';
 import { AxiosResponse } from 'axios';
 import { PaystackParams, payWithPaystack } from '@/services/paystackService';
 import { useBookingStore } from '@/stores/bookingStore';
@@ -75,10 +75,11 @@ export const useCreateBookingDraft = () => {
   });
 };
 
-export const useGetBooking = (bookingId: string) => useQuery({
-  queryKey: ['booking', bookingId],
-  queryFn: () => bookingsApi.getBooking(Number(bookingId)),
-  enabled: !!bookingId,
+export const useGetBooking = (bookingToken?: string) => 
+  useQuery({
+  queryKey: ['booking', bookingToken],
+  queryFn: () => bookingsApi.getBookingByToken(bookingToken).then(res => res.data.data),
+  enabled: !!bookingToken,
 });
 
 export const useCancelBooking = () => {
@@ -116,7 +117,7 @@ export const usePaystackPayment = () => {
         if (result.cancelled) {
           throw new Error('Payment was cancelled');
         } else {
-          throw new Error('Payment failed');
+          throw new Error('');
         }
       }
       
@@ -141,7 +142,7 @@ export const usePaystackPayment = () => {
         // link.click();
         
         // Or open in new tab (current behavior)
-        window.open(data.ticketUrl, "_blank");
+        // window.open(data.ticketUrl, "_blank");
         
         document.body.appendChild(link);
         document.body.removeChild(link);
@@ -171,11 +172,29 @@ export const useSettings = () =>useQuery({
   queryFn: () => settingsApi.getSettings(),
 })
 
+// Retrieve Booking
 export const useRetrieveBooking = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ bookingToken, email }: { bookingToken: string; email: string }) => 
       retrieveBookingApi.getBooking(bookingToken, email).then(res => res.data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['booking', data.id], data);
+      console.log("Retrieved booking:", data);
+    },
+    onError: (error) => {
+      console.error("Error retrieving booking:", error);
+    }
+  });
+};
+
+
+// confirm booking
+export const useGetBookingByToken = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ bookingToken }: { bookingToken: string }) => 
+      confirmBookingApi.getBooking(bookingToken).then(res => res.data),
     onSuccess: (data) => {
       queryClient.setQueryData(['booking', data.id], data);
       console.log("Retrieved booking:", data);

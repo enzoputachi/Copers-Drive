@@ -36,7 +36,8 @@ const BookingWizard = () => {
   const [showRestrictedDialog, setShowRestrictedDialog] = useState(false);
   const [showNavigationWarning, setShowNavigationWarning] = useState(false);
   const [showPaymentBackWarning, setShowPaymentBackWarning] = useState(false);
-  const [showCancelBookingDialog, setShowCancelBookingDialog] = useState(false); // Add this new state
+  const [showCancelBookingDialog, setShowCancelBookingDialog] = useState(false);
+  const [isPaymentInProgress, setIsPaymentInProgress] = useState(false); // Add this new state
 
   const { 
     departure, 
@@ -95,6 +96,17 @@ const BookingWizard = () => {
 
   const goToNextStep = () => {
     if (currentStep < BOOKING_STEPS.length - 1) {
+      const currentStepId = BOOKING_STEPS[currentStep].id;
+
+      // if (currentStepId === "payment") {
+      //   if (isPaymentInProgress) {
+      //     return;
+      //   }
+
+      //   if (!isCompleted["payment"]) {
+      //     return;
+      //   }
+      // }
       // Mark the current step as completed
       setIsCompleted(prev => ({ ...prev, [BOOKING_STEPS[currentStep].id]: true }));
       setCurrentStep(currentStep + 1);
@@ -178,6 +190,12 @@ const BookingWizard = () => {
   // Update step complete status
   const setStepComplete = (stepId: string, isComplete: boolean) => {
     setIsCompleted(prev => ({ ...prev, [stepId]: isComplete }));
+
+    // if (stepId === "payment") {
+    //   if (!isComplete && isPaymentInProgress) {
+    //     setIsPaymentInProgress(false);
+    //   }
+    // }
   };
 
   // Render the current step component
@@ -192,7 +210,10 @@ const BookingWizard = () => {
       case "passengerInfo":
         return <PassengerInfo onComplete={() => goToNextStep()} setStepComplete={setStepComplete} />;
       case "payment":
-        return <Payment onComplete={() => goToNextStep()} setStepComplete={setStepComplete} />;
+        return <Payment 
+          onComplete={() => goToNextStep()} 
+          setStepComplete={setStepComplete} 
+          />;
       case "confirmation":
         return <Confirmation />;
       default:
