@@ -11,6 +11,15 @@ export interface Route {
   isActive: boolean;
 }
 
+export interface Seat {
+  id: number;
+  seatNo: string;
+  status: 'AVAILABLE' | 'BOOKED' | 'RESERVED';
+  tripId: number;
+  bookingId: number | null;
+  reservedAt: string | null;
+}
+
 export interface Trip {
   id: number;
   departTime: string;  // ISO datetime
@@ -24,7 +33,7 @@ export interface Trip {
     plateNo: string;
     amenities?: string[];
   };
-  seats: { isBooked: boolean }[];
+  seats: Seat[];
 }
 
 export interface Bus {
@@ -39,14 +48,7 @@ export interface Bus {
     plateNo: string;
     amenities?: string[];
   };
-  seats: { isBooked: boolean }[];
-}
-
-export interface Seat {
-  id: number;
-  seatNo: string;
-  status: 'AVAILABLE' | 'BOOKED' | 'RESERVED';
-  tripId: number;
+  seats: Seat[];
 }
 
 export interface Booking {
