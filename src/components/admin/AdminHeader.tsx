@@ -34,12 +34,12 @@ const AdminHeader = ({ sidebarOpen, setSidebarOpen }: AdminHeaderProps) => {
           <Menu className="h-5 w-5" />
         </Button>
         <div className="relative w-64">
-          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          {/* <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             placeholder="Search..."
             className="h-9 w-full rounded-md border border-gray-200 pl-8 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+          /> */}
         </div>
       </div>
 
