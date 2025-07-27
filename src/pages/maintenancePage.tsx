@@ -15,7 +15,7 @@ const MaintenancePage: React.FC<MaintenancePageProps> = ({
   contactPhone,
 }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-50 flex items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
@@ -42,13 +42,13 @@ const MaintenancePage: React.FC<MaintenancePageProps> = ({
             <p className="text-sm text-gray-500 mb-2">Need immediate assistance?</p>
             <div className="flex items-center justify-center gap-1 text-sm">
               <Mail className="h-4 w-4" />
-              <a href={`mailto:${contactEmail}`} className="text-blue-600 hover:underline">
+              <a href={`mailto:${contactEmail}`} className="text-green-600 hover:underline">
                 {contactEmail}
               </a>
             </div>
             <div className="flex items-center justify-center gap-1 text-sm">
               <Phone className="h-4 w-4" />
-              <a href={`tel:${contactPhone}`} className="text-blue-600 hover:underline">
+              <a href={`tel:${contactPhone}`} className="text-green-600 hover:underline">
                 {contactPhone}
               </a>
             </div>
