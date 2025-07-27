@@ -17,7 +17,7 @@ const Confirmation = () => {
   const bookingMutation = useGetBookingByToken();
   const settings = data?.data?.data;
 
-  console.log('Booking mutration:', bookingMutation.data)
+  // console.log('Booking mutration:', bookingMutation.data)
 
 
   const { 
@@ -88,7 +88,7 @@ const Confirmation = () => {
   const handleJoinWhatsApp = () => {
     // Replace with your actual WhatsApp group link
     const whatsAppUrl = settings?.whatsAppUrl;
-    const whatsappGroupLink = whatsAppUrl;
+    const whatsappGroupLink = whatsAppUrl || '#';
     window.open(whatsappGroupLink, "_blank");
   };
 

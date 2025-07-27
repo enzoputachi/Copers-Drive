@@ -12,7 +12,7 @@ const Footer = () => {
   const [showWhatsAppDialog, setShowWhatsAppDialog] = useState(false);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
 
-  console.log("Settings Data:", settings);
+  // console.log("Settings Data:", settings);
 
   const year = new Date().getFullYear();
 
@@ -22,7 +22,7 @@ const Footer = () => {
 
   const handleJoinWhatsApp = () => {
     const whatsAppUrl = settings?.whatsAppUrl;
-    const whatsappGroupLink = whatsAppUrl;
+    const whatsappGroupLink = whatsAppUrl || '#';
     window.open(whatsappGroupLink, "_blank");
   };
 

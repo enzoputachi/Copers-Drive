@@ -62,7 +62,7 @@ const BusForm = ({ defaultValues, onSubmit, onCancel, isSubmitting = false }: Bu
           name="plateNo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Plate Number</FormLabel>
+              <FormLabel>Bus Serial Number</FormLabel>
               <FormControl>
                 <Input placeholder="ABC-123XY" {...field} />
               </FormControl>
