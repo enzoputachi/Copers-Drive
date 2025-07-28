@@ -59,7 +59,7 @@ const AdminBookings = () => {
   // —————————————————————————————————————————————
   const { data: apiBookingsRaw = [], isLoading, error } = useBookings();
 
-  const apiBookings = apiBookingsRaw.data
+  const apiBookings = apiBookingsRaw
 
   // —————————————————————————————————————————————
   // 4) Effect: if mock flag is on, set mock. Otherwise, when API finishes, copy/format it.

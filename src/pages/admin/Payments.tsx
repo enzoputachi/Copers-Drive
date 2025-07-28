@@ -60,7 +60,7 @@ const AdminPayments = () => {
   // 3) React Query hook
   // —————————————————————————————————————————————
   const { data: apiPaymentsRaw = [], isLoading, error } = usePayments();
-  const apiPayments = apiPaymentsRaw?.data?.data;
+  const apiPayments = apiPaymentsRaw?.data;
 
   // —————————————————————————————————————————————
   // 4) Effect: if mock flag is on, set mock. Otherwise, when API finishes, copy/format it.
