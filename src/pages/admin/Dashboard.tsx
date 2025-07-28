@@ -8,6 +8,7 @@ import SummaryCard from "@/components/admin/SummaryCard";
 import ActivityFeed, { ActivityItem } from "@/components/admin/ActivityFeed";
 import { useDashboardStats } from "@/hooks/useAdminQueries";
 import SimpleExportButton  from "@/components/ExportBooking";
+import SimpleFreeExpiredButton from "@/components/freexpitedSeats";
 
 // Mock Data for fallback
 const mockStats = {
@@ -113,6 +114,7 @@ const AdminDashboard = () => {
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <div className="flex items-center space-x-2">
           {/* <Button variant="outline">Export Reports</Button> */}
+          <SimpleFreeExpiredButton />
           <SimpleExportButton />
           <Button onClick={() => navigate("/trips")}>New Trip</Button>
         </div>
