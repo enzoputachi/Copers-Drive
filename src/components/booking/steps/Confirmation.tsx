@@ -87,7 +87,7 @@ const Confirmation = () => {
 
   const handleJoinWhatsApp = () => {
     // Replace with your actual WhatsApp group link
-    const whatsAppUrl = settings?.whatsAppUrl;
+    const whatsAppUrl = settings?.whatsAppGroupUrl;
     const whatsappGroupLink = whatsAppUrl || '#';
     window.open(whatsappGroupLink, "_blank");
   };
