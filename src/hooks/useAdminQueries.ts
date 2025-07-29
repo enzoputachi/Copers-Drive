@@ -248,8 +248,8 @@ export const useUpdateBooking = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, bookingData }: { id: string; bookingData: Partial<Booking> }) =>
-      adminApiService.updateBooking(id, bookingData),
+    mutationFn: ({ bookingData }: { bookingData: Partial<Booking> & {bookingToken: string} }) =>
+      adminApiService.updateBooking(bookingData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.bookings });
       toast.success('Booking updated successfully');
@@ -281,11 +281,11 @@ export const usePayments = () => {
   });
 };
 
-export const useProcessPayment = () => {
+export const useUpdatePayment = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => adminApiService.processPayment(id),
+    mutationFn: ({ paymentData }: { paymentData: Partial<Payment> & { bookingToken: string } }) => adminApiService.processPayment(paymentData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.payments });
       toast.success('Payment processed successfully');

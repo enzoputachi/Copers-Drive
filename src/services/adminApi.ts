@@ -145,6 +145,10 @@ export interface Booking {
   payment: Payment | null;
   logs: BookingLog[];
   Notifications: Notification[];
+  amountPaid?: number;
+  amountDue?: number;
+  isPaymentComplete?: boolean;
+  isSplitPayment?: boolean;
 }
 
 // =================== PAYMENT ===================
@@ -319,12 +323,12 @@ export const adminApiService = {
 
   // Bookings
   getBookings: () => adminApi.get<{ data: Booking[], status: string }>('/bookings'),
-  updateBooking: (id: string, bookingData: Partial<Booking>) => adminApi.patch<Booking>(`/bookings/${id}`, bookingData),
+  updateBooking: (bookingData: Partial<Booking>) => adminApi.patch<Booking>(`/bookings`, bookingData),
   deleteBooking: (id: string) => adminApi.delete(`/bookings/${id}`),
 
   // Payments
   getPayments: () => adminApi.get<Payment[]>('/payments'),
-  processPayment: (id: string) => adminApi.post(`/payments/${id}/process`),
+  processPayment: (paymentData: Partial<Payment>) => adminApi.patch(`/payments`, paymentData),
 
   // Logs
   getLogs: (type?: 'booking' | 'admin') => {
