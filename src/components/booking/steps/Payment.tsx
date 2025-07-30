@@ -96,6 +96,7 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
 
   // Call Paystack on submit
   const onSubmit = async (values: SimplePaymentFormData) => {
+    console.log("SUbmit cliked")
     if (!hasAgreedToTerms) {
       toast.error("Please agree to the terms and conditions to proceed");
       return;
@@ -130,17 +131,17 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
       setStepComplete("payment", true);
       onComplete();
     } catch (error: any) {
-      console.error("Payment error:", error);
+      // console.error("Payment error:", error);
       setStepComplete("payment", false);
-      const errorMessage = error?.response?.data?.message || error.message || '';
+      // const errorMessage = error?.response?.data?.message || error.message || '';
       
-      if (errorMessage.includes('Hold expired') || errorMessage.includes('seat')) {
-          toast.error("Your seat reservation has expired. Redirecting to seat selection...", {
-            duration: 5000
-          })
-      }
+      // if (errorMessage.includes('Hold expired') || errorMessage.includes('seat')) {
+      //     toast.error("Your seat reservation has expired. Redirecting to seat selection...", {
+      //       duration: 5000
+      //     })
+      // }
     
-      toast.error(error.message || "Payment failed. Please try again.");
+      // toast.error(error.message); 
     } finally {
       setIsSubmitting(false);
     }

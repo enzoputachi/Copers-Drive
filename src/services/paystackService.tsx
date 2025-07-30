@@ -109,8 +109,8 @@ export const payWithPaystack = async ({
         },
 
         onCancel: () => {
-          console.log("Payment was cancelled by user");
-          toast.info("Payment was cancelled.");
+          // console.log("Payment was cancelled by user");
+          // toast.info("Payment was cancelled.");
           resolveOnce({ 
             success: false, 
             cancelled: true,
@@ -138,9 +138,9 @@ export const payWithPaystack = async ({
       }, 300000); // 5 minutes timeout
     });
   } catch (error: any) {
-    console.error("Payment initialization error:", error?.response?.data || error.message);
+    console.error("Payment initialization error:", error?.response?.data?.message );
     
-    const errorMessage = error?.response?.data?.message || error.message;
+    const errorMessage = error?.response?.data?.message;
     
     // Determine error type based on the message
     let errorType: PaymentResult['error']['type'] = 'unknown';

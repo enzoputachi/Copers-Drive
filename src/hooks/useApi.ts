@@ -132,7 +132,7 @@ export const usePaystackPayment = () => {
       });
 
       if (data.ticketUrl) {
-        toast.success("Ticket is downloading...");
+        // toast.success("Ticket is downloading...");
 
         // Programmatic download
         const link = document.createElement('a');
@@ -150,11 +150,11 @@ export const usePaystackPayment = () => {
     },
 
     onError: (error) => {
-      console.error('Payment error:', error);
+      // console.error('Payment error:', error);
       
       // Don't show error toast for cancellations since we already show "cancelled" toast
       if (error.message !== 'Payment was cancelled') {
-        toast.error(error.message || 'Payment failed. Please try again.');
+        // toast.error(error.message);
       }
     }
   });

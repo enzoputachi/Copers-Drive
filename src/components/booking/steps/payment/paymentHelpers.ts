@@ -13,7 +13,7 @@ export const processPaystackPayment = async (email: string, amount: number): Pro
     
     return true;
   } catch (error) {
-    toast.error("Payment failed: " + (error.message || "Please try again"));
+    // toast.error("Payment failed: " + (error.message || "Please try again"));
     return false;
   }
 };
