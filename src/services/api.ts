@@ -91,9 +91,13 @@ export interface Notification {
 
 // ----- Config & Error Handling -----
 const api = axios.create({
-  baseURL: import.meta.env.VITE_APP_URL, // 'https://booking-api-tuso.onrender.com',
+  baseURL: import.meta.env.VITE_APP_URL,
   timeout: 10000,
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 
+    'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true',
+    'User-Agent': 'MyApp/1.0',
+  },
 });
 
 api.interceptors.response.use(

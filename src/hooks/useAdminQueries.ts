@@ -233,6 +233,22 @@ export const useDeleteTrip = () => {
 };
 
 // Booking hooks
+export const useAdminCreateBooking = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: adminApiService.adminCreateBooking,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.bookings })
+      toast.success('Booking updated successfully');
+    },
+    onError: (error) => {
+      // Optional: handle errors globally or locally here
+      console.error('Failed to create booking:', error);
+    },
+  })
+};
+
 export const useBookings = () => {
   return useQuery({
     queryKey: ADMIN_QUERY_KEYS.bookings,
@@ -266,6 +282,22 @@ export const useDeleteBooking = () => {
       queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.bookings });
       toast.success('Booking deleted successfully');
     },
+  });
+};
+
+// Retrieve Booking
+export const useRetrieveBooking = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ bookingToken, email }: { bookingToken: string; email: string }) => 
+      adminApiService.getBooking(bookingToken, email).then(res => res.data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['booking', data.id], data);
+      console.log("Retrieved booking and Ticket Successfully issued:", data);
+    },
+    onError: (error) => {
+      console.error("Error retrieving booking:", error);
+    }
   });
 };
 

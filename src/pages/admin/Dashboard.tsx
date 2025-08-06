@@ -110,7 +110,7 @@ const AdminDashboard = () => {
         <title>Dashboard | Corpers Drive Admin</title>
       </Helmet>
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 overflow-auto">
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <div className="flex items-center space-x-2">
           {/* <Button variant="outline">Export Reports</Button> */}

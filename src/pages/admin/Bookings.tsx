@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import DataTable from "@/components/admin/DataTable";
-import { useBookings, useUpdateBooking } from "@/hooks/useAdminQueries";
-import { Edit, Save, X, Check } from "lucide-react";
+import { useBookings, useUpdateBooking, useRetrieveBooking } from "@/hooks/useAdminQueries";
+import { Edit, Save, X, Check, Plus, Ticket } from "lucide-react";
 import api from "@/services/api";
+import { Button } from "@/components/ui/button";
+import BookingForm from "@/components/admin/forms/BookingForm"
 
 // Define the edit form interface
 interface EditForm {
@@ -88,6 +90,46 @@ const initialBookings = [
   },
 ];
 
+// Mock trips data for the booking form
+const mockTrips = [
+  {
+    id: "1",
+    route: "Lagos → Abuja",
+    departTime: "2024-08-05T08:00:00Z",
+    arriveTime: "2024-08-05T14:00:00Z",
+    price: 8500,
+    availableSeatsCount: 12,
+    bus: {
+      plateNo: "ABC-123XY",
+      busType: "Sprinter"
+    }
+  },
+  {
+    id: "2",
+    route: "Lagos → Ibadan",
+    departTime: "2024-08-05T10:00:00Z",
+    arriveTime: "2024-08-05T12:30:00Z",
+    price: 3500,
+    availableSeatsCount: 15,
+    bus: {
+      plateNo: "DEF-456ZY",
+      busType: "Coaster"
+    }
+  },
+  {
+    id: "3",
+    route: "Abuja → Lagos",
+    departTime: "2024-08-05T16:00:00Z",
+    arriveTime: "2024-08-05T22:00:00Z",
+    price: 8500,
+    availableSeatsCount: 8,
+    bus: {
+      plateNo: "GHI-789AB",
+      busType: "Sprinter"
+    }
+  }
+];
+
 // Toggle this to `false` in order to fetch real data from the API instead of using mock
 const USE_MOCK_BOOKINGS = false;
 
@@ -105,11 +147,14 @@ const AdminBookings = () => {
     isSplitPayment: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [issuingTicket, setIssuingTicket] = useState<string | null>(null);
 
   // —————————————————————————————————————————————
   // 3) React Query hooks
   // —————————————————————————————————————————————
   const { mutateAsync: updateBooking, isPending: isUpdating } = useUpdateBooking();
+  const { mutateAsync: retrieveBooking, isPending: isRetrieving } = useRetrieveBooking();
   const { data: apiBookingsRaw = [], isLoading, error } = useBookings();
   const apiBookings = apiBookingsRaw
 
@@ -259,7 +304,77 @@ const AdminBookings = () => {
   };
 
   // —————————————————————————————————————————————
-  // 6) Only show loader/error if we're NOT using mock
+  // 6) Issue Ticket functionality
+  // —————————————————————————————————————————————
+  const handleIssueTicket = async (booking: any) => {
+    setIssuingTicket(booking.id);
+    try {
+      const ticketData = await retrieveBooking({
+        bookingToken: booking.bookingToken,
+        email: booking.email
+      });
+
+      console.log('Ticket issued successfully:', ticketData);
+      alert('Ticket issued successfully!');
+    } catch (error) {
+      console.error('Error issuing ticket:', error);
+      alert('Failed to issue ticket. Please try again.');
+    } finally {
+      setIssuingTicket(null);
+    }
+  };
+
+  // —————————————————————————————————————————————
+  // 7) booking handlers
+  // —————————————————————————————————————————————
+  const handleBookingSubmit = async (bookingData: any) => {
+    setIsSubmitting(true);
+    try {
+      // TODO: Replace with actual API call to create booking
+      console.log('Creating booking:', bookingData);
+      
+      // Mock API response
+      const newBooking = {
+        id: String(Date.now()),
+        bookingToken: `TX-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
+        trip: mockTrips.find(t => t.id === String(bookingData.tripId)),
+        seat: [{ seatNo: "1A" }], // Mock seat assignment
+        passengerTitle: "Mr", // Default title
+        passengerName: bookingData.passengerName,
+        passengerAddress: bookingData.passengerAddress,
+        passengerAge: null,
+        nextOfKinName: bookingData.nextOfKinName,
+        nextOfKinPhone: bookingData.nextOfKinPhone,
+        email: bookingData.email,
+        mobile: bookingData.mobile,
+        status: "CONFIRMED",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isSplitPayment: false,
+        amountPaid: bookingData.isPaymentComplete ? mockTrips.find(t => t.id === String(bookingData.tripId))?.price || 0 : 0,
+        amountDue: bookingData.isPaymentComplete ? 0 : mockTrips.find(t => t.id === String(bookingData.tripId))?.price || 0,
+        isPaymentComplete: bookingData.isPaymentComplete,
+      };
+
+      // Add to local state
+      setBookingsData((prev: any) => [newBooking, ...prev]);
+      
+      setIsCreateModalOpen(false);
+      alert('booking created successfully!');
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      alert('Failed to create booking. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleBookingCancel = () => {
+    setIsCreateModalOpen(false);
+  };
+
+  // —————————————————————————————————————————————
+  // 8) Only show loader/error if we're NOT using mock
   // —————————————————————————————————————————————
   if (!USE_MOCK_BOOKINGS && isLoading) {
     return (
@@ -278,7 +393,7 @@ const AdminBookings = () => {
   }
 
   // —————————————————————————————————————————————
-  // 7) Define comprehensive columns for DataTable
+  // 9) Define comprehensive columns for DataTable
   // —————————————————————————————————————————————
   const columns = [
     { 
@@ -528,7 +643,7 @@ const AdminBookings = () => {
       key: "actions",
       title: "Actions",
       render: (booking: any) => (
-        <div className="flex gap-2 min-w-[140px]">
+        <div className="flex gap-2 min-w-[280px]">
           {editingBooking === booking.id ? (
             <>
               <button
@@ -552,7 +667,7 @@ const AdminBookings = () => {
             <>
               <button
                 onClick={() => handleEditBooking(booking)}
-                className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+                className="flex items-center gap-1 px-2 py-1 bg-yellow-600 text-white rounded text-xs hover:bg-yellow-700"
               >
                 <Edit size={12} />
                 Edit
@@ -567,6 +682,14 @@ const AdminBookings = () => {
                   Confirm
                 </button>
               )}
+              <button
+                onClick={() => handleIssueTicket(booking)}
+                disabled={issuingTicket === booking.id}
+                className="flex items-center gap-1 px-2 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 disabled:opacity-50"
+              >
+                <Ticket size={12} />
+                {issuingTicket === booking.id ? 'Issuing...' : 'Issue Ticket'}
+              </button>
             </>
           )}
         </div>
@@ -579,14 +702,20 @@ const AdminBookings = () => {
       <Helmet>
         <title>Booking Management | Corpers Drive Admin</title>
       </Helmet>
-
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">
-          Booking Management
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Comprehensive view of all bookings with editing capabilities for payment reconciliation
-        </p>
+      
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Booking Management
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Comprehensive view of all bookings with editing capabilities for
+            payment reconciliation
+          </p>
+        </div>
+        <Button onClick={() => setIsCreateModalOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />New Booking
+        </Button>
       </div>
 
       <DataTable
@@ -594,6 +723,71 @@ const AdminBookings = () => {
         data={bookingsData}
         keyExtractor={(item) => item.id}
       />
+
+      {/* Custom Full-Screen Modal with Bottom Slide Animation */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          {/* Backdrop with fade-in animation */}
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+            onClick={handleBookingCancel}
+          />
+          
+          {/* Modal Content with slide-up animation */}
+          <div className="relative w-full max-w-7xl mx-4 mb-4 bg-white rounded-t-2xl shadow-2xl animate-slide-up max-h-[95vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b bg-white rounded-t-2xl">
+              <h2 className="text-xl font-semibold text-gray-900">Create New Booking</h2>
+              <button
+                onClick={handleBookingCancel}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            
+            {/* Modal Body with scroll */}
+            <div className="p-6 overflow-y-auto max-h-[calc(95vh-80px)] bg-slate-100">
+              <BookingForm
+                onSubmit={handleBookingSubmit}
+                onCancel={handleBookingCancel}
+                isSubmitting={isSubmitting}
+                trips={mockTrips}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slide-up {
+          from {
+            transform: translateY(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
+        }
+
+        .animate-slide-up {
+          animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+      `}</style>
     </>
   );
 };

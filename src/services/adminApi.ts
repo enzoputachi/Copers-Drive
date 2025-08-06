@@ -151,6 +151,18 @@ export interface Booking {
   isSplitPayment?: boolean;
 }
 
+export interface CreateBookingInput {
+  tripId: number;
+  seatId: number;
+  passengerName: string;
+  passengerAddress: string;
+  email: string;
+  mobile: string;
+  nextOfKinName: string;
+  nextOfKinPhone: string;
+  isPaymentComplete: boolean;
+}
+
 // =================== PAYMENT ===================
 export interface Payment {
   id: number;
@@ -290,67 +302,89 @@ export interface LoginResponse {
 // API functions
 export const adminApiService = {
   // Dashboard
-  getDashboardStats: () => adminApi.get<DashboardResponse>('/dashboardStats'),
+  getDashboardStats: () => adminApi.get<DashboardResponse>("/dashboardStats"),
 
   // Users
-  getUsers: () => adminApi.get<User[]>('/users'),
-  createUser: (userData: Omit<User, 'id' | 'createdAt'>) => adminApi.post<User>('/users', userData),
-  login: (payload: LoginPayload ) => adminApi.post<LoginResponse>('/users/login', payload),
-  updateUser: (id: string, userData: Partial<User>) => adminApi.patch<User>(`/users/${id}`, userData),
+  getUsers: () => adminApi.get<User[]>("/users"),
+  createUser: (userData: Omit<User, "id" | "createdAt">) =>
+    adminApi.post<User>("/users", userData),
+  login: (payload: LoginPayload) =>
+    adminApi.post<LoginResponse>("/users/login", payload),
+  updateUser: (id: string, userData: Partial<User>) =>
+    adminApi.patch<User>(`/users/${id}`, userData),
   deleteUser: (id: string) => adminApi.delete(`/users/${id}`),
 
   // Routes
-  getRoutes: () => adminApi.get<{ status: string, data: Route[] }>('/routes'),  // ✅
-  createRoute: (routeData: Omit<Route, 'id'>) => adminApi.post<Route>('/routes', routeData),
-  updateRoute: (id: string, routeData: Partial<Route>) => adminApi.patch<Route>(`/routes/${id}`, routeData),
+  getRoutes: () => adminApi.get<{ status: string; data: Route[] }>("/routes"), // ✅
+  createRoute: (routeData: Omit<Route, "id">) =>
+    adminApi.post<Route>("/routes", routeData),
+  updateRoute: (id: string, routeData: Partial<Route>) =>
+    adminApi.patch<Route>(`/routes/${id}`, routeData),
   deleteRoute: (id: string) => adminApi.delete(`/routes/${id}`),
 
   // Buses
-  getBuses: () => adminApi.get<{ status: string; data: Bus[] }>('/buses'), // ✅
-  createBus: (busData: Omit<Bus, 'id'>) => adminApi.post<Bus>('/buses', busData), // ✅
-  updateBus: (id: string, busData: Partial<Bus>) => adminApi.patch<Bus>(`/buses/${id}`, busData),
+  getBuses: () => adminApi.get<{ status: string; data: Bus[] }>("/buses"), // ✅
+  createBus: (busData: Omit<Bus, "id">) =>
+    adminApi.post<Bus>("/buses", busData), // ✅
+  updateBus: (id: string, busData: Partial<Bus>) =>
+    adminApi.patch<Bus>(`/buses/${id}`, busData),
   deleteBus: (id: string) => adminApi.delete(`/buses/${id}`),
 
   // Trips
-  getTrips: () => adminApi.get<{ status: string, data: Trip[] }>('/trips'),
-  createTrip: (tripData: Omit<Trip, 'id' | 'availableSeats'>) => adminApi.post<Trip>('/trips', tripData),
-  updateTrip: (id: string, tripData: Partial<Trip>) => adminApi.patch<Trip>(`/trips/${id}`, tripData),
+  getTrips: () => adminApi.get<{ status: string; data: Trip[] }>("/trips"),
+  createTrip: (tripData: Omit<Trip, "id" | "availableSeats">) =>
+    adminApi.post<Trip>("/trips", tripData),
+  updateTrip: (id: string, tripData: Partial<Trip>) =>
+    adminApi.patch<Trip>(`/trips/${id}`, tripData),
   deleteTrip: (id: string) => adminApi.delete(`/trips/${id}`),
 
   // Seats
-  updateSeatStatus: (payload: { seatIds: number[]; data: Partial<Pick<Seat, 'status' | 'reservedAt'>>;}) => 
-    adminApi.patch<{count: number}>(`/seats/update`, payload),
+  updateSeatStatus: (payload: {
+    seatIds: number[];
+    data: Partial<Pick<Seat, "status" | "reservedAt">>;
+  }) => adminApi.patch<{ count: number }>(`/seats/update`, payload),
 
   // Bookings
-  getBookings: () => adminApi.get<{ data: Booking[], status: string }>('/bookings'),
-  updateBooking: (bookingData: Partial<Booking>) => adminApi.patch<Booking>(`/bookings`, bookingData),
+  adminCreateBooking: (data: CreateBookingInput) =>
+    adminApi.post<Booking>("/bookings/adminCreate", data),
+  getBookings: () =>
+    adminApi.get<{ data: Booking[]; status: string }>("/bookings"),
+  updateBooking: (bookingData: Partial<Booking>) =>
+    adminApi.patch<Booking>(`/bookings`, bookingData),
   deleteBooking: (id: string) => adminApi.delete(`/bookings/${id}`),
 
+  // retrive booking
+  getBooking: (bookingToken: string, email: string) =>
+    adminApi.get<Booking>("/retrieve", {
+      params: { email, bookingToken },
+    }),
+
   // Payments
-  getPayments: () => adminApi.get<Payment[]>('/payments'),
-  processPayment: (paymentData: Partial<Payment>) => adminApi.patch(`/payments`, paymentData),
+  getPayments: () => adminApi.get<Payment[]>("/payments"),
+  processPayment: (paymentData: Partial<Payment>) =>
+    adminApi.patch(`/payments`, paymentData),
 
   // Logs
-  getLogs: (type?: 'booking' | 'admin') => {
+  getLogs: (type?: "booking" | "admin") => {
     const params = type ? { type } : {};
-    return adminApi.get<SystemLog[]>('/logs', { params });
+    return adminApi.get<SystemLog[]>("/logs", { params });
   },
 
   // Notifications
-  getNotifications: () => adminApi.get<Notification[]>('/notifications'),
-  createNotification: (notificationData: Omit<Notification, 'id' | 'sentAt' | 'status'>) => 
-    adminApi.post<Notification>('/notifications', notificationData),
+  getNotifications: () => adminApi.get<Notification[]>("/notifications"),
+  createNotification: (
+    notificationData: Omit<Notification, "id" | "sentAt" | "status">
+  ) => adminApi.post<Notification>("/notifications", notificationData),
 
   // Settings
   // Settings
-  getSettings: () => adminApi.get<SystemSettings>('/companySettings'),
-  createSettings: (settings: Omit<SystemSettingsResponse, 'id' | 'createdAt' | 'updatedAt'>) =>
-    adminApi.post<SystemSettings>('/companySettings', settings),
+  getSettings: () => adminApi.get<SystemSettings>("/companySettings"),
+  createSettings: (
+    settings: Omit<SystemSettingsResponse, "id" | "createdAt" | "updatedAt">
+  ) => adminApi.post<SystemSettings>("/companySettings", settings),
   updateSettings: (id: number, settings: Partial<SystemSettingsResponse>) =>
     adminApi.patch<SystemSettingsResponse>(`/companySettings/${id}`, settings),
-  deleteSettings: (id: number) =>
-    adminApi.delete(`/companySettings/${id}`),
-
+  deleteSettings: (id: number) => adminApi.delete(`/companySettings/${id}`),
 };
 
 
