@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -17,32 +16,14 @@ const Confirmation = () => {
   const bookingMutation = useGetBookingByToken();
   const settings = data?.data?.data;
 
-  // console.log('Booking mutration:', bookingMutation.data)
-
+  console.log('Booking mutation:', bookingMutation.data)
 
   const { 
-    departure, 
-    destination, 
-    date,
-    tripType,
-    returnDate,
-    passengers,
-    selectedBus,
-    selectedSeats,
-    passengerInfo,
-    paymentInfo,
     bookingToken,
     resetForm
   } = useBookingStore();
 
-  const paidAmountInKobo = paymentInfo?.amount || 0;
-  const paidAmountInNaira = paidAmountInKobo / 100;
-  const totalAmount = selectedBus ? selectedBus.price * passengers : 0;
-  const totalAmountInNaira = totalAmount;
-
-  const isSplitPayment = paidAmountInKobo < totalAmount * 100;
-
-   useEffect(() => {
+  useEffect(() => {
     if (bookingToken) {
       bookingMutation.mutate({ bookingToken });
     }
@@ -69,8 +50,6 @@ const Confirmation = () => {
     }
   }, [bookingToken]);
 
-
-  
   const handleBookAnother = () => {
     // Reset all form data
     resetForm();
@@ -92,49 +71,60 @@ const Confirmation = () => {
     window.open(whatsappGroupLink, "_blank");
   };
 
-  // Create a "fake" booking reference number
-  const bookingRef = `TX${Math.floor(100000 + Math.random() * 900000)}`;
-
-  // const totalAmount = selectedBus ? selectedBus.price * passengers : 0;
-
-   const seatNo = selectedSeats[0]?.seatNo;
-
-   // form api
-  const bookingData = bookingMutation.data;
+  // Get booking data from API
+  const apiResponse = bookingMutation.data;
+  const bookingData = apiResponse?.booking;
   const isLoadingBooking = bookingMutation.isPending;
   const bookingError = bookingMutation.error;
 
-    if (isLoadingBooking) {
-      return (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading booking details...</p>
-          </div>
+  if (isLoadingBooking) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading booking details...</p>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
-    if (bookingError || !bookingData) {
-      return (
-        <div className="text-center py-8">
-          <div className="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
-            <AlertCircle className="h-8 w-8 text-red-600" />
-          </div>
-          <h2 className="text-2xl font-bold mb-2 text-red-600">
-            Booking Not Found
-          </h2>
-          <p className="text-gray-600 mb-6">
-            {bookingError?.message ||
-              "Unable to retrieve your booking details."}
-          </p>
-          <Button onClick={() => {
-            resetForm();
-            navigate("/");
-          }}>Return to Home</Button>
+  if (bookingError || !bookingData) {
+    return (
+      <div className="text-center py-8">
+        <div className="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+          <AlertCircle className="h-8 w-8 text-red-600" />
         </div>
-      );
-    }
+        <h2 className="text-2xl font-bold mb-2 text-red-600">
+          Booking Not Found
+        </h2>
+        <p className="text-gray-600 mb-6">
+          {bookingError?.message ||
+            "Unable to retrieve your booking details."}
+        </p>
+        <Button onClick={() => {
+          resetForm();
+          navigate("/");
+        }}>Return to Home</Button>
+      </div>
+    );
+  }
+
+  // Extract data from API response
+  const trip = bookingData.trip;
+  const route = trip?.route;
+  const bus = trip?.bus;
+  const seatNo = bookingData.seat.map((s) => s.seatNo)
+  const payment = bookingData.payment?.[0]; // payment is an array
+  
+  // Calculate payment amounts
+  const paidAmountInKobo = payment.amount || 0;
+  const paidAmountInNaira = paidAmountInKobo / 100;
+  const totalAmount = trip?.price || 0;
+  const isSplitPayment = bookingData.amountDue > 0;
+
+  // Parse dates
+  const departureDate = trip?.departTime ? new Date(trip.departTime) : null;
+  const returnDate = null; // No return date in current structure
 
   return (
     <div>
@@ -152,7 +142,7 @@ const Confirmation = () => {
       {/* Booking Reference */}
       <div className="bg-primary/5 p-4 rounded-lg text-center mb-6">
         <p className="text-sm text-gray-600 mb-1">Booking Reference</p>
-        <p className="text-2xl font-bold">{bookingToken}</p>
+        <p className="text-2xl font-bold">{bookingData.bookingToken}</p>
       </div>
 
       {/* Trip Details */}
@@ -164,35 +154,31 @@ const Confirmation = () => {
         <div className="grid grid-cols-2 gap-x-4 gap-y-2">
           <div>
             <p className="text-sm text-gray-500">From</p>
-            <p className="font-medium">{departure}</p>
+            <p className="font-medium">{route?.origin || 'N/A'}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">To</p>
-            <p className="font-medium">{destination}</p>
+            <p className="font-medium">{route?.destination || 'N/A'}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Departure Date</p>
             <p className="font-medium">
-              {date ? format(date, "EEE, MMM d, yyyy") : "N/A"}
+              {departureDate ? format(departureDate, "EEE, MMM d, yyyy") : "N/A"}
             </p>
           </div>
-          {tripType === "roundTrip" && returnDate && (
-            <div>
-              <p className="text-sm text-gray-500">Return Date</p>
-              <p className="font-medium">
-                {format(returnDate, "EEE, MMM d, yyyy")}
-              </p>
-            </div>
-          )}
           <div>
             <p className="text-sm text-gray-500">Departure Time</p>
-            <p className="font-medium">{selectedBus?.departureTime}</p>
+            <p className="font-medium">
+              {departureDate ? format(departureDate, "HH:mm") : "N/A"}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Trip Type</p>
-            <p className="font-medium capitalize">
-              {tripType === "oneWay" ? "One Way" : "Round Trip"}
-            </p>
+            <p className="font-medium capitalize">One Way</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Status</p>
+            <p className="font-medium capitalize">{bookingData.status || 'N/A'}</p>
           </div>
         </div>
       </div>
@@ -206,19 +192,23 @@ const Confirmation = () => {
         <div className="space-y-2">
           <div className="flex justify-between">
             <p className="text-gray-600">Bus</p>
-            <p className="font-medium">{selectedBus?.busName}</p>
+            <p className="font-medium">{bus?.busType || 'N/A'}</p>
           </div>
           <div className="flex justify-between">
-            <p className="text-gray-600">Bus Type</p>
-            <p className="font-medium">{selectedBus?.busType}</p>
+            <p className="text-gray-600">Bus Capacity</p>
+            <p className="font-medium">{bus?.capacity || 'N/A'} seats</p>
           </div>
           <div className="flex justify-between">
-            <p className="text-gray-600">Seat Number(s)</p>
-            <p className="font-medium">{seatNo}</p>
+            <p className="text-gray-600">Seat Number</p>
+            <p className="font-medium">{seatNo || 'N/A'}</p>
           </div>
           <div className="flex justify-between">
-            <p className="text-gray-600">Passengers</p>
-            <p className="font-medium">{passengers}</p>
+            <p className="text-gray-600">Passenger Name</p>
+            <p className="font-medium">{bookingData.passengerName || 'N/A'}</p>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-gray-600">Passenger Phone</p>
+            <p className="font-medium">{bookingData.mobile || 'N/A'}</p>
           </div>
         </div>
       </div>
@@ -232,18 +222,24 @@ const Confirmation = () => {
         <div className="space-y-2">
           <div className="flex justify-between">
             <p className="text-gray-600">Payment Method</p>
-            <p className="font-medium capitalize">{paymentInfo?.method}</p>
+            <p className="font-medium capitalize">{payment?.channel || 'N/A'}</p>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-gray-600">Payment Status</p>
+            <p className="font-medium capitalize">
+              {bookingData.isPaymentComplete ? 'Complete' : 'Partial'}
+            </p>
           </div>
           <div className="flex justify-between">
             <p className="text-gray-600">Price per Seat</p>
             <p className="font-medium">
-              ₦{selectedBus?.price.toLocaleString()}
+              ₦{totalAmount?.toLocaleString() || '0'}
             </p>
           </div>
           {isSplitPayment ? (
             <>
               <div className="flex justify-between">
-                <p className="text-gray-600">Commitment Fee Paid</p>
+                <p className="text-gray-600">Amount Paid</p>
                 <p className="font-medium">
                   ₦{paidAmountInNaira.toLocaleString()}
                 </p>
@@ -251,12 +247,12 @@ const Confirmation = () => {
               <div className="flex justify-between">
                 <p className="text-gray-600">Balance Remaining</p>
                 <p className="font-medium">
-                  ₦{(totalAmountInNaira - paidAmountInNaira).toLocaleString()}
+                  ₦{(bookingData.amountDue / 100).toLocaleString()}
                 </p>
               </div>
               <div className="flex justify-between font-semibold pt-2 border-t">
                 <p>Total Amount</p>
-                <p>₦{totalAmountInNaira.toLocaleString()}</p>
+                <p>₦{totalAmount?.toLocaleString() || '0'}</p>
               </div>
             </>
           ) : (
@@ -276,16 +272,22 @@ const Confirmation = () => {
         </h3>
         <ul className="text-sm text-amber-800 space-y-1 list-disc pl-5">
           <li>
-            Your e-ticket has been sent to{" "}
-            {passengerInfo?.primaryPassenger?.email}
+            Your e-ticket has been sent to {bookingData.email || 'your email'}
           </li>
           <li>Please arrive at the terminal 30 minutes before departure</li>
           <li>Present your booking reference or e-ticket for boarding</li>
           <li>You can manage your booking using your booking reference</li>
+          {isSplitPayment && (
+            <li className="font-medium">
+              Balance payment of ₦{(bookingData.amountDue / 100).toLocaleString()} 
+              is required before travel
+            </li>
+          )}
+          <li>Passenger: {bookingData.passengerName} - {bookingData.mobile}</li>
         </ul>
       </div>
         
-        {/* WhatsApp Community */}
+      {/* WhatsApp Community */}
       <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
         <h3 className="flex items-center font-medium text-green-800 mb-2">
           <MessageCircle className="h-5 w-5 mr-2" />
@@ -314,7 +316,7 @@ const Confirmation = () => {
         <Button onClick={handleGoHome}>Return to Home</Button>
       </div>
 
-       {/* WhatsApp Community Dialog */}
+      {/* WhatsApp Community Dialog */}
       <Dialog open={showWhatsAppDialog} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -346,12 +348,6 @@ const Confirmation = () => {
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Join WhatsApp Community
               </Button>
-              {/* <Button 
-                variant="outline" 
-                onClick={() => setShowWhatsAppDialog(false)}
-              >
-                Maybe Later
-              </Button> */}
             </div>
           </div>
         </DialogContent>
