@@ -45,7 +45,7 @@ const Payment = ({ onComplete, setStepComplete }: PaymentProps) => {
 
   // Calculate total amount based on selected bus and passengers
   const totalAmount = selectedBus ? selectedBus.price * passengers : 0;
-  const commitmentFee = 5000; 
+  const commitmentFee = 5000 * passengers; 
 
   const amountToPayInKobo = paymentMethod === "split" ? (Math.round(commitmentFee * 100)) : (Math.round(totalAmount * 100))
 
