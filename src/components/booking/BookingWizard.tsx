@@ -234,24 +234,34 @@ const BookingWizard = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      
       {/* Progress Steps */}
-      <div className="mb-8 overflow-x-auto">
-        <div className="flex min-w-max">
+      <div className="mb-8 overflow-x-auto ">
+        <div className="flex min-w-max justify-center">
           {BOOKING_STEPS.map((step, index) => (
             <div key={step.id} className="flex items-center">
-              <div 
-                className={`flex flex-col items-center ${index <= currentStep ? "text-primary" : "text-gray-400"}
-                ${hasSubmittedPassengerData && index < BOOKING_STEPS.findIndex(s => s.id === "payment") ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
+              <div
+                className={`flex flex-col items-center ${
+                  index <= currentStep ? "text-primary" : "text-gray-400"
+                }
+                ${
+                  hasSubmittedPassengerData &&
+                  index < BOOKING_STEPS.findIndex((s) => s.id === "payment")
+                    ? "cursor-not-allowed opacity-60"
+                    : "cursor-pointer"
+                }
                 `}
                 onClick={() => handleStepClick(index)}
               >
-                <div 
+                <div
                   className={`
                     w-8 h-8 rounded-full flex items-center justify-center mb-1
-                    ${index < currentStep ? "bg-primary text-white" : 
-                      index === currentStep ? "border-2 border-primary text-primary" : 
-                      "border-2 border-gray-300 text-gray-400"}
+                    ${
+                      index < currentStep
+                        ? "bg-primary text-white"
+                        : index === currentStep
+                        ? "border-2 border-primary text-primary"
+                        : "border-2 border-gray-300 text-gray-400"
+                    }
                   `}
                 >
                   {index < currentStep ? "✓" : index + 1}
@@ -259,7 +269,7 @@ const BookingWizard = () => {
                 <span className="text-xs font-medium">{step.label}</span>
               </div>
               {index < BOOKING_STEPS.length - 1 && (
-                <div 
+                <div
                   className={`w-12 h-0.5 mx-1 ${
                     index < currentStep ? "bg-primary" : "bg-gray-300"
                   }`}
@@ -271,88 +281,98 @@ const BookingWizard = () => {
       </div>
 
       {/* Trip Details Summary - Always show since we removed TripSelection */}
-      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="font-medium text-lg">Trip Details</h3>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => {
-              if (hasSubmittedPassengerData) {
-                setShowCancelBookingDialog(true); // Show cancel booking dialog instead
-              } else {
-                resetForm();
-                setCurrentStep(0)
-                navigate("/");
+      {currentStep !== BOOKING_STEPS.length - 1 && (
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="font-medium text-lg">Trip Details</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (hasSubmittedPassengerData) {
+                  setShowCancelBookingDialog(true); // Show cancel booking dialog instead
+                } else {
+                  resetForm();
+                  setCurrentStep(0);
+                  navigate("/");
+                }
+              }}
+              className={
+                hasSubmittedPassengerData
+                  ? "text-red-600 border-red-300 hover:bg-red-50"
+                  : ""
               }
-            }}
-            className={hasSubmittedPassengerData ? "text-red-600 border-red-300 hover:bg-red-50" : ""}
-          >
-             {hasSubmittedPassengerData ? "Cancel Booking" : "Modify"}
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Route */}
-          <div>
-            <div className="flex items-center space-x-2 mb-2">
-              <MapPin className="h-4 w-4 text-gray-500" />
-              <span className="text-sm text-gray-600">Route</span>
-            </div>
-            <p className="font-medium">{departure} → {destination}</p>
+            >
+              {hasSubmittedPassengerData ? "Cancel Booking" : "Modify"}
+            </Button>
           </div>
-          
-          {/* Date */}
-          <div>
-            <div className="flex items-center space-x-2 mb-2">
-              <CalendarIcon className="h-4 w-4 text-gray-500" />
-              <span className="text-sm text-gray-600">Date</span>
-            </div>
-            <p className="font-medium">
-              {date ? format(date, "EEEE, MMMM d, yyyy") : "No date selected"}
-            </p>
-          </div>
-          
-          {/* Passengers */}
-          <div>
-            <div className="flex items-center space-x-2 mb-2">
-              <Users className="h-4 w-4 text-gray-500" />
-              <span className="text-sm text-gray-600">Passengers</span>
-            </div>
-            <p className="font-medium">{passengers} passenger{passengers > 1 ? 's' : ''}</p>
-          </div>
-        </div>
-      </div>
 
-      {/* Progress Protection Warning */}
-      {hasSubmittedPassengerData && currentStep !== BOOKING_STEPS.length - 1 && (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p className="text-sm text-yellow-800">
-            <strong>Booking in Progress:</strong> Your passenger information has been saved. 
-            Please complete the payment process to secure your booking.
-          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Route */}
+            <div>
+              <div className="flex items-center space-x-2 mb-2">
+                <MapPin className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-600">Route</span>
+              </div>
+              <p className="font-medium">
+                {departure} → {destination}
+              </p>
+            </div>
+
+            {/* Date */}
+            <div>
+              <div className="flex items-center space-x-2 mb-2">
+                <CalendarIcon className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-600">Date</span>
+              </div>
+              <p className="font-medium">
+                {date ? format(date, "EEEE, MMMM d, yyyy") : "No date selected"}
+              </p>
+            </div>
+
+            {/* Passengers */}
+            <div>
+              <div className="flex items-center space-x-2 mb-2">
+                <Users className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-600">Passengers</span>
+              </div>
+              <p className="font-medium">
+                {passengers} passenger{passengers > 1 ? "s" : ""}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
+      {/* Progress Protection Warning */}
+      {hasSubmittedPassengerData &&
+        currentStep !== BOOKING_STEPS.length - 1 && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              <strong>Booking in Progress:</strong> Your passenger information
+              has been saved. Please complete the payment process to secure your
+              booking.
+            </p>
+          </div>
+        )}
+
       {/* Current Step Content */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        {renderStep()}
-      </div>
+      <div className="bg-white rounded-lg shadow-md p-6">{renderStep()}</div>
 
       {/* Navigation Buttons */}
       {showNavButtons && (
         <div className="flex justify-between mt-6">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={goToPrevStep}
             className="flex items-center"
           >
             <ChevronLeft className="mr-1 h-4 w-4" />
             {currentStep === 0 ? "Back to Home" : "Previous"}
           </Button>
-          
-          <Button 
-            onClick={goToNextStep} 
+
+          <Button
+            onClick={goToNextStep}
             disabled={isNextDisabled}
             className="flex items-center"
           >
@@ -363,14 +383,17 @@ const BookingWizard = () => {
       )}
 
       {/* Restricted Access Dialog */}
-      <AlertDialog open={showRestrictedDialog} onOpenChange={setShowRestrictedDialog}>
+      <AlertDialog
+        open={showRestrictedDialog}
+        onOpenChange={setShowRestrictedDialog}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Changes Not Allowed</AlertDialogTitle>
             <AlertDialogDescription>
-              You cannot go back and modify your bus selection or seat selection 
-              after submitting passenger information. This ensures your booking remains secure 
-              and prevents conflicts with seat reservations.
+              You cannot go back and modify your bus selection or seat selection
+              after submitting passenger information. This ensures your booking
+              remains secure and prevents conflicts with seat reservations.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -382,21 +405,30 @@ const BookingWizard = () => {
       </AlertDialog>
 
       {/* Cancel Booking Dialog - NEW */}
-      <AlertDialog open={showCancelBookingDialog} onOpenChange={setShowCancelBookingDialog}>
+      <AlertDialog
+        open={showCancelBookingDialog}
+        onOpenChange={setShowCancelBookingDialog}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Booking?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to cancel your booking? This will permanently delete 
-              all your booking information including passenger details, seat selection, 
-              and bus selection. This action cannot be undone.
+              Are you sure you want to cancel your booking? This will
+              permanently delete all your booking information including
+              passenger details, seat selection, and bus selection. This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowCancelBookingDialog(false)}>
+            <AlertDialogCancel
+              onClick={() => setShowCancelBookingDialog(false)}
+            >
               Keep Booking
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleCancelBooking} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleCancelBooking}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Cancel Booking
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -404,22 +436,29 @@ const BookingWizard = () => {
       </AlertDialog>
 
       {/* Payment Back Warning Dialog */}
-      <AlertDialog open={showPaymentBackWarning} onOpenChange={setShowPaymentBackWarning}>
+      <AlertDialog
+        open={showPaymentBackWarning}
+        onOpenChange={setShowPaymentBackWarning}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Going Back Will Reset Your Data</AlertDialogTitle>
             <AlertDialogDescription>
-              You are currently on the payment page with passenger information already saved. 
-              Going back will erase all your booking data including passenger details, seat selection, 
-              and bus selection. You will need to start the booking process from the beginning.
-              Are you sure you want to continue?
+              You are currently on the payment page with passenger information
+              already saved. Going back will erase all your booking data
+              including passenger details, seat selection, and bus selection.
+              You will need to start the booking process from the beginning. Are
+              you sure you want to continue?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowPaymentBackWarning(false)}>
               Stay on Payment Page
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handlePaymentBackWithReset} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handlePaymentBackWithReset}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Go Back and Reset Data
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -427,27 +466,32 @@ const BookingWizard = () => {
       </AlertDialog>
 
       {/* Navigation Warning Dialog */}
-      <AlertDialog open={showNavigationWarning} onOpenChange={setShowNavigationWarning}>
+      <AlertDialog
+        open={showNavigationWarning}
+        onOpenChange={setShowNavigationWarning}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Leave Booking Process?</AlertDialogTitle>
             <AlertDialogDescription>
-              Your booking is in progress and passenger information has been saved. 
-              If you leave now, you will lose all progress and need to start over.
-              Are you sure you want to continue?
+              Your booking is in progress and passenger information has been
+              saved. If you leave now, you will lose all progress and need to
+              start over. Are you sure you want to continue?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowNavigationWarning(false)}>
               Stay and Complete Booking
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleForceNavigation} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleForceNavigation}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Leave and Lose Progress
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
     </div>
   );
 };
