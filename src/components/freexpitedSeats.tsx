@@ -56,6 +56,7 @@ const SimpleFreeExpiredButton = () => {
         variant="outline" 
         onClick={handleFreeExpired}
         disabled={isProcessing}
+        className='ml-4'
       >
         {isProcessing ? (
           <>
