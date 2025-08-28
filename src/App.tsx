@@ -65,11 +65,7 @@ const PublicApp = () => {
   // Show maintenance page if maintenance mode is enabled
   if (settings?.maintenanceMode && !error) {
     return (
-      <MaintenancePage 
-        companyName={settings.companyName}
-        contactEmail={settings.contactEmail || settings.supportEmail}
-        contactPhone={settings.contactPhone || settings.supportPhone}
-      />
+      <MaintenancePage/>
     );
   }
 
@@ -164,7 +160,9 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <AdminAuthProvider>
           <Helmet>
-            <title>Corpers Drive - Safe Travels for NYSC Corps Members</title>
+            <title>Reliable NYSC Transportation | Corpers Drive - Safe, Trusted & Affordable Travel</title>
+            <meta name="description" content="Corpers Drive offers world-class, reliable transport services for NYSC corps members across Nigeria. We bridge logistical gaps, ensure safe travel, and empower youths through trustworthy networks and consistent service." />
+            <meta property="og:title" content="Reliable NYSC Transportation | Corpers Drive" />
             {/* meta tags omitted for brevity */}
           </Helmet>
           <TooltipProvider>
